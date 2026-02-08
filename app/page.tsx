@@ -23,8 +23,6 @@ export default function Page() {
   const [showAdminPanel, setShowAdminPanel] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
 
-  const [isLoading, setIsLoading] = useState(true)
-
   // Fetch rotes from API
   const fetchRotes = useCallback(async () => {
     try {
