@@ -1,0 +1,26 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Rote {
+  id          String   @id @default(cuid())
+  name        String
+  tradition   String
+  description String   @db.Text
+  spheres     Json     // Store as JSON: { "Forces": 3, "Prime": 2 }
+  level       String
+  pageRef     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([tradition])
+  @@index([level])
+}
