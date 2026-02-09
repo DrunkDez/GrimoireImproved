@@ -1,6 +1,7 @@
 import React from "react"
 import type { Metadata } from 'next'
 import { Cinzel, Crimson_Text, IM_Fell_DW_Pica } from 'next/font/google'
+import { AuthProvider } from '@/components/auth/auth-provider'
 
 import './globals.css'
 
@@ -40,7 +41,7 @@ export default function RootLayout({
       <body
         className={`${cinzel.variable} ${crimsonText.variable} ${imFell.variable} font-sans antialiased`}
       >
-        {children}
+        <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
   )
