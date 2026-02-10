@@ -199,12 +199,9 @@ export function AddRotePanel({ onAdd }: AddRotePanelProps) {
               <span className="text-ring" aria-hidden="true">{'\u2726'}</span>
               Required Spheres
             </span>
-            {/* Tradition Spheres */}
-            <span className="font-serif text-xs font-semibold text-primary uppercase tracking-widest flex items-center gap-2">
-              <span className="text-ring" aria-hidden="true">{'\u2726'}</span>
-              Tradition
-            </span>
+            
             <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3">
+              {/* Tradition Spheres */}
               {SPHERES.map((sphere) => (
                 <div
                   key={sphere}
@@ -223,14 +220,8 @@ export function AddRotePanel({ onAdd }: AddRotePanelProps) {
                   </div>
                 </div>
               ))}
-            </div>
-
-            {/* Technocracy Spheres */}
-            <span className="font-serif text-xs font-semibold text-foreground uppercase tracking-widest flex items-center gap-2 mt-2">
-              <span className="text-foreground/60" aria-hidden="true">{'\u2699'}</span>
-              Technocracy
-            </span>
-            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3">
+              
+              {/* Technocracy Spheres - same grid, different styling */}
               {TECHNOCRACY_SPHERES.map((sphere) => (
                 <div
                   key={sphere}
