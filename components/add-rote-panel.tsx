@@ -334,5 +334,3 @@ export function AddRotePanel({ onAdd }: AddRotePanelProps) {
     </div>
   )
 }
-  )
-}
