@@ -205,10 +205,10 @@ export function AddRotePanel({ onAdd }: AddRotePanelProps) {
               {SPHERES.map((sphere) => (
                 <div
                   key={sphere}
-                  className="flex items-center justify-between gap-2 bg-background border-2 border-primary rounded-sm px-3 py-3 min-h-[60px]
+                  className="flex items-center justify-between gap-2 bg-background border-2 border-primary rounded-sm px-3 py-2.5
                     transition-all duration-300 hover:border-accent"
                 >
-                  <span className="font-serif text-[0.65rem] font-bold text-primary uppercase tracking-wide leading-snug flex-1 break-words">
+                  <span className="font-serif text-[0.6rem] font-bold text-primary uppercase tracking-wide leading-tight flex-1">
                     {sphere}
                   </span>
                   <div className="shrink-0">
@@ -225,10 +225,10 @@ export function AddRotePanel({ onAdd }: AddRotePanelProps) {
               {TECHNOCRACY_SPHERES.map((sphere) => (
                 <div
                   key={sphere}
-                  className="flex items-center justify-between gap-2 bg-foreground/5 border-2 border-foreground/40 rounded-sm px-3 py-3 min-h-[60px]
+                  className="flex items-center justify-between gap-2 bg-foreground/5 border-2 border-foreground/40 rounded-sm px-3 py-2.5
                     transition-all duration-300 hover:border-foreground/70"
                 >
-                  <span className="font-serif text-[0.65rem] font-bold text-foreground uppercase tracking-wide leading-snug flex-1 break-words">
+                  <span className="font-serif text-[0.6rem] font-bold text-foreground uppercase tracking-wide leading-tight flex-1">
                     {sphere}
                   </span>
                   <div className="shrink-0">
