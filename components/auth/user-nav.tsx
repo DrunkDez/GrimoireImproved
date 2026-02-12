@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { User, LogOut, BookUser } from "lucide-react"
+import { User, LogOut, BookUser, Star, BookOpen } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 
@@ -56,6 +56,19 @@ export function UserNav() {
           <Link href="/dashboard" className="cursor-pointer">
             <BookUser className="w-4 h-4 mr-2" />
             My Characters
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link href="/merits-flaws" className="cursor-pointer">
+            <Star className="w-4 h-4 mr-2" />
+            Merits & Flaws
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href="/recommended" className="cursor-pointer">
+            <BookOpen className="w-4 h-4 mr-2" />
+            Resources
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />

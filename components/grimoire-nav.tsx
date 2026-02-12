@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/utils"
 
-export type TabId = "home" | "browse" | "add" | "search"
+export type TabId = "home" | "browse" | "add" | "search" | "merits" | "resources"
 
 interface GrimoireNavProps {
   activeTab: TabId
@@ -14,6 +14,8 @@ const tabs: { id: TabId; label: string; symbol: string }[] = [
   { id: "browse", label: "Browse Rotes", symbol: "\u2727" },
   { id: "search", label: "Search", symbol: "\u2315" },
   { id: "add", label: "Inscribe", symbol: "\u270E" },
+  { id: "merits", label: "Merits & Flaws", symbol: "\u2726" },
+  { id: "resources", label: "Resources", symbol: "\u{1F4DA}" },
 ]
 
 export function GrimoireNav({ activeTab, onTabChange }: GrimoireNavProps) {

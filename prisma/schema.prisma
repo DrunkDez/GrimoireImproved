@@ -68,3 +68,35 @@ model Rote {
   @@index([tradition])
   @@index([level])
 }
+
+model Merit {
+  id          String   @id @default(cuid())
+  name        String
+  category    String   // Physical, Mental, Social, Supernatural, etc.
+  type        String   // "merit" or "flaw"
+  cost        Int      // Point cost (positive for merits, negative for flaws)
+  description String   @db.Text
+  pageRef     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([category])
+  @@index([type])
+}
+
+model Resource {
+  id          String   @id @default(cuid())
+  name        String
+  type        String   // podcast, website, book, video, article, tool, etc.
+  category    String?  // Optional: Lore, Rules, Storytelling, Character Building, etc.
+  description String   @db.Text
+  url         String?  // Link to resource
+  author      String?  // Creator/author name
+  imageUrl    String?  // Optional image/logo
+  featured    Boolean  @default(false) // Admin can feature certain resources
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([type])
+  @@index([featured])
+}
