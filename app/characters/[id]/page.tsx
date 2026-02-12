@@ -21,6 +21,8 @@ import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
 
+import { GrimoireHeader } from "@/components/grimoire-header"
+
 export default function CharacterSheetPage({
   params,
 }: {
@@ -160,19 +162,24 @@ export default function CharacterSheetPage({
 
   return (
     <>
-      <div className="min-h-screen relative z-[1] py-6 px-3 md:py-8 md:px-4">
-        <div className="max-w-[1400px] mx-auto space-y-6">
-          {/* Header */}
-          <div className="flex items-center justify-between">
-            <Button
-              variant="ghost"
-              onClick={() => router.push("/dashboard")}
-              className="gap-2"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Back to Characters
-            </Button>
-          </div>
+      <div className="min-h-screen relative z-[1]">
+        <div className="max-w-[1400px] mx-auto bg-background border-[3px] border-primary rounded-lg overflow-hidden relative my-6 mx-3 md:my-8 md:mx-4
+          shadow-[0_0_0_1px_hsl(42_42%_59%),0_0_0_8px_hsl(36_42%_88%),0_0_0_11px_hsl(300_45%_20%),inset_0_0_80px_rgba(139,71,38,0.08),0_14px_40px_rgba(26,21,16,0.25)]">
+          
+          <GrimoireHeader />
+          
+          <div className="p-6 md:p-10 space-y-6">
+            {/* Navigation */}
+            <div className="flex items-center justify-between">
+              <Button
+                variant="ghost"
+                onClick={() => router.push("/dashboard")}
+                className="gap-2"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Back to Characters
+              </Button>
+            </div>
 
           {/* Character Info Card */}
           <Card className="border-2 border-primary">
@@ -346,6 +353,7 @@ export default function CharacterSheetPage({
               )}
             </CardContent>
           </Card>
+          </div>
         </div>
       </div>
       <Toaster />
