@@ -193,67 +193,53 @@ export function AddRotePanel({ onAdd }: AddRotePanelProps) {
             />
           </div>
 
-          {/* Spheres - MATCHING BROWSE PANEL EXACTLY */}
-          <div className="flex flex-col gap-6">
+          {/* Spheres - Unified Grid with Mixed Colors */}
+          <div className="flex flex-col gap-3">
             <span className="font-serif text-sm font-semibold text-primary uppercase tracking-widest flex items-center gap-2">
               <span className="text-ring" aria-hidden="true">{'\u2726'}</span>
-              Required Spheres
+              Spheres
             </span>
             
-            {/* Tradition Spheres */}
-            <div className="flex flex-col gap-2">
-              <span className="font-serif text-sm font-semibold text-primary uppercase tracking-widest flex items-center gap-2">
-                <span className="text-ring" aria-hidden="true">{'\u2726'}</span>
-                Tradition Spheres
-              </span>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                {SPHERES.map((sphere) => (
-                  <div
-                    key={sphere}
-                    className="flex items-center justify-between gap-3 bg-background border-2 border-primary rounded-sm px-4 py-3
-                      transition-all duration-300 hover:border-accent"
-                  >
-                    <span className="font-serif text-[0.7rem] font-bold text-primary uppercase tracking-widest flex-1 break-words leading-tight">
-                      {sphere}
-                    </span>
-                    <div className="shrink-0">
-                      <SphereDotsInteractive
-                        value={spheres[sphere] || 0}
-                        onChange={(level) => handleSphereChange(sphere, level)}
-                        label={sphere}
-                      />
-                    </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {/* Tradition Spheres - Purple theme */}
+              {SPHERES.map((sphere) => (
+                <div
+                  key={sphere}
+                  className="flex items-center justify-between gap-3 bg-background border-2 border-primary rounded-sm px-4 py-3
+                    transition-all duration-300 hover:border-accent"
+                >
+                  <span className="font-serif text-[0.7rem] font-bold text-primary uppercase tracking-widest flex-1 break-words leading-tight">
+                    {sphere}
+                  </span>
+                  <div className="shrink-0">
+                    <SphereDotsInteractive
+                      value={spheres[sphere] || 0}
+                      onChange={(level) => handleSphereChange(sphere, level)}
+                      label={sphere}
+                    />
                   </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Technocracy Spheres */}
-            <div className="flex flex-col gap-2">
-              <span className="font-serif text-sm font-semibold text-foreground uppercase tracking-widest flex items-center gap-2">
-                <span className="text-foreground/60" aria-hidden="true">{'\u2699'}</span>
-                Technocracy Spheres
-              </span>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                {TECHNOCRACY_SPHERES.map((sphere) => (
-                  <div
-                    key={sphere}
-                    className="flex items-center justify-between gap-3 bg-foreground/5 border-2 border-foreground/40 rounded-sm px-4 py-3
-                      transition-all duration-300 hover:border-foreground/70"
-                  >
-                    <span className="font-serif text-[0.7rem] font-bold text-foreground uppercase tracking-widest flex-1 break-words leading-tight">
-                      {sphere}
-                    </span>
-                    <div className="shrink-0">
-                      <SphereDotsInteractive
-                        value={spheres[sphere] || 0}
-                        onChange={(level) => handleSphereChange(sphere, level)}
-                        label={sphere}
-                      />
-                    </div>
+                </div>
+              ))}
+              
+              {/* Technocracy Spheres - Gray theme, same grid */}
+              {TECHNOCRACY_SPHERES.map((sphere) => (
+                <div
+                  key={sphere}
+                  className="flex items-center justify-between gap-3 bg-foreground/5 border-2 border-foreground/40 rounded-sm px-4 py-3
+                    transition-all duration-300 hover:border-foreground/70"
+                >
+                  <span className="font-serif text-[0.7rem] font-bold text-foreground uppercase tracking-widest flex-1 break-words leading-tight">
+                    {sphere}
+                  </span>
+                  <div className="shrink-0">
+                    <SphereDotsInteractive
+                      value={spheres[sphere] || 0}
+                      onChange={(level) => handleSphereChange(sphere, level)}
+                      label={sphere}
+                    />
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
             </div>
 
             {/* Selected spheres display */}
