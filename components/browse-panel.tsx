@@ -14,9 +14,21 @@ interface BrowsePanelProps {
 export function BrowsePanel({ rotes, onSelectRote }: BrowsePanelProps) {
   const [sphereFilters, setSphereFilters] = useState<Record<string, number>>({})
   const [traditionFilter, setTraditionFilter] = useState("")
+  const [searchTerm, setSearchTerm] = useState("")
 
   const filteredRotes = useMemo(() => {
     return rotes.filter((rote) => {
+      // Text search
+      if (searchTerm) {
+        const q = searchTerm.toLowerCase()
+        const textMatch =
+          rote.name.toLowerCase().includes(q) ||
+          rote.tradition.toLowerCase().includes(q) ||
+          rote.description.toLowerCase().includes(q) ||
+          Object.keys(rote.spheres).some((s) => s.toLowerCase().includes(q))
+        if (!textMatch) return false
+      }
+
       // Tradition filter
       if (traditionFilter && rote.tradition !== traditionFilter) return false
 
@@ -31,7 +43,7 @@ export function BrowsePanel({ rotes, onSelectRote }: BrowsePanelProps) {
 
       return true
     })
-  }, [rotes, sphereFilters, traditionFilter])
+  }, [rotes, sphereFilters, traditionFilter, searchTerm])
 
   const handleSphereChange = (sphere: string, level: number) => {
     setSphereFilters((prev) => ({ ...prev, [sphere]: level }))
@@ -40,14 +52,39 @@ export function BrowsePanel({ rotes, onSelectRote }: BrowsePanelProps) {
   const handleReset = () => {
     setSphereFilters({})
     setTraditionFilter("")
+    setSearchTerm("")
   }
 
   const activeFilterCount =
     Object.values(sphereFilters).filter((v) => v > 0).length +
-    (traditionFilter ? 1 : 0)
+    (traditionFilter ? 1 : 0) +
+    (searchTerm ? 1 : 0)
 
   return (
     <div className="animate-fade-in-up flex flex-col gap-8 p-6 md:p-10">
+      {/* Search Input */}
+      <div className="bg-card border-2 border-primary rounded-md p-5 shadow-[inset_0_0_20px_rgba(139,71,38,0.05)]">
+        <h2 className="font-serif text-xl font-bold text-primary uppercase tracking-[0.15em] mb-4 flex items-center gap-3">
+          <span className="text-ring text-lg drop-shadow-[0_0_8px_rgba(107,45,107,0.5)]" aria-hidden="true">
+            {'\u2315'}
+          </span>
+          Search the Grimoire
+          <span className="ml-auto text-accent text-lg" aria-hidden="true">{'\u25C8'}</span>
+        </h2>
+        <input
+          type="text"
+          placeholder="Search by name, tradition, sphere, or description..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full px-4 py-3 bg-background/60 border-2 border-primary rounded-sm
+            text-foreground font-mono text-base placeholder:text-foreground/40 placeholder:italic
+            transition-all duration-300
+            shadow-[inset_2px_2px_5px_rgba(0,0,0,0.1)]
+            focus:outline-none focus:border-ring focus:bg-background/80
+            focus:shadow-[inset_2px_2px_5px_rgba(0,0,0,0.1),0_0_10px_rgba(107,45,107,0.3)]"
+        />
+      </div>
+
       {/* Filter section */}
       <SphereFilter
         sphereFilters={sphereFilters}
