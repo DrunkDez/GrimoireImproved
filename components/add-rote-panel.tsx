@@ -1,7 +1,5 @@
 "use client"
 
-import React from "react"
-
 import { useState } from "react"
 import type { Rote } from "@/lib/mage-data"
 import { SPHERES, TECHNOCRACY_SPHERES, TRADITIONS, TECHNOCRACY_CONVENTIONS } from "@/lib/mage-data"
