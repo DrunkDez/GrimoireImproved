@@ -39,7 +39,7 @@ interface Merit {
   category: string
   type: "merit" | "flaw" | "background"
   subtype?: string
-  cost: number
+  cost: string
   description: string
   pageRef?: string
 }
@@ -66,7 +66,7 @@ export function AdminMeritsPanel() {
     category: "",
     type: "merit",
     subtype: "",
-    cost: 1,
+    cost: "1",
     description: "",
     pageRef: "",
   })
@@ -169,7 +169,7 @@ export function AdminMeritsPanel() {
       category: "",
       type: "merit",
       subtype: "",
-      cost: 1,
+      cost: "1",
       description: "",
       pageRef: "",
     })
@@ -284,21 +284,24 @@ export function AdminMeritsPanel() {
 
                 <div className="space-y-2">
                   <Label htmlFor="cost">
-                    Point Cost * {formData.type === "flaw" && "(use negative)"}
+                    Point Cost *
                   </Label>
                   <Input
                     id="cost"
-                    type="number"
+                    type="text"
                     required
                     value={formData.cost}
                     onChange={(e) =>
                       setFormData({
                         ...formData,
-                        cost: parseInt(e.target.value),
+                        cost: e.target.value,
                       })
                     }
-                    placeholder={formData.type === "merit" ? "1" : formData.type === "flaw" ? "-1" : "1"}
+                    placeholder="1, 1-5, Variable, etc."
                   />
+                  <p className="text-xs text-muted-foreground">
+                    Examples: "1", "-1", "1-5", "Variable", "1 per dot"
+                  </p>
                 </div>
               </div>
 
