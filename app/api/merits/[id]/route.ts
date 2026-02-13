@@ -3,9 +3,10 @@ import { prisma } from "@/lib/db"
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const params = await context.params
     const merit = await prisma.merit.findUnique({
       where: { id: params.id },
     })
@@ -29,9 +30,10 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const params = await context.params
     const body = await request.json()
     const { name, category, type, subtype, cost, description, pageRef } = body
 
@@ -60,18 +62,23 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const params = await context.params
+    console.log('Attempting to delete merit with ID:', params.id)
+    
     await prisma.merit.delete({
       where: { id: params.id },
     })
 
+    console.log('Merit deleted successfully:', params.id)
     return NextResponse.json({ message: "Merit deleted successfully" })
   } catch (error) {
     console.error("Error deleting merit:", error)
+    console.error("Error details:", JSON.stringify(error, null, 2))
     return NextResponse.json(
-      { error: "Failed to delete merit" },
+      { error: "Failed to delete merit", details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     )
   }
