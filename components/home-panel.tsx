@@ -1,11 +1,12 @@
 "use client"
 
+import Link from "next/link"
 import type { Rote } from "@/lib/mage-data"
 
 interface HomePanelProps {
   totalRotes: number
   traditions: number
-  onNavigate: (tab: "browse" | "add" | "search") => void
+  onNavigate: (tab: "browse" | "add") => void
 }
 
 export function HomePanel({ totalRotes, traditions, onNavigate }: HomePanelProps) {
@@ -93,20 +94,6 @@ export function HomePanel({ totalRotes, traditions, onNavigate }: HomePanelProps
         </button>
         <button
           type="button"
-          onClick={() => onNavigate("search")}
-          className="font-serif px-6 py-4 bg-secondary text-secondary-foreground border-2 border-primary rounded-sm
-            font-semibold text-sm uppercase tracking-[0.15em] cursor-pointer
-            transition-all duration-300
-            shadow-[0_4px_8px_rgba(0,0,0,0.15)]
-            hover:bg-background hover:border-ring hover:-translate-y-0.5
-            active:translate-y-0 flex items-center justify-center gap-3"
-        >
-          <span aria-hidden="true">{'\u27D0'}</span>
-          Search Rotes
-          <span aria-hidden="true">{'\u27D0'}</span>
-        </button>
-        <button
-          type="button"
           onClick={() => onNavigate("add")}
           className="font-serif px-6 py-4 bg-secondary text-secondary-foreground border-2 border-primary rounded-sm
             font-semibold text-sm uppercase tracking-[0.15em] cursor-pointer
@@ -119,6 +106,19 @@ export function HomePanel({ totalRotes, traditions, onNavigate }: HomePanelProps
           Inscribe a Rote
           <span aria-hidden="true">{'\u27D0'}</span>
         </button>
+        <Link
+          href="/character-creation"
+          className="font-serif px-6 py-4 bg-secondary text-secondary-foreground border-2 border-primary rounded-sm
+            font-semibold text-sm uppercase tracking-[0.15em] cursor-pointer
+            transition-all duration-300
+            shadow-[0_4px_8px_rgba(0,0,0,0.15)]
+            hover:bg-background hover:border-ring hover:-translate-y-0.5
+            active:translate-y-0 flex items-center justify-center gap-3"
+        >
+          <span aria-hidden="true">{'\u27D0'}</span>
+          Character Creation
+          <span aria-hidden="true">{'\u27D0'}</span>
+        </Link>
       </div>
     </div>
   )
