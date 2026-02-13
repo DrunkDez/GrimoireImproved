@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useCallback, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import type { Rote } from "@/lib/mage-data"
 import { SAMPLE_ROTES, TRADITIONS } from "@/lib/mage-data"
 import { GrimoireHeader } from "@/components/grimoire-header"
@@ -8,7 +9,6 @@ import { GrimoireNav, type TabId } from "@/components/grimoire-nav"
 import { GrimoireFooter } from "@/components/grimoire-footer"
 import { HomePanel } from "@/components/home-panel"
 import { BrowsePanel } from "@/components/browse-panel"
-import { SearchPanel } from "@/components/search-panel"
 import { AddRotePanel } from "@/components/add-rote-panel"
 import { RoteDetail } from "@/components/rote-detail"
 import { AdminPanel } from "@/components/admin-panel"
@@ -17,6 +17,7 @@ import { ShieldAlert } from "lucide-react"
 import { Toaster } from "@/components/ui/toaster"
 
 export default function Page() {
+  const router = useRouter()
   const [activeTab, setActiveTab] = useState<TabId>("home")
   const [rotes, setRotes] = useState<Rote[]>([])
   const [selectedRote, setSelectedRote] = useState<Rote | null>(null)
@@ -68,8 +69,19 @@ export default function Page() {
 
   const handleNavigate = useCallback((tab: TabId) => {
     setSelectedRote(null)
+    
+    // Navigate to separate pages for merits and resources
+    if (tab === "merits") {
+      router.push("/merits-flaws")
+      return
+    }
+    if (tab === "resources") {
+      router.push("/recommended")
+      return
+    }
+    
     setActiveTab(tab)
-  }, [])
+  }, [router])
 
   const uniqueTraditions = new Set(rotes.map((r) => r.tradition)).size
 
@@ -154,9 +166,6 @@ export default function Page() {
                 )}
                 {activeTab === "browse" && (
                   <BrowsePanel rotes={rotes} onSelectRote={handleSelectRote} />
-                )}
-                {activeTab === "search" && (
-                  <SearchPanel rotes={rotes} onSelectRote={handleSelectRote} />
                 )}
                 {activeTab === "add" && (
                   <AddRotePanel onAdd={handleAddRote} />
