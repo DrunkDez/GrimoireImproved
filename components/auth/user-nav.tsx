@@ -58,6 +58,12 @@ export function UserNav() {
             My Characters
           </Link>
         </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href="/character-creation" className="cursor-pointer">
+            <BookOpen className="w-4 h-4 mr-2" />
+            Character Creation Guide
+          </Link>
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
           <Link href="/merits-flaws" className="cursor-pointer">

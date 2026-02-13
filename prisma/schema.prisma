@@ -75,7 +75,7 @@ model Merit {
   category    String   // Physical, Mental, Social, Supernatural, Companion, Special Advantage, Genetic Flaw
   type        String   // "merit", "flaw", "background"
   subtype     String?  // For backgrounds: "general" or "mage"
-  cost        Int      // Point cost (positive for merits, negative for flaws, varies for backgrounds)
+  cost        String   // Point cost as text: "1", "1-5", "Variable", etc.
   description String   @db.Text
   pageRef     String?
   createdAt   DateTime @default(now())

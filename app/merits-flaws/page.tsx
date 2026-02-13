@@ -23,7 +23,7 @@ interface Merit {
   category: string
   type: "merit" | "flaw" | "background"
   subtype?: string
-  cost: number
+  cost: string
   description: string
   pageRef?: string
 }
@@ -239,7 +239,7 @@ export default function MeritsFlawsPage() {
                                   {merit.name}
                                 </CardTitle>
                                 <Badge variant="default" className="shrink-0">
-                                  {merit.cost} {merit.cost === 1 ? 'point' : 'points'}
+                                  {merit.cost} {merit.cost === "1" ? 'point' : 'points'}
                                 </Badge>
                               </div>
                               {merit.pageRef && (
@@ -289,7 +289,7 @@ export default function MeritsFlawsPage() {
                                   {flaw.name}
                                 </CardTitle>
                                 <Badge variant="destructive" className="shrink-0">
-                                  {Math.abs(flaw.cost)} {Math.abs(flaw.cost) === 1 ? 'point' : 'points'}
+                                  {flaw.cost} {flaw.cost === "1" || flaw.cost === "-1" ? 'point' : 'points'}
                                 </Badge>
                               </div>
                               {flaw.pageRef && (
@@ -346,7 +346,7 @@ export default function MeritsFlawsPage() {
                                     </Badge>
                                   </div>
                                   <Badge variant="secondary" className="shrink-0">
-                                    {bg.cost} {bg.cost === 1 ? 'pt' : 'pts'}
+                                    {bg.cost} {bg.cost === "1" ? 'pt' : 'pts'}
                                   </Badge>
                                 </div>
                                 {bg.pageRef && (
@@ -387,7 +387,7 @@ export default function MeritsFlawsPage() {
                                     </Badge>
                                   </div>
                                   <Badge variant="secondary" className="shrink-0">
-                                    {bg.cost} {bg.cost === 1 ? 'pt' : 'pts'}
+                                    {bg.cost} {bg.cost === "1" ? 'pt' : 'pts'}
                                   </Badge>
                                 </div>
                                 {bg.pageRef && (

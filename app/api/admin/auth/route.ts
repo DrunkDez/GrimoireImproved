@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-const ADMIN_PASSWORD = 'TruthUntilParadox'
+// Use environment variable with fallback
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'TruthUntilParadox'
 
 // POST /api/admin/auth - Verify admin password
 export async function POST(request: NextRequest) {

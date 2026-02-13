@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
         category,
         type,
         subtype: subtype || null,
-        cost: parseInt(cost),
+        cost,
         description,
         pageRef: pageRef || null,
       },

@@ -42,7 +42,7 @@ export async function PUT(
         category,
         type,
         subtype: subtype || null,
-        cost: parseInt(cost),
+        cost,
         description,
         pageRef: pageRef || null,
       },
