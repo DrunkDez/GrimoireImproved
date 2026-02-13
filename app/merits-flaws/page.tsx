@@ -6,22 +6,43 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Input } from "@/components/ui/input"
-import { Search, Star, Zap } from "lucide-react"
+import { Label } from "@/components/ui/label"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { Search, Star, Zap, BookOpen } from "lucide-react"
 
 interface Merit {
   id: string
   name: string
   category: string
-  type: "merit" | "flaw"
+  type: "merit" | "flaw" | "background"
+  subtype?: string
   cost: number
   description: string
   pageRef?: string
 }
 
+const CATEGORIES = [
+  "Physical",
+  "Mental",
+  "Social",
+  "Supernatural",
+  "Companion",
+  "Special Advantage",
+  "Genetic Flaw"
+]
+
 export default function MeritsFlawsPage() {
   const [merits, setMerits] = useState<Merit[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
+  const [typeFilter, setTypeFilter] = useState("all")
+  const [categoryFilter, setCategoryFilter] = useState("all")
 
   useEffect(() => {
     fetchMerits()
@@ -41,14 +62,16 @@ export default function MeritsFlawsPage() {
     }
   }
 
-  const filterMerits = (items: Merit[], type: "merit" | "flaw") => {
+  const filterItems = (items: Merit[], type?: "merit" | "flaw" | "background") => {
     return items.filter(item => {
-      const matchesType = item.type === type
+      const matchesType = !type || item.type === type
+      const matchesTypeFilter = typeFilter === "all" || item.type === typeFilter
+      const matchesCategoryFilter = categoryFilter === "all" || item.category === categoryFilter
       const matchesSearch = searchTerm === "" || 
         item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.description.toLowerCase().includes(searchTerm.toLowerCase())
-      return matchesType && matchesSearch
+      return matchesType && matchesTypeFilter && matchesCategoryFilter && matchesSearch
     })
   }
 
@@ -63,10 +86,19 @@ export default function MeritsFlawsPage() {
     return grouped
   }
 
-  const meritsList = filterMerits(merits, "merit")
-  const flawsList = filterMerits(merits, "flaw")
+  const groupBackgroundsBySubtype = (items: Merit[]) => {
+    const general = items.filter(bg => bg.subtype === "general")
+    const mage = items.filter(bg => bg.subtype === "mage")
+    return { general, mage }
+  }
+
+  const meritsList = filterItems(merits, "merit")
+  const flawsList = filterItems(merits, "flaw")
+  const backgroundsList = filterItems(merits, "background")
+  
   const meritsGrouped = groupByCategory(meritsList)
   const flawsGrouped = groupByCategory(flawsList)
+  const { general: generalBgs, mage: mageBgs } = groupBackgroundsBySubtype(backgroundsList)
 
   return (
     <div className="min-h-screen relative z-[1]">
@@ -79,24 +111,79 @@ export default function MeritsFlawsPage() {
           {/* Header */}
           <div className="text-center space-y-4">
             <h1 className="text-4xl md:text-5xl font-cinzel font-bold text-primary">
-              Merits & Flaws
+              Merits, Flaws & Backgrounds
             </h1>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Enhance your character with advantages and disadvantages that shape their story
+              Enhance your character with advantages, disadvantages, and backgrounds
             </p>
           </div>
 
-          {/* Search */}
-          <div className="max-w-md mx-auto">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                placeholder="Search merits and flaws..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
+          {/* Search & Filters */}
+          <div className="bg-card border-2 border-primary rounded-md p-6 space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Search */}
+              <div className="space-y-2">
+                <Label htmlFor="search">Search</Label>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    id="search"
+                    placeholder="Search by name..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+              </div>
+
+              {/* Type Filter */}
+              <div className="space-y-2">
+                <Label htmlFor="type-filter">Type</Label>
+                <Select value={typeFilter} onValueChange={setTypeFilter}>
+                  <SelectTrigger id="type-filter">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Types</SelectItem>
+                    <SelectItem value="merit">Merits</SelectItem>
+                    <SelectItem value="flaw">Flaws</SelectItem>
+                    <SelectItem value="background">Backgrounds</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Category Filter */}
+              <div className="space-y-2">
+                <Label htmlFor="category-filter">Category</Label>
+                <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                  <SelectTrigger id="category-filter">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Categories</SelectItem>
+                    {CATEGORIES.map(cat => (
+                      <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
+
+            {/* Active Filters Display */}
+            {(searchTerm || typeFilter !== "all" || categoryFilter !== "all") && (
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-sm text-muted-foreground">Active filters:</span>
+                {searchTerm && (
+                  <Badge variant="secondary">Search: {searchTerm}</Badge>
+                )}
+                {typeFilter !== "all" && (
+                  <Badge variant="secondary">Type: {typeFilter}</Badge>
+                )}
+                {categoryFilter !== "all" && (
+                  <Badge variant="secondary">Category: {categoryFilter}</Badge>
+                )}
+              </div>
+            )}
           </div>
 
           {isLoading ? (
@@ -107,13 +194,13 @@ export default function MeritsFlawsPage() {
             <Card className="border-2 border-primary">
               <CardContent className="p-12 text-center">
                 <p className="text-muted-foreground">
-                  No merits or flaws have been added yet. Check back soon!
+                  No content available yet. Check back soon!
                 </p>
               </CardContent>
             </Card>
           ) : (
             <Tabs defaultValue="merits" className="space-y-6">
-              <TabsList className="grid w-full max-w-md mx-auto grid-cols-2">
+              <TabsList className="grid w-full max-w-2xl mx-auto grid-cols-3">
                 <TabsTrigger value="merits" className="gap-2">
                   <Star className="w-4 h-4" />
                   Merits ({meritsList.length})
@@ -121,6 +208,10 @@ export default function MeritsFlawsPage() {
                 <TabsTrigger value="flaws" className="gap-2">
                   <Zap className="w-4 h-4" />
                   Flaws ({flawsList.length})
+                </TabsTrigger>
+                <TabsTrigger value="backgrounds" className="gap-2">
+                  <BookOpen className="w-4 h-4" />
+                  Backgrounds ({backgroundsList.length})
                 </TabsTrigger>
               </TabsList>
 
@@ -130,7 +221,9 @@ export default function MeritsFlawsPage() {
                   <Card className="border-2 border-primary">
                     <CardContent className="p-8 text-center">
                       <p className="text-muted-foreground">
-                        {searchTerm ? "No merits match your search" : "No merits available yet"}
+                        {searchTerm || typeFilter !== "all" || categoryFilter !== "all" 
+                          ? "No merits match your filters" 
+                          : "No merits available yet"}
                       </p>
                     </CardContent>
                   </Card>
@@ -178,7 +271,9 @@ export default function MeritsFlawsPage() {
                   <Card className="border-2 border-primary">
                     <CardContent className="p-8 text-center">
                       <p className="text-muted-foreground">
-                        {searchTerm ? "No flaws match your search" : "No flaws available yet"}
+                        {searchTerm || typeFilter !== "all" || categoryFilter !== "all"
+                          ? "No flaws match your filters" 
+                          : "No flaws available yet"}
                       </p>
                     </CardContent>
                   </Card>
@@ -217,6 +312,105 @@ export default function MeritsFlawsPage() {
                       </div>
                     </div>
                   ))
+                )}
+              </TabsContent>
+
+              {/* Backgrounds Tab */}
+              <TabsContent value="backgrounds" className="space-y-8">
+                {backgroundsList.length === 0 ? (
+                  <Card className="border-2 border-primary">
+                    <CardContent className="p-8 text-center">
+                      <p className="text-muted-foreground">
+                        {searchTerm || typeFilter !== "all" || categoryFilter !== "all"
+                          ? "No backgrounds match your filters" 
+                          : "No backgrounds available yet"}
+                      </p>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <>
+                    {/* General Backgrounds */}
+                    {generalBgs.length > 0 && (
+                      <div className="space-y-4">
+                        <h2 className="text-2xl font-cinzel font-bold text-primary flex items-center gap-2">
+                          <span className="text-accent">{'\u2726'}</span>
+                          General Backgrounds
+                        </h2>
+                        <div className="grid gap-4 md:grid-cols-2">
+                          {generalBgs.map(bg => (
+                            <Card key={bg.id} className="border-2 border-primary hover:border-accent transition-colors">
+                              <CardHeader>
+                                <div className="flex items-start justify-between gap-4">
+                                  <div className="flex-1">
+                                    <CardTitle className="text-xl font-cinzel">
+                                      {bg.name}
+                                    </CardTitle>
+                                    <Badge variant="outline" className="mt-2">
+                                      {bg.category}
+                                    </Badge>
+                                  </div>
+                                  <Badge variant="secondary" className="shrink-0">
+                                    {bg.cost} {bg.cost === 1 ? 'pt' : 'pts'}
+                                  </Badge>
+                                </div>
+                                {bg.pageRef && (
+                                  <CardDescription className="text-xs italic">
+                                    Reference: {bg.pageRef}
+                                  </CardDescription>
+                                )}
+                              </CardHeader>
+                              <CardContent>
+                                <p className="text-sm text-foreground leading-relaxed">
+                                  {bg.description}
+                                </p>
+                              </CardContent>
+                            </Card>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Mage Backgrounds */}
+                    {mageBgs.length > 0 && (
+                      <div className="space-y-4">
+                        <h2 className="text-2xl font-cinzel font-bold text-primary flex items-center gap-2">
+                          <span className="text-accent">{'\u2726'}</span>
+                          Mage Backgrounds
+                        </h2>
+                        <div className="grid gap-4 md:grid-cols-2">
+                          {mageBgs.map(bg => (
+                            <Card key={bg.id} className="border-2 border-primary hover:border-accent transition-colors">
+                              <CardHeader>
+                                <div className="flex items-start justify-between gap-4">
+                                  <div className="flex-1">
+                                    <CardTitle className="text-xl font-cinzel">
+                                      {bg.name}
+                                    </CardTitle>
+                                    <Badge variant="outline" className="mt-2">
+                                      {bg.category}
+                                    </Badge>
+                                  </div>
+                                  <Badge variant="secondary" className="shrink-0">
+                                    {bg.cost} {bg.cost === 1 ? 'pt' : 'pts'}
+                                  </Badge>
+                                </div>
+                                {bg.pageRef && (
+                                  <CardDescription className="text-xs italic">
+                                    Reference: {bg.pageRef}
+                                  </CardDescription>
+                                )}
+                              </CardHeader>
+                              <CardContent>
+                                <p className="text-sm text-foreground leading-relaxed">
+                                  {bg.description}
+                                </p>
+                              </CardContent>
+                            </Card>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </>
                 )}
               </TabsContent>
             </Tabs>

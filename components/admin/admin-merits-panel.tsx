@@ -37,7 +37,8 @@ interface Merit {
   id?: string
   name: string
   category: string
-  type: "merit" | "flaw"
+  type: "merit" | "flaw" | "background"
+  subtype?: string
   cost: number
   description: string
   pageRef?: string
@@ -48,8 +49,9 @@ const CATEGORIES = [
   "Mental",
   "Social",
   "Supernatural",
-  "Background",
-  "General"
+  "Companion",
+  "Special Advantage",
+  "Genetic Flaw"
 ]
 
 export function AdminMeritsPanel() {
@@ -63,6 +65,7 @@ export function AdminMeritsPanel() {
     name: "",
     category: "",
     type: "merit",
+    subtype: "",
     cost: 1,
     description: "",
     pageRef: "",
@@ -123,6 +126,7 @@ export function AdminMeritsPanel() {
       name: merit.name,
       category: merit.category,
       type: merit.type,
+      subtype: merit.subtype || "",
       cost: merit.cost,
       description: merit.description,
       pageRef: merit.pageRef || "",
@@ -164,6 +168,7 @@ export function AdminMeritsPanel() {
       name: "",
       category: "",
       type: "merit",
+      subtype: "",
       cost: 1,
       description: "",
       pageRef: "",
@@ -239,8 +244,8 @@ export function AdminMeritsPanel() {
                   <Label htmlFor="type">Type *</Label>
                   <Select
                     value={formData.type}
-                    onValueChange={(value: "merit" | "flaw") =>
-                      setFormData({ ...formData, type: value })
+                    onValueChange={(value: "merit" | "flaw" | "background") =>
+                      setFormData({ ...formData, type: value, subtype: value === "background" ? "" : undefined })
                     }
                     required
                   >
@@ -250,9 +255,32 @@ export function AdminMeritsPanel() {
                     <SelectContent>
                       <SelectItem value="merit">Merit</SelectItem>
                       <SelectItem value="flaw">Flaw</SelectItem>
+                      <SelectItem value="background">Background</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
+
+                {/* Background Subtype - only show if type is background */}
+                {formData.type === "background" && (
+                  <div className="space-y-2">
+                    <Label htmlFor="subtype">Background Type *</Label>
+                    <Select
+                      value={formData.subtype || ""}
+                      onValueChange={(value) =>
+                        setFormData({ ...formData, subtype: value })
+                      }
+                      required
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select background type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="general">General Background</SelectItem>
+                        <SelectItem value="mage">Mage Background</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
 
                 <div className="space-y-2">
                   <Label htmlFor="cost">
@@ -269,7 +297,7 @@ export function AdminMeritsPanel() {
                         cost: parseInt(e.target.value),
                       })
                     }
-                    placeholder={formData.type === "merit" ? "1" : "-1"}
+                    placeholder={formData.type === "merit" ? "1" : formData.type === "flaw" ? "-1" : "1"}
                   />
                 </div>
               </div>

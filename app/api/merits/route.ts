@@ -23,11 +23,19 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { name, category, type, cost, description, pageRef } = body
+    const { name, category, type, subtype, cost, description, pageRef } = body
 
     if (!name || !category || !type || cost === undefined || !description) {
       return NextResponse.json(
         { error: "Missing required fields" },
+        { status: 400 }
+      )
+    }
+
+    // Validate that backgrounds have a subtype
+    if (type === "background" && !subtype) {
+      return NextResponse.json(
+        { error: "Background type requires a subtype (general or mage)" },
         { status: 400 }
       )
     }
@@ -37,6 +45,7 @@ export async function POST(request: NextRequest) {
         name,
         category,
         type,
+        subtype: subtype || null,
         cost: parseInt(cost),
         description,
         pageRef: pageRef || null,
