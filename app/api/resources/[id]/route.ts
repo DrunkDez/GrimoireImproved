@@ -3,9 +3,10 @@ import { prisma } from "@/lib/db"
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const params = await context.params
     const resource = await prisma.resource.findUnique({
       where: { id: params.id },
     })
@@ -29,9 +30,10 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const params = await context.params
     const body = await request.json()
     const { name, type, category, description, url, author, imageUrl, featured } = body
 
@@ -61,18 +63,23 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const params = await context.params
+    console.log('Attempting to delete resource with ID:', params.id)
+    
     await prisma.resource.delete({
       where: { id: params.id },
     })
 
+    console.log('Resource deleted successfully:', params.id)
     return NextResponse.json({ message: "Resource deleted successfully" })
   } catch (error) {
     console.error("Error deleting resource:", error)
+    console.error("Error details:", JSON.stringify(error, null, 2))
     return NextResponse.json(
-      { error: "Failed to delete resource" },
+      { error: "Failed to delete resource", details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     )
   }
