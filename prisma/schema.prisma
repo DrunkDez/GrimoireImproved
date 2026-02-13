@@ -72,9 +72,10 @@ model Rote {
 model Merit {
   id          String   @id @default(cuid())
   name        String
-  category    String   // Physical, Mental, Social, Supernatural, etc.
-  type        String   // "merit" or "flaw"
-  cost        Int      // Point cost (positive for merits, negative for flaws)
+  category    String   // Physical, Mental, Social, Supernatural, Companion, Special Advantage, Genetic Flaw
+  type        String   // "merit", "flaw", "background"
+  subtype     String?  // For backgrounds: "general" or "mage"
+  cost        Int      // Point cost (positive for merits, negative for flaws, varies for backgrounds)
   description String   @db.Text
   pageRef     String?
   createdAt   DateTime @default(now())
@@ -82,6 +83,7 @@ model Merit {
 
   @@index([category])
   @@index([type])
+  @@index([subtype])
 }
 
 model Resource {
