@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Search, Star, Zap, BookOpen } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
 interface Merit {
   id: string
@@ -41,7 +42,6 @@ export default function MeritsFlawsPage() {
   const [merits, setMerits] = useState<Merit[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
-  const [typeFilter, setTypeFilter] = useState("all")
   const [categoryFilter, setCategoryFilter] = useState("all")
 
   useEffect(() => {
@@ -62,16 +62,21 @@ export default function MeritsFlawsPage() {
     }
   }
 
-  const filterItems = (items: Merit[], type?: "merit" | "flaw" | "background") => {
+  const filterItems = (items: Merit[], type: "merit" | "flaw" | "background") => {
     return items.filter(item => {
-      const matchesType = !type || item.type === type
-      const matchesTypeFilter = typeFilter === "all" || item.type === typeFilter
+      // Must match the type for this tab
+      const matchesType = item.type === type
+      
+      // Apply category filter
       const matchesCategoryFilter = categoryFilter === "all" || item.category === categoryFilter
+      
+      // Apply search term
       const matchesSearch = searchTerm === "" || 
         item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.description.toLowerCase().includes(searchTerm.toLowerCase())
-      return matchesType && matchesTypeFilter && matchesCategoryFilter && matchesSearch
+      
+      return matchesType && matchesCategoryFilter && matchesSearch
     })
   }
 
@@ -100,6 +105,13 @@ export default function MeritsFlawsPage() {
   const flawsGrouped = groupByCategory(flawsList)
   const { general: generalBgs, mage: mageBgs } = groupBackgroundsBySubtype(backgroundsList)
 
+  const resetFilters = () => {
+    setSearchTerm("")
+    setCategoryFilter("all")
+  }
+
+  const hasActiveFilters = searchTerm !== "" || categoryFilter !== "all"
+
   return (
     <div className="min-h-screen relative z-[1]">
       <div className="max-w-[1400px] mx-auto bg-background border-[3px] border-primary rounded-lg overflow-hidden relative my-6 mx-3 md:my-8 md:mx-4
@@ -120,7 +132,7 @@ export default function MeritsFlawsPage() {
 
           {/* Search & Filters */}
           <div className="bg-card border-2 border-primary rounded-md p-6 space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Search */}
               <div className="space-y-2">
                 <Label htmlFor="search">Search</Label>
@@ -128,28 +140,12 @@ export default function MeritsFlawsPage() {
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
                     id="search"
-                    placeholder="Search by name..."
+                    placeholder="Search by name or description..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="pl-10"
                   />
                 </div>
-              </div>
-
-              {/* Type Filter */}
-              <div className="space-y-2">
-                <Label htmlFor="type-filter">Type</Label>
-                <Select value={typeFilter} onValueChange={setTypeFilter}>
-                  <SelectTrigger id="type-filter">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Types</SelectItem>
-                    <SelectItem value="merit">Merits</SelectItem>
-                    <SelectItem value="flaw">Flaws</SelectItem>
-                    <SelectItem value="background">Backgrounds</SelectItem>
-                  </SelectContent>
-                </Select>
               </div>
 
               {/* Category Filter */}
@@ -170,18 +166,18 @@ export default function MeritsFlawsPage() {
             </div>
 
             {/* Active Filters Display */}
-            {(searchTerm || typeFilter !== "all" || categoryFilter !== "all") && (
+            {hasActiveFilters && (
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-sm text-muted-foreground">Active filters:</span>
                 {searchTerm && (
                   <Badge variant="secondary">Search: {searchTerm}</Badge>
                 )}
-                {typeFilter !== "all" && (
-                  <Badge variant="secondary">Type: {typeFilter}</Badge>
-                )}
                 {categoryFilter !== "all" && (
                   <Badge variant="secondary">Category: {categoryFilter}</Badge>
                 )}
+                <Button variant="ghost" size="sm" onClick={resetFilters}>
+                  Clear all
+                </Button>
               </div>
             )}
           </div>
@@ -194,7 +190,7 @@ export default function MeritsFlawsPage() {
             <Card className="border-2 border-primary">
               <CardContent className="p-12 text-center">
                 <p className="text-muted-foreground">
-                  No content available yet. Check back soon!
+                  No content available yet. Check the admin panel to add merits, flaws, and backgrounds!
                 </p>
               </CardContent>
             </Card>
@@ -221,7 +217,7 @@ export default function MeritsFlawsPage() {
                   <Card className="border-2 border-primary">
                     <CardContent className="p-8 text-center">
                       <p className="text-muted-foreground">
-                        {searchTerm || typeFilter !== "all" || categoryFilter !== "all" 
+                        {hasActiveFilters
                           ? "No merits match your filters" 
                           : "No merits available yet"}
                       </p>
@@ -271,7 +267,7 @@ export default function MeritsFlawsPage() {
                   <Card className="border-2 border-primary">
                     <CardContent className="p-8 text-center">
                       <p className="text-muted-foreground">
-                        {searchTerm || typeFilter !== "all" || categoryFilter !== "all"
+                        {hasActiveFilters
                           ? "No flaws match your filters" 
                           : "No flaws available yet"}
                       </p>
@@ -321,7 +317,7 @@ export default function MeritsFlawsPage() {
                   <Card className="border-2 border-primary">
                     <CardContent className="p-8 text-center">
                       <p className="text-muted-foreground">
-                        {searchTerm || typeFilter !== "all" || categoryFilter !== "all"
+                        {hasActiveFilters
                           ? "No backgrounds match your filters" 
                           : "No backgrounds available yet"}
                       </p>
