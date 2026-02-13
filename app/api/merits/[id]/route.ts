@@ -33,7 +33,7 @@ export async function PUT(
 ) {
   try {
     const body = await request.json()
-    const { name, category, type, cost, description, pageRef } = body
+    const { name, category, type, subtype, cost, description, pageRef } = body
 
     const merit = await prisma.merit.update({
       where: { id: params.id },
@@ -41,6 +41,7 @@ export async function PUT(
         name,
         category,
         type,
+        subtype: subtype || null,
         cost: parseInt(cost),
         description,
         pageRef: pageRef || null,
