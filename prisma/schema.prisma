@@ -102,3 +102,13 @@ model Resource {
   @@index([type])
   @@index([featured])
 }
+
+model SiteSettings {
+  id                  String   @id @default(cuid())
+  key                 String   @unique // Identifier for the setting
+  value               String   @db.Text
+  updatedAt           DateTime @updatedAt
+  
+  @@index([key])
+}
+

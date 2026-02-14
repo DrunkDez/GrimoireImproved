@@ -2,10 +2,13 @@
 
 import { UserNav } from "@/components/auth/user-nav"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { useSiteSettings } from "@/hooks/use-site-settings"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 
 export function GrimoireHeader() {
+  const { settings, isLoading } = useSiteSettings()
+
   return (
     <header className="relative bg-card/80 backdrop-blur-md px-6 py-12 text-center border-b-2 border-primary/20 shadow-lg">
       {/* Top Controls */}
@@ -34,10 +37,10 @@ export function GrimoireHeader() {
 
       <Link href="/" className="block hover:opacity-90 transition-all duration-300 group">
         <h1 className="font-serif text-4xl md:text-6xl font-black tracking-wider uppercase text-primary leading-tight mb-4 group-hover:scale-[1.02] transition-transform duration-300">
-          <span className="inline-block mr-4 opacity-80 drop-shadow-[0_0_12px_rgba(180,120,200,0.6)] dark:drop-shadow-[0_0_20px_rgba(180,120,200,0.8)] animate-mystical-pulse text-5xl md:text-7xl">
-            {'\u2726'}
+          <span className="inline-block mr-4 opacity-80 drop-shadow-[0_0_12px_rgba(180,120,200,0.6)] dark:drop-shadow-[0_0_20px_rgba(180,120,200,0.8)] animate-mystical-pulse text-5xl md:text-7xl font-magebats">
+            A
           </span>
-          The Enlightened Grimoire
+          {isLoading ? "The Enlightened Grimoire" : settings.siteTitle}
         </h1>
       </Link>
 
@@ -51,7 +54,7 @@ export function GrimoireHeader() {
       />
 
       <p className="font-mono text-lg md:text-xl italic text-muted-foreground tracking-wide mb-6">
-        A Compendium of Mystical Rotes for the Awakened
+        {isLoading ? "A Compendium of Mystical Rotes for the Awakened" : settings.siteSubtitle}
       </p>
 
       {/* Quick Access Links - Modernized */}
@@ -62,7 +65,7 @@ export function GrimoireHeader() {
             size="sm" 
             className="gap-2 font-serif hover:bg-primary/10 hover:border-primary hover:scale-105 transition-all duration-300"
           >
-            <span className="text-base">{'\u2726'}</span>
+            <span className="text-base font-magebats">e</span>
             Merits & Flaws
           </Button>
         </Link>

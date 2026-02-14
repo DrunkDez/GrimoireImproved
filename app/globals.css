@@ -1,13 +1,24 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
+/* Mage Bats Font */
+@font-face {
+  font-family: 'Mage Bats';
+  src: url('/fonts/Mage_Bats.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
 @layer utilities {
   .text-balance {
     text-wrap: balance;
   }
 }
-
+  @layer utilities {
+    .font-magebats {
+      font-family: 'Mage Bats', sans-serif;
+    }
+  }
 @layer base {
   :root {
     /* Modern Light Mode - Warm Parchment */

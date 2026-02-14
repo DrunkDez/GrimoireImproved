@@ -4,13 +4,24 @@ import { useState } from "react"
 import type { Rote } from "@/lib/mage-data"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Lock, X, BookOpen, Star, Library } from "lucide-react"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import { ShieldAlert, Lock, X, BookOpen, Star, Library, FileText } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { AdminRotesPanel } from "@/components/admin/admin-rotes-panel"
 import { AdminMeritsPanel } from "@/components/admin/admin-merits-panel"
 import { AdminResourcesPanel } from "@/components/admin/admin-resources-panel"
-import { AdminRotesPanel } from "@/components/admin/admin-rotes-panel"
+import { AdminContentPanel } from "@/components/admin/admin-content-panel"
 
 interface AdminPanelProps {
   rotes: Rote[]
@@ -62,31 +73,53 @@ export function AdminPanel({ rotes, onRotesChange, onClose }: AdminPanelProps) {
     }
   }
 
-  // Login screen
   if (!isAuthenticated) {
     return (
-      <div className="p-6 max-w-md mx-auto">
-        <Card className="border-2 border-primary shadow-lg">
-          <CardHeader className="text-center">
-            <div className="mx-auto mb-4 w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-              <Lock className="w-8 h-8 text-primary" />
-            </div>
-            <CardTitle className="text-2xl font-cinzel">Admin Access</CardTitle>
-            <CardDescription>Enter the password to access the Admin Panel</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleLogin} className="space-y-4">
-              <Input
-                type="password"
-                placeholder="Enter admin password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                disabled={isLoading}
-                className="font-mono"
-              />
-              <Button type="submit" disabled={isLoading} className="w-full">
-                {isLoading ? "Verifying..." : "Access Admin Panel"}
-              </Button>
+      <div className="flex items-center justify-center min-h-[500px] p-6">
+        <Card className="w-full max-w-md border-2 border-primary/30 shadow-2xl">
+          <CardContent className="pt-6">
+            <form onSubmit={handleLogin} className="space-y-6">
+              <div className="text-center space-y-2">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
+                  <Lock className="w-8 h-8 text-primary" />
+                </div>
+                <h2 className="text-2xl font-cinzel font-bold text-primary">
+                  Admin Access
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  Enter password to access the admin panel
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Admin password"
+                  disabled={isLoading}
+                  className="text-center"
+                  autoFocus
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <Button
+                  type="submit"
+                  disabled={isLoading || !password}
+                  className="w-full"
+                >
+                  {isLoading ? "Verifying..." : "Access Panel"}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={onClose}
+                  disabled={isLoading}
+                >
+                  Cancel
+                </Button>
+              </div>
             </form>
           </CardContent>
         </Card>
@@ -94,16 +127,16 @@ export function AdminPanel({ rotes, onRotesChange, onClose }: AdminPanelProps) {
     )
   }
 
-  // Main admin panel with tabs
   return (
-    <div className="p-6 md:p-10">
+    <div className="p-6 space-y-6">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-3xl font-cinzel font-bold text-primary">
+          <h1 className="text-3xl font-cinzel font-bold text-primary flex items-center gap-2">
+            <ShieldAlert className="w-8 h-8" />
             Admin Panel
           </h1>
           <p className="text-muted-foreground">
-            Manage your grimoire's mystical knowledge
+            Manage your grimoire's content and settings
           </p>
         </div>
         <Button variant="outline" onClick={onClose} className="gap-2">
@@ -112,8 +145,12 @@ export function AdminPanel({ rotes, onRotesChange, onClose }: AdminPanelProps) {
         </Button>
       </div>
 
-      <Tabs defaultValue="rotes" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3 max-w-2xl">
+      <Tabs defaultValue="content" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-4 max-w-3xl">
+          <TabsTrigger value="content" className="gap-2">
+            <FileText className="w-4 h-4" />
+            Content
+          </TabsTrigger>
           <TabsTrigger value="rotes" className="gap-2">
             <BookOpen className="w-4 h-4" />
             Rotes
@@ -127,6 +164,10 @@ export function AdminPanel({ rotes, onRotesChange, onClose }: AdminPanelProps) {
             Resources
           </TabsTrigger>
         </TabsList>
+
+        <TabsContent value="content">
+          <AdminContentPanel />
+        </TabsContent>
 
         <TabsContent value="rotes">
           <AdminRotesPanel rotes={rotes} onRotesChange={onRotesChange} />
