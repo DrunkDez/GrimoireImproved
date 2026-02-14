@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import type { Rote } from "@/lib/mage-data"
+import { useSiteSettings } from "@/hooks/use-site-settings"
 
 interface HomePanelProps {
   totalRotes: number
@@ -10,11 +11,18 @@ interface HomePanelProps {
 }
 
 export function HomePanel({ totalRotes, traditions, onNavigate }: HomePanelProps) {
+  const { settings, isLoading } = useSiteSettings()
+  
   const stats = [
-    { value: totalRotes, label: "Rotes Inscribed" },
-    { value: traditions, label: "Traditions" },
-    { value: 12, label: "Spheres" },
+    { value: totalRotes, label: "Rotes Inscribed", symbol: "a" },
+    { value: traditions, label: "Traditions", symbol: "b" },
+    { value: 12, label: "Spheres", symbol: "c" },
   ]
+
+  // Parse the welcome text into paragraphs
+  const welcomeParagraphs = isLoading 
+    ? ["Loading..."]
+    : settings.homeWelcomeText.split('\n\n').filter(p => p.trim())
 
   return (
     <div className="animate-fade-in-up flex flex-col gap-8 p-6 md:p-10">
@@ -23,35 +31,31 @@ export function HomePanel({ totalRotes, traditions, onNavigate }: HomePanelProps
         {/* Animated background glow */}
         <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-primary/5 via-transparent to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
         
-        {/* Background star */}
-        <div className="absolute top-8 left-1/2 -translate-x-1/2 text-6xl text-primary/20 dark:text-primary/30 font-serif" aria-hidden="true">
-          {'\u2726'}
+        {/* Background symbol using Mage Bats font */}
+        <div className="absolute top-8 left-1/2 -translate-x-1/2 text-6xl text-primary/20 dark:text-primary/30 font-magebats" aria-hidden="true">
+          a
         </div>
 
-        {/* Mystical icon */}
-        <div className="relative text-6xl text-primary/80 dark:text-accent mb-6 animate-mystical-pulse drop-shadow-[0_0_20px_rgba(180,120,200,0.4)] dark:drop-shadow-[0_0_30px_rgba(180,120,200,0.6)]" aria-hidden="true">
-          {'\u2748'}
+        {/* Mystical icon using Mage Bats font */}
+        <div className="relative text-6xl text-primary/80 dark:text-accent mb-6 animate-mystical-pulse drop-shadow-[0_0_20px_rgba(180,120,200,0.4)] dark:drop-shadow-[0_0_30px_rgba(180,120,200,0.6)] font-magebats" aria-hidden="true">
+          j
         </div>
 
         <h2 className="relative font-serif text-2xl md:text-3xl font-bold text-primary dark:text-primary uppercase tracking-widest mb-6">
-          Welcome, Seeker of Knowledge
+          {isLoading ? "Welcome, Seeker of Knowledge" : settings.homeWelcomeTitle}
         </h2>
 
-        <p className="relative font-mono text-foreground text-base md:text-lg leading-relaxed max-w-2xl mx-auto mb-3">
-          Within these pages lies a curated compendium of mystical Rotes drawn from
-          the Nine Traditions and beyond.
-        </p>
-        <p className="relative font-mono text-foreground text-base md:text-lg leading-relaxed max-w-2xl mx-auto mb-3">
-          Each Rote represents a proven path through the Tapestry, a well-worn
-          groove in reality that an Awakened will may follow.
-        </p>
-        <p className="relative font-mono text-muted-foreground italic text-sm max-w-lg mx-auto">
-          Browse the collection, search by Sphere or Tradition, or inscribe your own
-          discoveries for others to study.
-        </p>
+        {welcomeParagraphs.map((paragraph, index) => (
+          <p 
+            key={index}
+            className="relative font-mono text-foreground text-base md:text-lg leading-relaxed max-w-2xl mx-auto mb-3 last:mb-0 last:italic last:text-muted-foreground last:text-sm last:max-w-lg"
+          >
+            {paragraph}
+          </p>
+        ))}
       </div>
 
-      {/* Stats - Modernized cards */}
+      {/* Stats - Modernized cards with Mage Bats symbols */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {stats.map((stat) => (
           <div
@@ -66,9 +70,9 @@ export function HomePanel({ totalRotes, traditions, onNavigate }: HomePanelProps
             {/* Animated gradient background */}
             <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             
-            {/* Decorative symbol */}
-            <div className="absolute top-2 left-1/2 -translate-x-1/2 text-primary/30 dark:text-primary/40 text-lg group-hover:scale-110 transition-transform duration-300" aria-hidden="true">
-              {'\u25C8'}
+            {/* Decorative symbol using Mage Bats font */}
+            <div className="absolute top-2 left-1/2 -translate-x-1/2 text-primary/30 dark:text-primary/40 text-lg group-hover:scale-110 transition-transform duration-300 font-magebats" aria-hidden="true">
+              {stat.symbol}
             </div>
             
             <div className="relative text-5xl font-serif text-primary dark:text-accent leading-none mb-2 drop-shadow-lg group-hover:scale-110 transition-transform duration-300">
@@ -81,7 +85,7 @@ export function HomePanel({ totalRotes, traditions, onNavigate }: HomePanelProps
         ))}
       </div>
 
-      {/* Quick actions - Modernized buttons */}
+      {/* Quick actions - Modernized buttons with Mage Bats symbols */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <button
           type="button"
@@ -96,9 +100,9 @@ export function HomePanel({ totalRotes, traditions, onNavigate }: HomePanelProps
             overflow-hidden"
         >
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-          <span className="relative" aria-hidden="true">{'\u27D0'}</span>
+          <span className="relative font-magebats text-lg" aria-hidden="true">d</span>
           <span className="relative">Browse the Library</span>
-          <span className="relative" aria-hidden="true">{'\u27D0'}</span>
+          <span className="relative font-magebats text-lg" aria-hidden="true">d</span>
         </button>
         
         <button
@@ -114,9 +118,9 @@ export function HomePanel({ totalRotes, traditions, onNavigate }: HomePanelProps
             overflow-hidden"
         >
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-          <span className="relative" aria-hidden="true">{'\u27D0'}</span>
+          <span className="relative font-magebats text-lg" aria-hidden="true">e</span>
           <span className="relative">Inscribe a Rote</span>
-          <span className="relative" aria-hidden="true">{'\u27D0'}</span>
+          <span className="relative font-magebats text-lg" aria-hidden="true">e</span>
         </button>
         
         <Link
@@ -131,9 +135,9 @@ export function HomePanel({ totalRotes, traditions, onNavigate }: HomePanelProps
             overflow-hidden"
         >
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-          <span className="relative" aria-hidden="true">{'\u27D0'}</span>
+          <span className="relative font-magebats text-lg" aria-hidden="true">f</span>
           <span className="relative">Character Creation</span>
-          <span className="relative" aria-hidden="true">{'\u27D0'}</span>
+          <span className="relative font-magebats text-lg" aria-hidden="true">f</span>
         </Link>
       </div>
     </div>
