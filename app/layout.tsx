@@ -2,6 +2,7 @@ import React from "react"
 import type { Metadata } from 'next'
 import { Cinzel, Crimson_Text, IM_Fell_DW_Pica } from 'next/font/google'
 import { AuthProvider } from '@/components/auth/auth-provider'
+import { ThemeProvider } from '@/components/theme-provider'
 
 import './globals.css'
 
@@ -37,11 +38,18 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${cinzel.variable} ${crimsonText.variable} ${imFell.variable} font-sans antialiased`}
       >
-        <AuthProvider>{children}</AuthProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem
+          disableTransitionOnChange={false}
+        >
+          <AuthProvider>{children}</AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   )
