@@ -1,8 +1,10 @@
 "use client"
 
+import React from "react"
+
 import { useState } from "react"
 import type { Rote } from "@/lib/mage-data"
-import { SPHERES, TECHNOCRACY_SPHERES, TRADITIONS, TECHNOCRACY_CONVENTIONS } from "@/lib/mage-data"
+import { SPHERES, TECHNOCRACY_SPHERES, TRADITIONS, CRAFTS, TECHNOCRACY_CONVENTIONS } from "@/lib/mage-data"
 import { SphereDotsInteractive, SphereDots } from "./sphere-dots"
 
 const ROTE_LEVELS = ["Initiate", "Apprentice", "Disciple", "Adept", "Master"]
@@ -78,7 +80,7 @@ export function AddRotePanel({ onAdd }: AddRotePanelProps) {
         <ul className="flex flex-col gap-3">
           {[
             "Provide the <strong>name</strong> of your Rote as it is known among the Awakened.",
-            "Select the <strong>Tradition</strong> from which this Rote originates.",
+            "Select the <strong>Tradition, Craft, or Convention</strong> from which this Rote originates.",
             "Describe the <strong>focus and effect</strong> of the Rote in detail.",
             "Indicate all <strong>Spheres</strong> required and their minimum levels.",
             "Optionally include a <strong>page reference</strong> for verification.",
@@ -98,7 +100,7 @@ export function AddRotePanel({ onAdd }: AddRotePanelProps) {
         </div>
       )}
 
-      {/* Form - FULL WIDTH like Browse Panel */}
+      {/* Form */}
       <form
         onSubmit={handleSubmit}
         className="bg-card border-[3px] border-primary rounded-md p-6 md:p-8
@@ -136,7 +138,7 @@ export function AddRotePanel({ onAdd }: AddRotePanelProps) {
           <div className="flex flex-col gap-2">
             <label htmlFor="rote-tradition" className="font-serif text-sm font-semibold text-primary uppercase tracking-widest flex items-center gap-2">
               <span className="text-ring" aria-hidden="true">{'\u2726'}</span>
-              Tradition
+              Tradition / Craft / Convention
             </label>
             <select
               id="rote-tradition"
@@ -155,9 +157,14 @@ export function AddRotePanel({ onAdd }: AddRotePanelProps) {
                 backgroundPosition: 'right 1rem center',
               }}
             >
-              <option value="">Select a Tradition or Convention...</option>
+              <option value="">Select a Tradition, Craft, or Convention...</option>
               <optgroup label="Traditions">
                 {TRADITIONS.map((t) => (
+                  <option key={t} value={t}>{t}</option>
+                ))}
+              </optgroup>
+              <optgroup label="Crafts">
+                {CRAFTS.map((t) => (
                   <option key={t} value={t}>{t}</option>
                 ))}
               </optgroup>
@@ -191,22 +198,22 @@ export function AddRotePanel({ onAdd }: AddRotePanelProps) {
             />
           </div>
 
-          {/* Spheres - Unified Grid with Mixed Colors */}
+          {/* Spheres */}
           <div className="flex flex-col gap-3">
             <span className="font-serif text-sm font-semibold text-primary uppercase tracking-widest flex items-center gap-2">
               <span className="text-ring" aria-hidden="true">{'\u2726'}</span>
-              Spheres
+              Required Spheres
             </span>
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {/* Tradition Spheres - Purple theme */}
+            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3">
+              {/* Tradition Spheres */}
               {SPHERES.map((sphere) => (
                 <div
                   key={sphere}
-                  className="flex items-center justify-between gap-3 bg-background border-2 border-primary rounded-sm px-4 py-3
+                  className="flex items-center justify-between gap-2 bg-background border-2 border-primary rounded-sm px-3 py-3 min-h-[60px]
                     transition-all duration-300 hover:border-accent"
                 >
-                  <span className="font-serif text-[0.7rem] font-bold text-primary uppercase tracking-widest flex-1 break-words leading-tight">
+                  <span className="font-serif text-[0.65rem] font-bold text-primary uppercase tracking-wide leading-snug flex-1 break-words">
                     {sphere}
                   </span>
                   <div className="shrink-0">
@@ -219,14 +226,14 @@ export function AddRotePanel({ onAdd }: AddRotePanelProps) {
                 </div>
               ))}
               
-              {/* Technocracy Spheres - Gray theme, same grid */}
+              {/* Technocracy Spheres - same grid, different styling */}
               {TECHNOCRACY_SPHERES.map((sphere) => (
                 <div
                   key={sphere}
-                  className="flex items-center justify-between gap-3 bg-foreground/5 border-2 border-foreground/40 rounded-sm px-4 py-3
+                  className="flex items-center justify-between gap-2 bg-foreground/5 border-2 border-foreground/40 rounded-sm px-3 py-3 min-h-[60px]
                     transition-all duration-300 hover:border-foreground/70"
                 >
-                  <span className="font-serif text-[0.7rem] font-bold text-foreground uppercase tracking-widest flex-1 break-words leading-tight">
+                  <span className="font-serif text-[0.65rem] font-bold text-foreground uppercase tracking-wide leading-snug flex-1 break-words">
                     {sphere}
                   </span>
                   <div className="shrink-0">
@@ -242,7 +249,7 @@ export function AddRotePanel({ onAdd }: AddRotePanelProps) {
 
             {/* Selected spheres display */}
             {selectedSpheres.length > 0 && (
-              <div className="bg-primary/5 border-2 border-primary rounded-sm p-4">
+              <div className="bg-primary/5 border-2 border-primary rounded-sm p-4 mt-2">
                 <h4 className="font-serif text-xs font-bold text-primary uppercase tracking-widest mb-2">
                   Selected Spheres
                 </h4>
