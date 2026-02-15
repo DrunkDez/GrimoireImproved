@@ -1,7 +1,8 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-/* Mage Bats Font */
+
+/* Mage Bats Font - Mage: The Ascension symbols */
 @font-face {
   font-family: 'Mage Bats';
   src: url('/fonts/Mage_Bats.ttf') format('truetype');
@@ -9,71 +10,72 @@
   font-style: normal;
   font-display: swap;
 }
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;
   }
-}
-  @layer utilities {
-    .font-magebats {
-      font-family: 'Mage Bats', sans-serif;
-    }
+  
+  .font-magebats {
+    font-family: 'Mage Bats', sans-serif;
   }
+}
+
 @layer base {
   :root {
-    /* Modern Light Mode - Warm Parchment */
-    --background: 36 42% 95%;
-    --foreground: 300 35% 15%;
-    --card: 0 0% 100%;
-    --card-foreground: 300 35% 15%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 300 35% 15%;
-    --primary: 300 45% 25%;
-    --primary-foreground: 36 42% 98%;
-    --secondary: 36 25% 88%;
-    --secondary-foreground: 300 45% 20%;
-    --muted: 36 20% 92%;
-    --muted-foreground: 300 25% 40%;
-    --accent: 42 50% 65%;
-    --accent-foreground: 300 35% 15%;
+    /* Modern Light Mode - Warm Mystical Parchment */
+    --background: 35 25% 94%;
+    --foreground: 280 45% 12%;
+    --card: 40 35% 97%;
+    --card-foreground: 280 45% 12%;
+    --popover: 40 35% 98%;
+    --popover-foreground: 280 45% 12%;
+    --primary: 280 60% 35%;
+    --primary-foreground: 40 35% 98%;
+    --secondary: 38 30% 85%;
+    --secondary-foreground: 280 60% 25%;
+    --muted: 38 20% 88%;
+    --muted-foreground: 280 30% 45%;
+    --accent: 42 85% 55%;
+    --accent-foreground: 280 45% 12%;
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 98%;
-    --border: 300 20% 82%;
-    --input: 300 20% 85%;
-    --ring: 300 45% 35%;
-    --chart-1: 300 45% 30%;
-    --chart-2: 42 50% 65%;
-    --chart-3: 25 45% 55%;
-    --chart-4: 300 35% 50%;
+    --border: 280 25% 75%;
+    --input: 280 20% 80%;
+    --ring: 280 60% 45%;
+    --chart-1: 280 60% 35%;
+    --chart-2: 42 85% 55%;
+    --chart-3: 25 50% 55%;
+    --chart-4: 280 40% 50%;
     --chart-5: 0 72% 51%;
     --radius: 0.5rem;
   }
 
   .dark {
-    /* Modern Dark Mode - Deep Mystical */
-    --background: 270 30% 8%;
-    --foreground: 36 35% 90%;
-    --card: 270 25% 12%;
-    --card-foreground: 36 35% 90%;
-    --popover: 270 30% 10%;
-    --popover-foreground: 36 35% 90%;
-    --primary: 280 60% 65%;
-    --primary-foreground: 270 30% 8%;
-    --secondary: 270 20% 18%;
-    --secondary-foreground: 36 35% 90%;
-    --muted: 270 20% 15%;
-    --muted-foreground: 36 25% 65%;
-    --accent: 42 80% 70%;
-    --accent-foreground: 270 30% 8%;
+    /* Modern Dark Mode - Deep Cosmic Mystery */
+    --background: 270 40% 6%;
+    --foreground: 40 60% 92%;
+    --card: 270 35% 10%;
+    --card-foreground: 40 60% 92%;
+    --popover: 270 40% 8%;
+    --popover-foreground: 40 60% 92%;
+    --primary: 280 70% 65%;
+    --primary-foreground: 270 40% 6%;
+    --secondary: 270 25% 18%;
+    --secondary-foreground: 40 60% 92%;
+    --muted: 270 25% 14%;
+    --muted-foreground: 40 35% 68%;
+    --accent: 42 90% 68%;
+    --accent-foreground: 270 40% 6%;
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 98%;
-    --border: 270 20% 22%;
-    --input: 270 20% 20%;
-    --ring: 280 60% 65%;
-    --chart-1: 280 60% 65%;
-    --chart-2: 42 80% 70%;
-    --chart-3: 200 60% 60%;
-    --chart-4: 280 50% 55%;
+    --border: 270 30% 22%;
+    --input: 270 25% 20%;
+    --ring: 280 70% 65%;
+    --chart-1: 280 70% 65%;
+    --chart-2: 42 90% 68%;
+    --chart-3: 200 65% 60%;
+    --chart-4: 280 55% 55%;
     --chart-5: 0 72% 51%;
   }
 }
@@ -82,13 +84,14 @@
   * {
     @apply border-border;
   }
+  
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
 
-/* Modern texture overlays */
+/* Mystical animated background */
 body::before {
   content: '';
   position: fixed;
@@ -98,20 +101,23 @@ body::before {
   height: 100%;
   pointer-events: none;
   z-index: 0;
-  opacity: 0.4;
-  background:
-    radial-gradient(circle at 20% 30%, rgba(201, 169, 97, 0.08) 0%, transparent 50%),
-    radial-gradient(circle at 80% 70%, rgba(139, 71, 38, 0.06) 0%, transparent 50%);
+  opacity: 0.6;
+  background-image: 
+    radial-gradient(circle at 15% 25%, rgba(180, 120, 200, 0.12) 0%, transparent 40%),
+    radial-gradient(circle at 85% 70%, rgba(200, 150, 100, 0.1) 0%, transparent 40%),
+    radial-gradient(circle at 50% 50%, rgba(150, 100, 200, 0.08) 0%, transparent 60%);
+  animation: mystical-drift 30s ease-in-out infinite;
 }
 
 .dark body::before {
-  opacity: 0.3;
-  background:
-    radial-gradient(circle at 20% 30%, rgba(180, 120, 200, 0.08) 0%, transparent 50%),
-    radial-gradient(circle at 80% 70%, rgba(42, 80, 200, 0.05) 0%, transparent 50%);
+  opacity: 0.4;
+  background-image: 
+    radial-gradient(circle at 15% 25%, rgba(180, 120, 200, 0.15) 0%, transparent 40%),
+    radial-gradient(circle at 85% 70%, rgba(42, 80, 200, 0.12) 0%, transparent 40%),
+    radial-gradient(circle at 50% 50%, rgba(200, 100, 150, 0.1) 0%, transparent 60%);
 }
 
-/* Noise texture for depth */
+/* Enhanced noise texture */
 body::after {
   content: '';
   position: fixed;
@@ -121,39 +127,71 @@ body::after {
   height: 100%;
   pointer-events: none;
   z-index: 0;
-  opacity: 0.03;
+  opacity: 0.04;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  mix-blend-mode: overlay;
 }
 
 .dark body::after {
-  opacity: 0.05;
+  opacity: 0.06;
 }
 
-/* Modern custom scrollbar */
+/* Mystical particle effect */
+@keyframes float-particle {
+  0%, 100% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.5;
+  }
+  90% {
+    opacity: 0.5;
+  }
+  50% {
+    transform: translate(100px, -300px) rotate(180deg);
+  }
+}
+
+/* Modern custom scrollbar with glow */
 ::-webkit-scrollbar {
-  width: 12px;
+  width: 14px;
 }
 
 ::-webkit-scrollbar-track {
   @apply bg-secondary;
-  border-radius: 6px;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
 }
 
 ::-webkit-scrollbar-thumb {
   @apply bg-primary;
-  border-radius: 6px;
-  border: 2px solid transparent;
+  border-radius: 8px;
+  border: 3px solid transparent;
   background-clip: padding-box;
   transition: all 0.3s ease;
+  box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-primary;
-  border-width: 1px;
+  background: linear-gradient(180deg, hsl(var(--primary)), hsl(var(--accent)));
+  box-shadow: 
+    inset 0 0 6px rgba(0,0,0,0.3),
+    0 0 8px hsl(var(--primary) / 0.5);
 }
 
 .dark ::-webkit-scrollbar-thumb {
-  background: linear-gradient(to bottom, hsl(280 60% 65%), hsl(280 60% 55%));
+  background: linear-gradient(180deg, hsl(280 70% 65%), hsl(280 70% 55%));
+  box-shadow: 
+    inset 0 0 6px rgba(0,0,0,0.5),
+    0 0 10px hsl(280 70% 65% / 0.3);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  box-shadow: 
+    inset 0 0 6px rgba(0,0,0,0.5),
+    0 0 15px hsl(280 70% 65% / 0.6);
 }
 
 ::selection {
@@ -161,25 +199,27 @@ body::after {
 }
 
 .dark ::selection {
-  background: rgba(180, 120, 200, 0.3);
+  background: rgba(180, 120, 200, 0.4);
 }
 
-/* Modern animations */
+/* Enhanced animations */
 @keyframes mystical-pulse {
   0%, 100% {
     opacity: 0.7;
     transform: scale(1);
+    filter: drop-shadow(0 0 8px hsl(var(--primary) / 0.4));
   }
   50% {
     opacity: 1;
-    transform: scale(1.03);
+    transform: scale(1.05);
+    filter: drop-shadow(0 0 16px hsl(var(--primary) / 0.8));
   }
 }
 
 @keyframes fade-in-up {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(30px);
   }
   to {
     opacity: 1;
@@ -203,10 +243,46 @@ body::after {
 
 @keyframes glow-pulse {
   0%, 100% {
-    box-shadow: 0 0 20px rgba(180, 120, 200, 0.3);
+    box-shadow: 
+      0 0 20px hsl(var(--primary) / 0.3),
+      inset 0 0 20px hsl(var(--primary) / 0.1);
   }
   50% {
-    box-shadow: 0 0 30px rgba(180, 120, 200, 0.5);
+    box-shadow: 
+      0 0 40px hsl(var(--primary) / 0.6),
+      inset 0 0 30px hsl(var(--primary) / 0.2);
+  }
+}
+
+@keyframes mystical-drift {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(20px, -20px) scale(1.1);
+  }
+  66% {
+    transform: translate(-20px, 20px) scale(0.9);
+  }
+}
+
+@keyframes border-dance {
+  0%, 100% {
+    border-color: hsl(var(--primary) / 0.5);
+    box-shadow: 0 0 10px hsl(var(--primary) / 0.3);
+  }
+  50% {
+    border-color: hsl(var(--accent) / 0.7);
+    box-shadow: 0 0 20px hsl(var(--accent) / 0.5);
+  }
+}
+
+@keyframes text-shimmer {
+  0% {
+    background-position: -500%;
+  }
+  100% {
+    background-position: 500%;
   }
 }
 
@@ -215,7 +291,7 @@ body::after {
 }
 
 .animate-fade-in-up {
-  animation: fade-in-up 0.5s ease forwards;
+  animation: fade-in-up 0.6s ease forwards;
 }
 
 .animate-slow-rotate {
@@ -230,64 +306,338 @@ body::after {
   animation: glow-pulse 3s ease-in-out infinite;
 }
 
-/* Modern glass morphism */
+.animate-border-dance {
+  animation: border-dance 4s ease-in-out infinite;
+}
+
+/* Mystical glass morphism with enhanced effects */
 .glass {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.15) 0%,
+    rgba(255, 255, 255, 0.05) 100%
+  );
+  backdrop-filter: blur(12px) saturate(150%);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 
+    0 8px 32px 0 rgba(31, 38, 135, 0.15),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.3);
 }
 
 .dark .glass {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.08) 0%,
+    rgba(255, 255, 255, 0.02) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 
+    0 8px 32px 0 rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
 }
 
-/* Modern gradients */
-.gradient-primary {
-  background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%);
+/* Enhanced card with mystical border */
+.mystical-card {
+  position: relative;
+  background: hsl(var(--card));
+  border: 2px solid hsl(var(--primary) / 0.3);
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.dark .gradient-primary {
-  background: linear-gradient(135deg, hsl(280 60% 65%) 0%, hsl(42 80% 70%) 100%);
+.mystical-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 2px;
+  background: linear-gradient(
+    135deg,
+    hsl(var(--primary) / 0.5),
+    hsl(var(--accent) / 0.5),
+    hsl(var(--primary) / 0.5)
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.4s ease;
 }
 
-/* Smooth focus styles */
+.mystical-card:hover::before {
+  opacity: 1;
+}
+
+.mystical-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 
+    0 20px 40px hsl(var(--primary) / 0.2),
+    0 0 20px hsl(var(--primary) / 0.1);
+}
+
+/* Grimoire text effect */
+.grimoire-text {
+  background: linear-gradient(
+    135deg,
+    hsl(var(--primary)),
+    hsl(var(--accent)),
+    hsl(var(--primary))
+  );
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: text-shimmer 8s ease-in-out infinite;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+/* Enhanced button effects */
+.mystical-button {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(
+    135deg,
+    hsl(var(--primary)),
+    hsl(var(--primary) / 0.8)
+  );
+  border: 2px solid hsl(var(--accent) / 0.5);
+  transition: all 0.3s ease;
+}
+
+.mystical-button::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.mystical-button:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+.mystical-button:hover {
+  transform: translateY(-2px);
+  border-color: hsl(var(--accent));
+  box-shadow: 
+    0 10px 30px hsl(var(--primary) / 0.4),
+    0 0 20px hsl(var(--accent) / 0.3);
+}
+
+/* Mystical input with glow */
+.mystical-input {
+  background: hsl(var(--background) / 0.6);
+  border: 2px solid hsl(var(--border));
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.mystical-input:focus {
+  outline: none;
+  border-color: hsl(var(--primary));
+  background: hsl(var(--background) / 0.9);
+  box-shadow: 
+    0 0 0 3px hsl(var(--primary) / 0.1),
+    0 0 20px hsl(var(--primary) / 0.2),
+    inset 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Rune decorations */
+.rune-corner {
+  position: relative;
+}
+
+.rune-corner::before,
+.rune-corner::after {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border: 2px solid hsl(var(--primary) / 0.3);
+  transition: all 0.3s ease;
+}
+
+.rune-corner::before {
+  top: -2px;
+  left: -2px;
+  border-right: none;
+  border-bottom: none;
+}
+
+.rune-corner::after {
+  bottom: -2px;
+  right: -2px;
+  border-left: none;
+  border-top: none;
+}
+
+.rune-corner:hover::before,
+.rune-corner:hover::after {
+  border-color: hsl(var(--accent));
+  width: 30px;
+  height: 30px;
+}
+
+/* Floating particles effect */
+.particle-bg {
+  position: relative;
+  overflow: hidden;
+}
+
+.particle-bg::before {
+  content: '✦';
+  position: absolute;
+  font-family: 'Mage Bats', sans-serif;
+  font-size: 20px;
+  color: hsl(var(--primary) / 0.2);
+  animation: float-particle 15s ease-in-out infinite;
+  animation-delay: 0s;
+}
+
+.particle-bg::after {
+  content: '✧';
+  position: absolute;
+  font-family: 'Mage Bats', sans-serif;
+  font-size: 16px;
+  color: hsl(var(--accent) / 0.2);
+  animation: float-particle 20s ease-in-out infinite;
+  animation-delay: 7s;
+}
+
+/* Enhanced shadows */
+.shadow-mystical {
+  box-shadow: 
+    0 4px 6px rgba(0, 0, 0, 0.1),
+    0 2px 4px rgba(0, 0, 0, 0.06),
+    0 0 20px hsl(var(--primary) / 0.1);
+}
+
+.dark .shadow-mystical {
+  box-shadow: 
+    0 4px 6px rgba(0, 0, 0, 0.4),
+    0 2px 4px rgba(0, 0, 0, 0.3),
+    0 0 30px hsl(var(--primary) / 0.2);
+}
+
+.shadow-mystical-lg {
+  box-shadow: 
+    0 10px 25px rgba(0, 0, 0, 0.15),
+    0 5px 10px rgba(0, 0, 0, 0.1),
+    0 0 40px hsl(var(--primary) / 0.15);
+}
+
+.dark .shadow-mystical-lg {
+  box-shadow: 
+    0 10px 25px rgba(0, 0, 0, 0.6),
+    0 5px 10px rgba(0, 0, 0, 0.4),
+    0 0 50px hsl(var(--primary) / 0.3);
+}
+
+/* Smooth focus states */
 *:focus-visible {
-  @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  @apply outline-none ring-2 ring-primary ring-offset-2 ring-offset-background;
   transition: all 0.2s ease;
 }
 
-/* Modern card shadows */
-.card-shadow {
-  box-shadow: 
-    0 1px 3px rgba(0, 0, 0, 0.12),
-    0 1px 2px rgba(0, 0, 0, 0.24);
-  transition: all 0.3s cubic-bezier(.25,.8,.25,1);
+/* Enhanced card hover effects */
+.card-hover {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.card-shadow:hover {
+.card-hover:hover {
+  transform: translateY(-6px) scale(1.02);
   box-shadow: 
-    0 14px 28px rgba(0, 0, 0, 0.15),
-    0 10px 10px rgba(0, 0, 0, 0.12);
+    0 20px 40px rgba(0, 0, 0, 0.15),
+    0 10px 20px rgba(0, 0, 0, 0.1),
+    0 0 30px hsl(var(--primary) / 0.2);
 }
 
-.dark .card-shadow {
+.dark .card-hover:hover {
   box-shadow: 
-    0 1px 3px rgba(0, 0, 0, 0.4),
-    0 1px 2px rgba(0, 0, 0, 0.5);
+    0 20px 40px rgba(0, 0, 0, 0.6),
+    0 10px 20px rgba(0, 0, 0, 0.4),
+    0 0 40px hsl(var(--primary) / 0.4);
 }
 
-.dark .card-shadow:hover {
-  box-shadow: 
-    0 14px 28px rgba(0, 0, 0, 0.6),
-    0 10px 10px rgba(0, 0, 0, 0.5),
-    0 0 20px rgba(180, 120, 200, 0.2);
+/* Mystical border animation */
+.border-glow {
+  position: relative;
+  border: 2px solid hsl(var(--primary) / 0.3);
 }
 
-/* Smooth transitions */
-* {
-  transition-property: background-color, border-color, color, fill, stroke;
-  transition-duration: 200ms;
+.border-glow::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  background: linear-gradient(
+    45deg,
+    hsl(var(--primary)),
+    hsl(var(--accent)),
+    hsl(var(--primary))
+  );
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: -1;
+  background-size: 200% 200%;
+  animation: text-shimmer 3s ease infinite;
+}
+
+.border-glow:hover::before {
+  opacity: 1;
+}
+
+/* Arcane divider */
+.arcane-divider {
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    hsl(var(--primary) / 0.5) 20%,
+    hsl(var(--accent) / 0.5) 50%,
+    hsl(var(--primary) / 0.5) 80%,
+    transparent
+  );
+  position: relative;
+}
+
+.arcane-divider::before {
+  content: '✦';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'Mage Bats', sans-serif;
+  font-size: 24px;
+  color: hsl(var(--primary));
+  background: hsl(var(--background));
+  padding: 0 12px;
+}
+
+/* Smooth transitions for all interactive elements */
+button, a, input, select, textarea {
+  transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform;
+  transition-duration: 300ms;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Enhanced typography */
+h1, h2, h3, h4, h5, h6 {
+  letter-spacing: 0.02em;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 {
+  text-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.5),
+    0 0 20px hsl(var(--primary) / 0.2);
 }
