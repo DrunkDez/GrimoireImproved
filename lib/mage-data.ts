@@ -22,6 +22,20 @@ export const TRADITIONS = [
   'Orphans',
 ] as const
 
+export const CRAFTS = [
+  'Ahl-i-Batin',
+  'Taftâni',
+  'Sisters of Hippolyta',
+  'Knights Templar',
+  'Wu-Keng',
+  'Lions of Zion',
+  'Wu Nung',
+  'Children of Knowledge',
+  'Batáa',
+  'Wu Lung',
+  'Kopa Loei',
+] as const
+
 export const TECHNOCRACY_CONVENTIONS = [
   'Iteration X',
   'New World Order',
@@ -30,7 +44,7 @@ export const TECHNOCRACY_CONVENTIONS = [
   'Void Engineers',
 ] as const
 
-export const ALL_FACTIONS = [...TRADITIONS, ...TECHNOCRACY_CONVENTIONS] as const
+export const ALL_FACTIONS = [...TRADITIONS, ...CRAFTS, ...TECHNOCRACY_CONVENTIONS] as const
 
 export const SPHERES = [
   'Correspondence',
