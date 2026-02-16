@@ -15,7 +15,6 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Search, Star, Zap, BookOpen } from "lucide-react"
-import { Button } from "@/components/ui/button"
 
 interface Merit {
   id: string
@@ -23,6 +22,16 @@ interface Merit {
   category: string
   type: "merit" | "flaw" | "background"
   subtype?: string
+  cost: string
+  description: string
+  pageRef?: string
+}
+
+interface Background {
+  id: string
+  name: string
+  category: string | null
+  subtype: string
   cost: string
   description: string
   pageRef?: string
@@ -40,43 +49,57 @@ const CATEGORIES = [
 
 export default function MeritsFlawsPage() {
   const [merits, setMerits] = useState<Merit[]>([])
+  const [backgrounds, setBackgrounds] = useState<Background[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
+  const [typeFilter, setTypeFilter] = useState("all")
   const [categoryFilter, setCategoryFilter] = useState("all")
 
   useEffect(() => {
-    fetchMerits()
+    fetchData()
   }, [])
 
-  const fetchMerits = async () => {
+  const fetchData = async () => {
     try {
-      const response = await fetch("/api/merits")
-      if (response.ok) {
-        const data = await response.json()
-        setMerits(data)
+      // Fetch merits & flaws
+      const meritsResponse = await fetch("/api/merits")
+      if (meritsResponse.ok) {
+        const meritsData = await meritsResponse.json()
+        setMerits(meritsData)
+      }
+
+      // Fetch backgrounds separately
+      const backgroundsResponse = await fetch("/api/backgrounds")
+      if (backgroundsResponse.ok) {
+        const backgroundsData = await backgroundsResponse.json()
+        setBackgrounds(backgroundsData)
       }
     } catch (error) {
-      console.error("Error fetching merits:", error)
+      console.error("Error fetching data:", error)
     } finally {
       setIsLoading(false)
     }
   }
 
-  const filterItems = (items: Merit[], type: "merit" | "flaw" | "background") => {
+  const filterMerits = (items: Merit[], type?: "merit" | "flaw") => {
     return items.filter(item => {
-      // Must match the type for this tab
-      const matchesType = item.type === type
-      
-      // Apply category filter
+      const matchesType = !type || item.type === type
+      const matchesTypeFilter = typeFilter === "all" || item.type === typeFilter
       const matchesCategoryFilter = categoryFilter === "all" || item.category === categoryFilter
-      
-      // Apply search term
       const matchesSearch = searchTerm === "" || 
         item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.description.toLowerCase().includes(searchTerm.toLowerCase())
-      
-      return matchesType && matchesCategoryFilter && matchesSearch
+      return matchesType && matchesTypeFilter && matchesCategoryFilter && matchesSearch
+    })
+  }
+
+  const filterBackgrounds = (items: Background[]) => {
+    return items.filter(item => {
+      const matchesSearch = searchTerm === "" || 
+        item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.description.toLowerCase().includes(searchTerm.toLowerCase())
+      return matchesSearch
     })
   }
 
@@ -91,26 +114,19 @@ export default function MeritsFlawsPage() {
     return grouped
   }
 
-  const groupBackgroundsBySubtype = (items: Merit[]) => {
+  const groupBackgroundsBySubtype = (items: Background[]) => {
     const general = items.filter(bg => bg.subtype === "general")
     const mage = items.filter(bg => bg.subtype === "mage")
     return { general, mage }
   }
 
-  const meritsList = filterItems(merits, "merit")
-  const flawsList = filterItems(merits, "flaw")
-  const backgroundsList = filterItems(merits, "background")
+  const meritsList = filterMerits(merits, "merit")
+  const flawsList = filterMerits(merits, "flaw")
+  const backgroundsList = filterBackgrounds(backgrounds)
   
   const meritsGrouped = groupByCategory(meritsList)
   const flawsGrouped = groupByCategory(flawsList)
   const { general: generalBgs, mage: mageBgs } = groupBackgroundsBySubtype(backgroundsList)
-
-  const resetFilters = () => {
-    setSearchTerm("")
-    setCategoryFilter("all")
-  }
-
-  const hasActiveFilters = searchTerm !== "" || categoryFilter !== "all"
 
   return (
     <div className="min-h-screen relative z-[1]">
@@ -148,7 +164,7 @@ export default function MeritsFlawsPage() {
                 </div>
               </div>
 
-              {/* Category Filter */}
+              {/* Category Filter - Only for Merits/Flaws */}
               <div className="space-y-2">
                 <Label htmlFor="category-filter">Category</Label>
                 <Select value={categoryFilter} onValueChange={setCategoryFilter}>
@@ -164,49 +180,27 @@ export default function MeritsFlawsPage() {
                 </Select>
               </div>
             </div>
-
-            {/* Active Filters Display */}
-            {hasActiveFilters && (
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-sm text-muted-foreground">Active filters:</span>
-                {searchTerm && (
-                  <Badge variant="secondary">Search: {searchTerm}</Badge>
-                )}
-                {categoryFilter !== "all" && (
-                  <Badge variant="secondary">Category: {categoryFilter}</Badge>
-                )}
-                <Button variant="ghost" size="sm" onClick={resetFilters}>
-                  Clear all
-                </Button>
-              </div>
-            )}
           </div>
 
           {isLoading ? (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">Loading...</p>
-            </div>
-          ) : merits.length === 0 ? (
             <Card className="border-2 border-primary">
-              <CardContent className="p-12 text-center">
-                <p className="text-muted-foreground">
-                  No content available yet. Check the admin panel to add merits, flaws, and backgrounds!
-                </p>
+              <CardContent className="p-8 text-center">
+                <p className="text-muted-foreground">Loading...</p>
               </CardContent>
             </Card>
           ) : (
             <Tabs defaultValue="merits" className="space-y-6">
-              <TabsList className="grid w-full max-w-2xl mx-auto grid-cols-3">
-                <TabsTrigger value="merits" className="gap-2">
-                  <Star className="w-4 h-4" />
+              <TabsList className="grid w-full grid-cols-3 bg-card border-2 border-primary">
+                <TabsTrigger value="merits" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                  <Star className="w-4 h-4 mr-2" />
                   Merits ({meritsList.length})
                 </TabsTrigger>
-                <TabsTrigger value="flaws" className="gap-2">
-                  <Zap className="w-4 h-4" />
+                <TabsTrigger value="flaws" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                  <Zap className="w-4 h-4 mr-2" />
                   Flaws ({flawsList.length})
                 </TabsTrigger>
-                <TabsTrigger value="backgrounds" className="gap-2">
-                  <BookOpen className="w-4 h-4" />
+                <TabsTrigger value="backgrounds" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                  <BookOpen className="w-4 h-4 mr-2" />
                   Backgrounds ({backgroundsList.length})
                 </TabsTrigger>
               </TabsList>
@@ -217,7 +211,7 @@ export default function MeritsFlawsPage() {
                   <Card className="border-2 border-primary">
                     <CardContent className="p-8 text-center">
                       <p className="text-muted-foreground">
-                        {hasActiveFilters
+                        {searchTerm || categoryFilter !== "all"
                           ? "No merits match your filters" 
                           : "No merits available yet"}
                       </p>
@@ -239,7 +233,7 @@ export default function MeritsFlawsPage() {
                                   {merit.name}
                                 </CardTitle>
                                 <Badge variant="default" className="shrink-0">
-                                  {merit.cost} {merit.cost === "1" ? 'point' : 'points'}
+                                  {merit.cost}
                                 </Badge>
                               </div>
                               {merit.pageRef && (
@@ -267,7 +261,7 @@ export default function MeritsFlawsPage() {
                   <Card className="border-2 border-primary">
                     <CardContent className="p-8 text-center">
                       <p className="text-muted-foreground">
-                        {hasActiveFilters
+                        {searchTerm || categoryFilter !== "all"
                           ? "No flaws match your filters" 
                           : "No flaws available yet"}
                       </p>
@@ -289,7 +283,7 @@ export default function MeritsFlawsPage() {
                                   {flaw.name}
                                 </CardTitle>
                                 <Badge variant="destructive" className="shrink-0">
-                                  {flaw.cost} {flaw.cost === "1" || flaw.cost === "-1" ? 'point' : 'points'}
+                                  {flaw.cost}
                                 </Badge>
                               </div>
                               {flaw.pageRef && (
@@ -317,9 +311,7 @@ export default function MeritsFlawsPage() {
                   <Card className="border-2 border-primary">
                     <CardContent className="p-8 text-center">
                       <p className="text-muted-foreground">
-                        {hasActiveFilters
-                          ? "No backgrounds match your filters" 
-                          : "No backgrounds available yet"}
+                        {searchTerm ? "No backgrounds match your search" : "No backgrounds available yet"}
                       </p>
                     </CardContent>
                   </Card>
@@ -331,22 +323,18 @@ export default function MeritsFlawsPage() {
                         <h2 className="text-2xl font-cinzel font-bold text-primary flex items-center gap-2">
                           <span className="text-accent">{'\u2726'}</span>
                           General Backgrounds
+                          <Badge variant="outline" className="ml-2">{generalBgs.length}</Badge>
                         </h2>
                         <div className="grid gap-4 md:grid-cols-2">
                           {generalBgs.map(bg => (
                             <Card key={bg.id} className="border-2 border-primary hover:border-accent transition-colors">
                               <CardHeader>
                                 <div className="flex items-start justify-between gap-4">
-                                  <div className="flex-1">
-                                    <CardTitle className="text-xl font-cinzel">
-                                      {bg.name}
-                                    </CardTitle>
-                                    <Badge variant="outline" className="mt-2">
-                                      {bg.category}
-                                    </Badge>
-                                  </div>
+                                  <CardTitle className="text-xl font-cinzel">
+                                    {bg.name}
+                                  </CardTitle>
                                   <Badge variant="secondary" className="shrink-0">
-                                    {bg.cost} {bg.cost === "1" ? 'pt' : 'pts'}
+                                    {bg.cost}
                                   </Badge>
                                 </div>
                                 {bg.pageRef && (
@@ -372,22 +360,18 @@ export default function MeritsFlawsPage() {
                         <h2 className="text-2xl font-cinzel font-bold text-primary flex items-center gap-2">
                           <span className="text-accent">{'\u2726'}</span>
                           Mage Backgrounds
+                          <Badge variant="outline" className="ml-2">{mageBgs.length}</Badge>
                         </h2>
                         <div className="grid gap-4 md:grid-cols-2">
                           {mageBgs.map(bg => (
                             <Card key={bg.id} className="border-2 border-primary hover:border-accent transition-colors">
                               <CardHeader>
                                 <div className="flex items-start justify-between gap-4">
-                                  <div className="flex-1">
-                                    <CardTitle className="text-xl font-cinzel">
-                                      {bg.name}
-                                    </CardTitle>
-                                    <Badge variant="outline" className="mt-2">
-                                      {bg.category}
-                                    </Badge>
-                                  </div>
+                                  <CardTitle className="text-xl font-cinzel">
+                                    {bg.name}
+                                  </CardTitle>
                                   <Badge variant="secondary" className="shrink-0">
-                                    {bg.cost} {bg.cost === "1" ? 'pt' : 'pts'}
+                                    {bg.cost}
                                   </Badge>
                                 </div>
                                 {bg.pageRef && (
