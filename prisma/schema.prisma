@@ -86,6 +86,20 @@ model Merit {
   @@index([subtype])
 }
 
+model Background {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  category    String?  // For future categorization (Social, Resources, Power, etc.)
+  subtype     String   // "general" or "mage"
+  cost        String   // "Variable", "Double Cost", etc.
+  description String   @db.Text
+  pageRef     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([subtype])
+}
+
 model Resource {
   id          String   @id @default(cuid())
   name        String
@@ -111,4 +125,3 @@ model SiteSettings {
   
   @@index([key])
 }
-
