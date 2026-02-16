@@ -3,17 +3,17 @@
 import { useEffect, useState } from "react"
 import Image from "next/image"
 
-// Sphere symbol mappings
+// Sphere symbol mappings - UPDATED for clean filenames
 const SPHERES = [
-  { name: "Correspondence", white: "/spheres/Correspondence_15_.png", gold: "/spheres/CorGold.png" },
-  { name: "Entropy", white: "/spheres/Entropy_15_.png", gold: "/spheres/EntGold.png" },
-  { name: "Forces", white: "/spheres/Forces_15_.png", gold: "/spheres/ForGold.png" },
-  { name: "Life", white: "/spheres/Life_15_.png", gold: "/spheres/LifGold.png" },
-  { name: "Matter", white: "/spheres/Matter_15_.png", gold: "/spheres/MatGold.png" },
-  { name: "Mind", white: "/spheres/Mind_15_.png", gold: "/spheres/MinGold.png" },
-  { name: "Prime", white: "/spheres/Prime_15_.png", gold: "/spheres/PriGold.png" },
-  { name: "Spirit", white: "/spheres/Spirit_15_.png", gold: "/spheres/SpiGold.png" },
-  { name: "Time", white: "/spheres/Time_15_.png", gold: "/spheres/TimGold.png" },
+  { name: "Correspondence", white: "/spheres/Correspondence15.png", gold: "/spheres/CorGold.png" },
+  { name: "Entropy", white: "/spheres/Entropy15.png", gold: "/spheres/EntGold.png" },
+  { name: "Forces", white: "/spheres/Forces15.png", gold: "/spheres/ForGold.png" },
+  { name: "Life", white: "/spheres/Life15.png", gold: "/spheres/LifGold.png" },
+  { name: "Matter", white: "/spheres/Matter15.png", gold: "/spheres/MatGold.png" },
+  { name: "Mind", white: "/spheres/Mind15.png", gold: "/spheres/MinGold.png" },
+  { name: "Prime", white: "/spheres/Prime15.png", gold: "/spheres/PriGold.png" },
+  { name: "Spirit", white: "/spheres/Spirit15.png", gold: "/spheres/SpiGold.png" },
+  { name: "Time", white: "/spheres/Time15.png", gold: "/spheres/TimGold.png" },
 ]
 
 interface SelectedSphere {
