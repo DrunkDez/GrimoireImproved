@@ -3,6 +3,7 @@
 import Link from "next/link"
 import type { Rote } from "@/lib/mage-data"
 import { useSiteSettings } from "@/hooks/use-site-settings"
+import { RandomSphereSymbols } from "@/components/random-sphere-symbols"
 
 interface HomePanelProps {
   totalRotes: number
@@ -26,20 +27,18 @@ export function HomePanel({ totalRotes, traditions, onNavigate }: HomePanelProps
 
   return (
     <div className="animate-fade-in-up flex flex-col gap-8 p-6 md:p-10">
-      {/* Hero area - Modernized with glass effect */}
+      {/* Hero area with random sphere symbols */}
       <div className="relative bg-card/60 backdrop-blur-sm border-2 border-primary/30 rounded-xl px-6 py-16 text-center shadow-xl hover:shadow-2xl transition-all duration-500 group">
         {/* Animated background glow */}
         <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-primary/5 via-transparent to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
         
         {/* Background symbol using Mage Bats font */}
-        <div className="absolute top-8 left-1/2 -translate-x-1/2 text-6xl text-primary/20 dark:text-primary/30 font-magebats" aria-hidden="true">
+        <div className="absolute top-8 left-1/2 -translate-x-1/2 text-6xl text-primary/10 dark:text-primary/20 font-magebats animate-slow-rotate" aria-hidden="true">
           a
         </div>
 
-        {/* Mystical icon using Mage Bats font */}
-        <div className="relative text-6xl text-primary/80 dark:text-accent mb-6 animate-mystical-pulse drop-shadow-[0_0_20px_rgba(180,120,200,0.4)] dark:drop-shadow-[0_0_30px_rgba(180,120,200,0.6)] font-magebats" aria-hidden="true">
-          j
-        </div>
+        {/* Random Sphere Symbols - REPLACES the single mystical icon */}
+        <RandomSphereSymbols />
 
         <h2 className="relative font-serif text-2xl md:text-3xl font-bold text-primary dark:text-primary uppercase tracking-widest mb-6">
           {isLoading ? "Welcome, Seeker of Knowledge" : settings.homeWelcomeTitle}
@@ -141,5 +140,7 @@ export function HomePanel({ totalRotes, traditions, onNavigate }: HomePanelProps
         </Link>
       </div>
     </div>
+  )
+}
   )
 }
