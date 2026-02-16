@@ -16,6 +16,7 @@ model User {
   name          String?
   passwordHash  String
   characters    Character[]
+  rotes         Rote[]      // User's created rotes
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
 }
@@ -48,49 +49,59 @@ model CharacterRote {
   specialty   Boolean   @default(false) // Is this a specialty rote?
   createdAt   DateTime  @default(now())
   
-  @@unique([characterId, roteId]) // Can't assign same rote twice to one character
+  @@unique([characterId, roteId])
   @@index([characterId])
   @@index([roteId])
 }
 
 model Rote {
-  id          String          @id @default(cuid())
-  name        String
-  tradition   String
-  description String          @db.Text
-  spheres     Json            // Store as JSON: { "Forces": 3, "Prime": 2 }
-  level       String
-  pageRef     String?
-  characters  CharacterRote[]
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
+  id                String          @id @default(cuid())
+  name              String
+  tradition         String          // Which tradition/convention it belongs to
+  description       String          @db.Text
+  spheres           Json            // JSON object with sphere levels
+  level             String          // Initiate, Apprentice, Disciple, Adept, Master
+  pageRef           String?         // Book page reference
+  userId            String?         // Who created this rote (null for admin/default rotes)
+  user              User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
+  isPublic          Boolean         @default(true) // Public for everyone or private to creator
+  characterRotes    CharacterRote[]
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
 
   @@index([tradition])
   @@index([level])
+  @@index([userId])
+  @@index([isPublic])
 }
 
 model Merit {
   id          String   @id @default(cuid())
-  name        String
-  category    String   // Physical, Mental, Social, Supernatural, Companion, Special Advantage, Genetic Flaw
-  type        String   // "merit", "flaw", "background"
-  subtype     String?  // For backgrounds: "general" or "mage"
-  cost        String   // Point cost as text: "1", "1-5", "Variable", etc.
+  name        String   @unique
+  type        String   // Physical, Social, Mental, Supernatural
+  cost        String   // Can be variable like "1-5" or "Special"
   description String   @db.Text
   pageRef     String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  @@index([category])
   @@index([type])
-  @@index([subtype])
+}
+
+model Background {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  cost        String   // Usually "1-5" but can be special
+  description String   @db.Text
+  pageRef     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model Resource {
   id          String   @id @default(cuid())
-  name        String
-  type        String   // podcast, website, book, video, article, tool, etc.
-  category    String?  // Optional: Lore, Rules, Storytelling, Character Building, etc.
+  title       String
+  type        String   // "Book", "Supplement", "Website", "Video", etc
   description String   @db.Text
   url         String?  // Link to resource
   author      String?  // Creator/author name
@@ -112,3 +123,24 @@ model SiteSettings {
   @@index([key])
 }
 
+model MageGroup {
+  id                String   @id @default(cuid())
+  name              String   @unique // "Akashic Brotherhood", "Iteration X", etc
+  slug              String   @unique // URL-friendly: "akashic-brotherhood"
+  category          String   // "Tradition", "Technocracy", "Craft"
+  description       String   @db.Text // Full description text
+  philosophy        String?  @db.Text // Their philosophy/beliefs
+  practices         String?  @db.Text // How they practice magic
+  organization      String?  @db.Text // How they're organized
+  symbolImage       String?  // Path to symbol/icon image
+  logoImage         String?  // Path to stylized name logo
+  representativeImage String? // Path to representative/header image
+  published         Boolean  @default(false) // Control visibility
+  sortOrder         Int      @default(0) // For custom ordering
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([category])
+  @@index([published])
+  @@index([slug])
+}
