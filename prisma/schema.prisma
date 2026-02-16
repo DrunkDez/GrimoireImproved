@@ -16,6 +16,7 @@ model User {
   name          String?
   passwordHash  String
   characters    Character[]
+  rotes         Rote[]      // ADDED: User's created rotes
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
 }
@@ -61,12 +62,17 @@ model Rote {
   spheres     Json            // Store as JSON: { "Forces": 3, "Prime": 2 }
   level       String
   pageRef     String?
+  userId      String?         // ADDED: Who created this rote (null for admin/default rotes)
+  user        User?           // ADDED: Relation to User
+  isPublic    Boolean         @default(true) // ADDED: Public for everyone or private to creator
   characters  CharacterRote[]
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
 
   @@index([tradition])
   @@index([level])
+  @@index([userId])      // ADDED: Index for userId
+  @@index([isPublic])    // ADDED: Index for isPublic
 }
 
 model Merit {
@@ -111,4 +117,3 @@ model SiteSettings {
   
   @@index([key])
 }
-
