@@ -2,6 +2,7 @@
 
 import { UserNav } from "@/components/auth/user-nav"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { RandomLogo } from "@/components/random-logo"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 
@@ -33,9 +34,13 @@ export function GrimoireHeader() {
       />
 
       <Link href="/" className="block hover:opacity-80 transition-opacity">
-        <h1 className="font-serif text-4xl md:text-6xl font-black tracking-wider uppercase text-primary leading-tight mb-4">
-          The Enlightened Grimoire
-        </h1>
+        {/* Random Logo + Title */}
+        <div className="flex items-center justify-center gap-6 mb-4">
+          <RandomLogo />
+          <h1 className="font-serif text-4xl md:text-6xl font-black tracking-wider uppercase text-primary leading-tight">
+            The Enlightened Grimoire
+          </h1>
+        </div>
       </Link>
 
       {/* Decorative underline */}
