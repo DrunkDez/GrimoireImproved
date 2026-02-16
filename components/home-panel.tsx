@@ -142,5 +142,3 @@ export function HomePanel({ totalRotes, traditions, onNavigate }: HomePanelProps
     </div>
   )
 }
-  )
-}
