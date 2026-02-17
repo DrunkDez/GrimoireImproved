@@ -1,635 +1,516 @@
 "use client"
 
 import { useState } from "react"
-import { cn } from "@/lib/utils"
-import { Check, Lock, AlertCircle } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { GrimoireHeader } from "@/components/grimoire-header"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
+import { 
+  Sparkles, 
+  Users, 
+  Brain, 
+  Dumbbell, 
+  Zap, 
+  BookOpen,
+  Star,
+  Heart,
+  Target,
+  Gift,
+  ChevronRight,
+  Info
+} from "lucide-react"
+import Link from "next/link"
 
-type Priority = "primary" | "secondary" | "tertiary" | null
-
-interface CharacterCreationState {
-  // Current phase
-  phase: "attributes-priority" | "attributes-assign" | "abilities-priority" | "abilities-assign" | "spheres" | "complete"
-  
-  // Attribute priorities
-  attributePriorities: {
-    physical: Priority
-    social: Priority
-    mental: Priority
-  }
-  
-  // Attribute values (each starts at 1, locked)
-  attributes: {
-    // Physical
-    strength: number
-    dexterity: number
-    stamina: number
-    // Social
-    charisma: number
-    manipulation: number
-    appearance: number
-    // Mental
-    perception: number
-    intelligence: number
-    wits: number
-  }
-  
-  // Ability priorities
-  abilityPriorities: {
-    talents: Priority
-    skills: Priority
-    knowledges: Priority
-  }
-  
-  // Ability values
-  abilities: {
-    // Talents
-    alertness: number
-    art: number
-    athletics: number
-    awareness: number
-    brawl: number
-    empathy: number
-    expression: number
-    intimidation: number
-    leadership: number
-    streetwise: number
-    subterfuge: number
-    // Skills
-    craft: number
-    drive: number
-    etiquette: number
-    firearms: number
-    martialArts: number
-    meditation: number
-    melee: number
-    research: number
-    stealth: number
-    survival: number
-    technology: number
-    // Knowledges
-    academics: number
-    computer: number
-    cosmology: number
-    enigmas: number
-    esoterica: number
-    investigation: number
-    law: number
-    medicine: number
-    occult: number
-    politics: number
-    science: number
-  }
-}
-
-const INITIAL_STATE: CharacterCreationState = {
-  phase: "attributes-priority",
-  attributePriorities: {
-    physical: null,
-    social: null,
-    mental: null
-  },
-  attributes: {
-    strength: 1,
-    dexterity: 1,
-    stamina: 1,
-    charisma: 1,
-    manipulation: 1,
-    appearance: 1,
-    perception: 1,
-    intelligence: 1,
-    wits: 1
-  },
-  abilityPriorities: {
-    talents: null,
-    skills: null,
-    knowledges: null
-  },
-  abilities: {
-    alertness: 0, art: 0, athletics: 0, awareness: 0, brawl: 0,
-    empathy: 0, expression: 0, intimidation: 0, leadership: 0,
-    streetwise: 0, subterfuge: 0,
-    craft: 0, drive: 0, etiquette: 0, firearms: 0, martialArts: 0,
-    meditation: 0, melee: 0, research: 0, stealth: 0, survival: 0,
-    technology: 0,
-    academics: 0, computer: 0, cosmology: 0, enigmas: 0, esoterica: 0,
-    investigation: 0, law: 0, medicine: 0, occult: 0, politics: 0,
-    science: 0
-  }
-}
-
-export default function ProperCharacterCreation() {
-  const [state, setState] = useState<CharacterCreationState>(INITIAL_STATE)
-
-  // Calculate points for attributes
-  const getAttributePoints = (category: keyof typeof state.attributePriorities): number => {
-    const priority = state.attributePriorities[category]
-    if (priority === "primary") return 7
-    if (priority === "secondary") return 5
-    if (priority === "tertiary") return 3
-    return 0
-  }
-
-  const getAttributesInCategory = (category: "physical" | "social" | "mental"): (keyof typeof state.attributes)[] => {
-    if (category === "physical") return ["strength", "dexterity", "stamina"]
-    if (category === "social") return ["charisma", "manipulation", "appearance"]
-    return ["perception", "intelligence", "wits"]
-  }
-
-  const getAttributePointsSpent = (category: keyof typeof state.attributePriorities): number => {
-    const attrs = getAttributesInCategory(category)
-    // Each starts at 1, so we count points above 1
-    return attrs.reduce((sum, attr) => sum + (state.attributes[attr] - 1), 0)
-  }
-
-  const getAttributePointsRemaining = (category: keyof typeof state.attributePriorities): number => {
-    return getAttributePoints(category) - getAttributePointsSpent(category)
-  }
-
-  // Calculate points for abilities
-  const getAbilityPoints = (category: keyof typeof state.abilityPriorities): number => {
-    const priority = state.abilityPriorities[category]
-    if (priority === "primary") return 13
-    if (priority === "secondary") return 9
-    if (priority === "tertiary") return 5
-    return 0
-  }
-
-  const getAbilitiesInCategory = (category: "talents" | "skills" | "knowledges"): (keyof typeof state.abilities)[] => {
-    if (category === "talents") {
-      return ["alertness", "art", "athletics", "awareness", "brawl", "empathy", 
-              "expression", "intimidation", "leadership", "streetwise", "subterfuge"]
-    }
-    if (category === "skills") {
-      return ["craft", "drive", "etiquette", "firearms", "martialArts", "meditation",
-              "melee", "research", "stealth", "survival", "technology"]
-    }
-    return ["academics", "computer", "cosmology", "enigmas", "esoterica", "investigation",
-            "law", "medicine", "occult", "politics", "science"]
-  }
-
-  const getAbilityPointsSpent = (category: keyof typeof state.abilityPriorities): number => {
-    const abilities = getAbilitiesInCategory(category)
-    return abilities.reduce((sum, ability) => sum + state.abilities[ability], 0)
-  }
-
-  const getAbilityPointsRemaining = (category: keyof typeof state.abilityPriorities): number => {
-    return getAbilityPoints(category) - getAbilityPointsSpent(category)
-  }
-
-  // Set priority
-  const setAttributePriority = (category: keyof typeof state.attributePriorities, priority: Priority) => {
-    // Clear any existing assignment of this priority
-    const newPriorities = { ...state.attributePriorities }
-    Object.keys(newPriorities).forEach(key => {
-      if (newPriorities[key as keyof typeof newPriorities] === priority) {
-        newPriorities[key as keyof typeof newPriorities] = null
-      }
-    })
-    newPriorities[category] = priority
-    
-    setState({ ...state, attributePriorities: newPriorities })
-  }
-
-  const setAbilityPriority = (category: keyof typeof state.abilityPriorities, priority: Priority) => {
-    const newPriorities = { ...state.abilityPriorities }
-    Object.keys(newPriorities).forEach(key => {
-      if (newPriorities[key as keyof typeof newPriorities] === priority) {
-        newPriorities[key as keyof typeof newPriorities] = null
-      }
-    })
-    newPriorities[category] = priority
-    
-    setState({ ...state, abilityPriorities: newPriorities })
-  }
-
-  // Check if can proceed
-  const canProceedFromAttributePriority = () => {
-    return Object.values(state.attributePriorities).filter(p => p !== null).length === 3
-  }
-
-  const canProceedFromAttributeAssign = () => {
-    return getAttributePointsRemaining("physical") === 0 &&
-           getAttributePointsRemaining("social") === 0 &&
-           getAttributePointsRemaining("mental") === 0
-  }
-
-  const canProceedFromAbilityPriority = () => {
-    return Object.values(state.abilityPriorities).filter(p => p !== null).length === 3
-  }
-
-  const canProceedFromAbilityAssign = () => {
-    return getAbilityPointsRemaining("talents") === 0 &&
-           getAbilityPointsRemaining("skills") === 0 &&
-           getAbilityPointsRemaining("knowledges") === 0
-  }
-
-  // Set attribute value
-  const setAttributeValue = (attr: keyof typeof state.attributes, value: number) => {
-    // Can't go below 1
-    if (value < 1) return
-    
-    // Find which category this attribute belongs to
-    let category: "physical" | "social" | "mental" = "physical"
-    if (["charisma", "manipulation", "appearance"].includes(attr)) category = "social"
-    if (["perception", "intelligence", "wits"].includes(attr)) category = "mental"
-    
-    // Check if we have enough points
-    const currentValue = state.attributes[attr]
-    const pointDiff = value - currentValue
-    const remaining = getAttributePointsRemaining(category)
-    
-    if (pointDiff > remaining) return // Not enough points
-    
-    setState({
-      ...state,
-      attributes: {
-        ...state.attributes,
-        [attr]: value
-      }
-    })
-  }
-
-  // Set ability value
-  const setAbilityValue = (ability: keyof typeof state.abilities, value: number) => {
-    // Can't go below 0
-    if (value < 0) return
-    
-    // Can't go above 3 during character creation
-    if (value > 3) return
-    
-    // Find which category
-    let category: "talents" | "skills" | "knowledges" = "talents"
-    if (getAbilitiesInCategory("skills").includes(ability)) category = "skills"
-    if (getAbilitiesInCategory("knowledges").includes(ability)) category = "knowledges"
-    
-    // Check points
-    const currentValue = state.abilities[ability]
-    const pointDiff = value - currentValue
-    const remaining = getAbilityPointsRemaining(category)
-    
-    if (pointDiff > remaining) return
-    
-    setState({
-      ...state,
-      abilities: {
-        ...state.abilities,
-        [ability]: value
-      }
-    })
-  }
-
+export default function CharacterCreationGuide() {
   return (
-    <div className="min-h-screen p-6 md:p-10 space-y-8">
-      <div className="max-w-4xl mx-auto space-y-8">
-        {/* Header */}
-        <div className="text-center space-y-4">
-          <h1 className="text-4xl md:text-5xl font-cinzel font-bold text-primary">
-            Character Creation
-          </h1>
-          <div className="flex items-center justify-center gap-2">
-            {["Attributes Priority", "Attributes", "Abilities Priority", "Abilities", "Complete"].map((step, i) => (
-              <div key={i} className="flex items-center gap-2">
-                {i > 0 && <div className="w-8 h-0.5 bg-primary/30" />}
-                <div className={cn(
-                  "w-8 h-8 rounded-full border-2 flex items-center justify-center text-xs font-bold",
-                  i < ["attributes-priority", "attributes-assign", "abilities-priority", "abilities-assign", "complete"].indexOf(state.phase)
-                    ? "bg-primary border-primary text-primary-foreground"
-                    : i === ["attributes-priority", "attributes-assign", "abilities-priority", "abilities-assign", "complete"].indexOf(state.phase)
-                    ? "border-accent text-accent animate-pulse"
-                    : "border-primary/30 text-muted-foreground"
-                )}>
-                  {i < ["attributes-priority", "attributes-assign", "abilities-priority", "abilities-assign", "complete"].indexOf(state.phase) ? <Check className="w-4 h-4" /> : i + 1}
-                </div>
-              </div>
-            ))}
+    <div className="min-h-screen relative z-[1]">
+      <div className="max-w-[1400px] mx-auto bg-background border-[3px] border-primary rounded-lg overflow-hidden relative my-6 mx-3 md:my-8 md:mx-4">
+        <GrimoireHeader />
+
+        <div className="p-6 md:p-10 space-y-8">
+          {/* Header */}
+          <div className="text-center space-y-4">
+            <h1 className="text-4xl md:text-5xl font-cinzel font-bold text-primary">
+              Character Creation Guide
+            </h1>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Learn how to create your Mage: The Ascension character step by step
+            </p>
           </div>
+
+          {/* Quick Start CTA */}
+          <Card className="border-2 border-accent bg-accent/5">
+            <CardContent className="p-8 text-center space-y-4">
+              <Sparkles className="w-12 h-12 text-accent mx-auto" />
+              <h2 className="text-2xl font-cinzel font-bold text-accent">
+                Ready to Create Your Character?
+              </h2>
+              <p className="text-muted-foreground max-w-xl mx-auto">
+                Use our guided character creation tool to build your mage step-by-step with automatic point tracking and helpful tips!
+              </p>
+              <Link href="/character-creation">
+                <Button size="lg" className="gap-2">
+                  <Sparkles className="w-5 h-5" />
+                  Start Guided Creation
+                  <ChevronRight className="w-5 h-5" />
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+
+          {/* Main Guide */}
+          <Tabs defaultValue="overview" className="space-y-6">
+            <TabsList className="grid w-full grid-cols-5">
+              <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="attributes">Attributes</TabsTrigger>
+              <TabsTrigger value="abilities">Abilities</TabsTrigger>
+              <TabsTrigger value="spheres">Spheres</TabsTrigger>
+              <TabsTrigger value="finishing">Finishing</TabsTrigger>
+            </TabsList>
+
+            {/* Overview Tab */}
+            <TabsContent value="overview" className="space-y-6">
+              <Card className="border-2 border-primary">
+                <CardHeader>
+                  <CardTitle className="font-cinzel text-2xl">Character Creation Steps</CardTitle>
+                  <CardDescription>Follow these steps to create your mage</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="flex gap-4 p-4 border-2 border-primary/30 rounded-md">
+                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold">
+                        1
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-primary">Concept & Tradition</h3>
+                        <p className="text-sm text-muted-foreground">
+                          Choose your character concept, Tradition, and basic identity
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-4 p-4 border-2 border-primary/30 rounded-md">
+                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold">
+                        2
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-primary">Attributes</h3>
+                        <p className="text-sm text-muted-foreground">
+                          Prioritize Physical, Social, and Mental (7/5/3 dots + 1 free each)
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-4 p-4 border-2 border-accent/30 rounded-md">
+                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-accent text-accent-foreground flex items-center justify-center font-bold">
+                        3
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-accent">Abilities</h3>
+                        <p className="text-sm text-muted-foreground">
+                          Prioritize Talents, Skills, Knowledges (13/9/5 dots, max 3 each)
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-4 p-4 border-2 border-ring/30 rounded-md">
+                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-ring text-ring-foreground flex items-center justify-center font-bold">
+                        4
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-ring">Spheres</h3>
+                        <p className="text-sm text-muted-foreground">
+                          Choose your magical Spheres (6 dots, affinity at 1, max 3 each)
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-4 p-4 border-2 border-primary/30 rounded-md">
+                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold">
+                        5
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-primary">Backgrounds</h3>
+                        <p className="text-sm text-muted-foreground">
+                          Select Backgrounds like Avatar, Resources, Allies (7 dots total)
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-4 p-4 border-2 border-accent/30 rounded-md">
+                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-accent text-accent-foreground flex items-center justify-center font-bold">
+                        6
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-accent">Freebie Points</h3>
+                        <p className="text-sm text-muted-foreground">
+                          Spend 15 freebie points to customize your character
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-2 border-ring">
+                <CardHeader>
+                  <CardTitle className="font-cinzel text-2xl">Quick Reference</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="space-y-2">
+                      <h3 className="font-semibold text-primary">Starting Points</h3>
+                      <ul className="space-y-1 text-sm">
+                        <li>• <strong>Attributes:</strong> 1 free in each (9 total), then 7/5/3</li>
+                        <li>• <strong>Abilities:</strong> 13/9/5 dots (max 3 per ability)</li>
+                        <li>• <strong>Spheres:</strong> 6 dots (affinity at 1, max 3)</li>
+                        <li>• <strong>Backgrounds:</strong> 7 dots</li>
+                        <li>• <strong>Arete:</strong> Starts at 1</li>
+                        <li>• <strong>Willpower:</strong> Starts at 5</li>
+                        <li>• <strong>Quintessence:</strong> Equal to Avatar rating</li>
+                      </ul>
+                    </div>
+
+                    <div className="space-y-2">
+                      <h3 className="font-semibold text-accent">Freebie Point Costs</h3>
+                      <ul className="space-y-1 text-sm">
+                        <li>• <strong>Attribute:</strong> 5 points per dot</li>
+                        <li>• <strong>Ability:</strong> 2 points per dot</li>
+                        <li>• <strong>Sphere:</strong> 7 points per dot</li>
+                        <li>• <strong>Background:</strong> 1 point per dot</li>
+                        <li>• <strong>Arete:</strong> 4 points per dot</li>
+                        <li>• <strong>Willpower:</strong> 1 point per dot</li>
+                        <li>• <strong>Quintessence:</strong> 4 points for 4 points</li>
+                      </ul>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Attributes Tab */}
+            <TabsContent value="attributes" className="space-y-6">
+              <Card className="border-2 border-primary">
+                <CardHeader>
+                  <CardTitle className="font-cinzel text-2xl flex items-center gap-2">
+                    <Dumbbell className="w-6 h-6" />
+                    Attributes
+                  </CardTitle>
+                  <CardDescription>
+                    Your character's innate capabilities - each starts at 1 dot
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="bg-primary/10 border border-primary/30 rounded-md p-4">
+                    <p className="text-sm">
+                      <strong>How it works:</strong> Each of the 9 attributes automatically starts at 1 dot (representing basic human capability). 
+                      You then prioritize the three categories - Physical, Social, and Mental - choosing which gets 7 additional dots (Primary), 
+                      5 additional dots (Secondary), and 3 additional dots (Tertiary).
+                    </p>
+                  </div>
+
+                  <div className="grid gap-6 md:grid-cols-3">
+                    <div className="space-y-3">
+                      <h3 className="font-cinzel font-bold text-lg text-primary flex items-center gap-2">
+                        <Dumbbell className="w-5 h-5" />
+                        Physical
+                      </h3>
+                      <div className="space-y-2">
+                        <div className="p-3 border border-primary/30 rounded-md">
+                          <h4 className="font-semibold">Strength</h4>
+                          <p className="text-xs text-muted-foreground">Physical power and muscle</p>
+                        </div>
+                        <div className="p-3 border border-primary/30 rounded-md">
+                          <h4 className="font-semibold">Dexterity</h4>
+                          <p className="text-xs text-muted-foreground">Agility and coordination</p>
+                        </div>
+                        <div className="p-3 border border-primary/30 rounded-md">
+                          <h4 className="font-semibold">Stamina</h4>
+                          <p className="text-xs text-muted-foreground">Endurance and resilience</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <h3 className="font-cinzel font-bold text-lg text-primary flex items-center gap-2">
+                        <Users className="w-5 h-5" />
+                        Social
+                      </h3>
+                      <div className="space-y-2">
+                        <div className="p-3 border border-primary/30 rounded-md">
+                          <h4 className="font-semibold">Charisma</h4>
+                          <p className="text-xs text-muted-foreground">Charm and magnetism</p>
+                        </div>
+                        <div className="p-3 border border-primary/30 rounded-md">
+                          <h4 className="font-semibold">Manipulation</h4>
+                          <p className="text-xs text-muted-foreground">Persuasion and influence</p>
+                        </div>
+                        <div className="p-3 border border-primary/30 rounded-md">
+                          <h4 className="font-semibold">Appearance</h4>
+                          <p className="text-xs text-muted-foreground">Physical attractiveness</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <h3 className="font-cinzel font-bold text-lg text-primary flex items-center gap-2">
+                        <Brain className="w-5 h-5" />
+                        Mental
+                      </h3>
+                      <div className="space-y-2">
+                        <div className="p-3 border border-primary/30 rounded-md">
+                          <h4 className="font-semibold">Perception</h4>
+                          <p className="text-xs text-muted-foreground">Awareness and insight</p>
+                        </div>
+                        <div className="p-3 border border-primary/30 rounded-md">
+                          <h4 className="font-semibold">Intelligence</h4>
+                          <p className="text-xs text-muted-foreground">Reasoning and memory</p>
+                        </div>
+                        <div className="p-3 border border-primary/30 rounded-md">
+                          <h4 className="font-semibold">Wits</h4>
+                          <p className="text-xs text-muted-foreground">Quick thinking and cunning</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-accent/10 border border-accent/30 rounded-md p-4">
+                    <p className="text-sm">
+                      <strong>💡 Tip:</strong> Most mages prioritize Mental or Social attributes. Consider your character concept - 
+                      a street-smart hacker might prioritize Mental, a charismatic cult leader would choose Social, 
+                      while a martial artist mage could go Physical first.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Abilities Tab */}
+            <TabsContent value="abilities" className="space-y-6">
+              <Card className="border-2 border-accent">
+                <CardHeader>
+                  <CardTitle className="font-cinzel text-2xl flex items-center gap-2">
+                    <BookOpen className="w-6 h-6" />
+                    Abilities
+                  </CardTitle>
+                  <CardDescription>
+                    Your character's learned skills and knowledge - maximum 3 dots each during creation
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="bg-accent/10 border border-accent/30 rounded-md p-4">
+                    <p className="text-sm">
+                      <strong>How it works:</strong> Prioritize Talents, Skills, and Knowledges choosing which gets 13 dots (Primary), 
+                      9 dots (Secondary), and 5 dots (Tertiary). No ability can exceed 3 dots during character creation.
+                    </p>
+                  </div>
+
+                  <div className="grid gap-6 md:grid-cols-3">
+                    <div className="space-y-3">
+                      <h3 className="font-cinzel font-bold text-lg text-accent">Talents</h3>
+                      <p className="text-xs text-muted-foreground mb-2">Intuitive abilities, no formal training needed</p>
+                      <div className="space-y-1 text-sm">
+                        <div className="flex items-start gap-2">
+                          <span className="text-accent">•</span>
+                          <span>Alertness, Art, Athletics, Awareness, Brawl, Empathy, Expression, Intimidation, Leadership, Streetwise, Subterfuge</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <h3 className="font-cinzel font-bold text-lg text-accent">Skills</h3>
+                      <p className="text-xs text-muted-foreground mb-2">Practical abilities requiring practice</p>
+                      <div className="space-y-1 text-sm">
+                        <div className="flex items-start gap-2">
+                          <span className="text-accent">•</span>
+                          <span>Craft, Drive, Etiquette, Firearms, Martial Arts, Meditation, Melee, Research, Stealth, Survival, Technology</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <h3 className="font-cinzel font-bold text-lg text-accent">Knowledges</h3>
+                      <p className="text-xs text-muted-foreground mb-2">Academic and scholarly learning</p>
+                      <div className="space-y-1 text-sm">
+                        <div className="flex items-start gap-2">
+                          <span className="text-accent">•</span>
+                          <span>Academics, Computer, Cosmology, Enigmas, Esoterica, Investigation, Law, Medicine, Occult, Politics, Science</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-ring/10 border border-ring/30 rounded-md p-4">
+                    <p className="text-sm">
+                      <strong>💡 Tip:</strong> <strong>Occult</strong> is essential for most mages! Also consider your Tradition's focus - 
+                      Hermetics need Academics and Occult, Virtual Adepts need Computer and Technology, Akashic Brotherhood might want Martial Arts and Meditation.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Spheres Tab */}
+            <TabsContent value="spheres" className="space-y-6">
+              <Card className="border-2 border-ring">
+                <CardHeader>
+                  <CardTitle className="font-cinzel text-2xl flex items-center gap-2">
+                    <Zap className="w-6 h-6" />
+                    Spheres of Magic
+                  </CardTitle>
+                  <CardDescription>
+                    Your character's magical capabilities - 6 dots to spend, max 3 per Sphere
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="bg-ring/10 border border-ring/30 rounded-md p-4">
+                    <p className="text-sm">
+                      <strong>How it works:</strong> Your Tradition grants one affinity Sphere at 1 dot for free. 
+                      You have 6 additional dots to distribute among the Nine Spheres, with a maximum of 3 dots in any single Sphere during character creation.
+                    </p>
+                  </div>
+
+                  <div className="grid gap-3 md:grid-cols-3">
+                    {[
+                      { name: "Correspondence", desc: "Space, distance, and connection" },
+                      { name: "Entropy", desc: "Fate, fortune, and decay" },
+                      { name: "Forces", desc: "Energy, fire, and motion" },
+                      { name: "Life", desc: "Biology and healing" },
+                      { name: "Matter", desc: "Substances and materials" },
+                      { name: "Mind", desc: "Thoughts and consciousness" },
+                      { name: "Prime", desc: "Quintessence and raw magic" },
+                      { name: "Spirit", desc: "The Umbra and ephemera" },
+                      { name: "Time", desc: "Past, present, and future" }
+                    ].map(sphere => (
+                      <div key={sphere.name} className="p-3 border border-ring/30 rounded-md">
+                        <h4 className="font-semibold text-ring">{sphere.name}</h4>
+                        <p className="text-xs text-muted-foreground">{sphere.desc}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="bg-accent/10 border border-accent/30 rounded-md p-4">
+                    <p className="text-sm">
+                      <strong>💡 Tip:</strong> Your Arete limits what you can do with Spheres. Starting Arete is 1, 
+                      so you can only use the first level of each Sphere initially. Spend freebie points to raise Arete!
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Finishing Tab */}
+            <TabsContent value="finishing" className="space-y-6">
+              <Card className="border-2 border-accent">
+                <CardHeader>
+                  <CardTitle className="font-cinzel text-2xl flex items-center gap-2">
+                    <Gift className="w-6 h-6" />
+                    Finishing Touches
+                  </CardTitle>
+                  <CardDescription>
+                    Complete your character with Backgrounds, Freebie Points, and personal details
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="space-y-4">
+                    <div>
+                      <h3 className="font-semibold text-lg text-primary mb-2">Backgrounds (7 dots)</h3>
+                      <p className="text-sm text-muted-foreground mb-3">
+                        Backgrounds represent your character's resources, connections, and advantages. 
+                        <strong>Avatar</strong> is essential for mages!
+                      </p>
+                      <div className="grid gap-2 md:grid-cols-2 text-sm">
+                        <div>• Avatar (your inner guide)</div>
+                        <div>• Allies (helpful contacts)</div>
+                        <div>• Resources (wealth)</div>
+                        <div>• Node (Quintessence source)</div>
+                        <div>• Library (research materials)</div>
+                        <div>• Mentor (wise teacher)</div>
+                        <div>• And many more!</div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <h3 className="font-semibold text-lg text-accent mb-2">Freebie Points (15 points)</h3>
+                      <p className="text-sm text-muted-foreground mb-3">
+                        Customize your character by spending 15 freebie points on:
+                      </p>
+                      <div className="grid gap-2 text-sm">
+                        <div className="flex justify-between">
+                          <span>Attributes</span>
+                          <span className="text-accent font-semibold">5 points per dot</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Abilities</span>
+                          <span className="text-accent font-semibold">2 points per dot</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Spheres</span>
+                          <span className="text-accent font-semibold">7 points per dot</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Backgrounds</span>
+                          <span className="text-accent font-semibold">1 point per dot</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Arete</span>
+                          <span className="text-accent font-semibold">4 points per dot</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Willpower</span>
+                          <span className="text-accent font-semibold">1 point per dot</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <h3 className="font-semibold text-lg text-ring mb-2">Character Details</h3>
+                      <p className="text-sm text-muted-foreground mb-3">
+                        Finally, add the finishing touches:
+                      </p>
+                      <ul className="space-y-1 text-sm">
+                        <li>• Name, age, and appearance</li>
+                        <li>• Nature & Demeanor (personality archetypes)</li>
+                        <li>• Essence (Dynamic, Pattern, Primordial, or Questing)</li>
+                        <li>• Character concept and background story</li>
+                        <li>• Equipment and possessions</li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  <div className="bg-primary/10 border border-primary/30 rounded-md p-4">
+                    <p className="text-sm">
+                      <strong>💡 Recommendation:</strong> Spend freebie points on <strong>Arete</strong> first! 
+                      It's expensive but crucial - your Arete limits what you can do with your Spheres. 
+                      Many players raise it from 1 to 3 during character creation.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+
+          {/* Bottom CTA */}
+          <Card className="border-2 border-accent bg-accent/5">
+            <CardContent className="p-8 text-center space-y-4">
+              <h2 className="text-2xl font-cinzel font-bold text-accent">
+                Ready to Begin?
+              </h2>
+              <p className="text-muted-foreground max-w-xl mx-auto">
+                Our guided creation tool will walk you through every step with automatic point tracking, 
+                helpful tips, and validation to ensure your character follows all the rules!
+              </p>
+              <Link href="/character-creation">
+                <Button size="lg" className="gap-2">
+                  <Sparkles className="w-5 h-5" />
+                  Start Creating Your Mage
+                  <ChevronRight className="w-5 h-5" />
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
         </div>
-
-        {/* PHASE 1: Attribute Priority Selection */}
-        {state.phase === "attributes-priority" && (
-          <Card className="border-2 border-accent">
-            <CardHeader>
-              <CardTitle className="font-cinzel text-2xl">Step 1: Prioritize Attributes</CardTitle>
-              <CardDescription>
-                Choose which attribute category gets 7 dots (Primary), 5 dots (Secondary), and 3 dots (Tertiary).
-                <br />Each attribute starts at 1 dot automatically.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {(["physical", "social", "mental"] as const).map(category => (
-                <div key={category} className="flex items-center justify-between p-4 border-2 border-primary/30 rounded-md">
-                  <div>
-                    <h3 className="font-serif font-bold text-lg capitalize">{category} Attributes</h3>
-                    <p className="text-sm text-muted-foreground">
-                      {category === "physical" && "Strength, Dexterity, Stamina"}
-                      {category === "social" && "Charisma, Manipulation, Appearance"}
-                      {category === "mental" && "Perception, Intelligence, Wits"}
-                    </p>
-                  </div>
-                  <div className="flex gap-2">
-                    {(["primary", "secondary", "tertiary"] as const).map(priority => (
-                      <Button
-                        key={priority}
-                        size="sm"
-                        variant={state.attributePriorities[category] === priority ? "default" : "outline"}
-                        onClick={() => setAttributePriority(category, priority)}
-                      >
-                        {priority === "primary" && "Primary (7)"}
-                        {priority === "secondary" && "Secondary (5)"}
-                        {priority === "tertiary" && "Tertiary (3)"}
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-              ))}
-              
-              <Button 
-                className="w-full" 
-                size="lg"
-                disabled={!canProceedFromAttributePriority()}
-                onClick={() => setState({ ...state, phase: "attributes-assign" })}
-              >
-                Continue to Attribute Assignment →
-              </Button>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* PHASE 2: Attribute Assignment */}
-        {state.phase === "attributes-assign" && (
-          <div className="space-y-6">
-            {(["physical", "social", "mental"] as const).map(category => {
-              const priority = state.attributePriorities[category]
-              if (!priority) return null
-              
-              const remaining = getAttributePointsRemaining(category)
-              const total = getAttributePoints(category)
-              
-              return (
-                <Card key={category} className="border-2 border-primary">
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <CardTitle className="font-cinzel text-2xl capitalize">{category} Attributes</CardTitle>
-                        <CardDescription>
-                          {priority.charAt(0).toUpperCase() + priority.slice(1)} - {total} dots to spend
-                        </CardDescription>
-                      </div>
-                      <Badge variant={remaining === 0 ? "default" : "secondary"} className="text-lg px-4 py-2">
-                        {remaining} / {total} remaining
-                      </Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-2">
-                    {getAttributesInCategory(category).map(attr => (
-                      <AttributeDotRating
-                        key={attr}
-                        label={attr.charAt(0).toUpperCase() + attr.slice(1)}
-                        value={state.attributes[attr]}
-                        onChange={(v) => setAttributeValue(attr, v)}
-                        locked={true}
-                      />
-                    ))}
-                  </CardContent>
-                </Card>
-              )
-            })}
-            
-            <Button
-              className="w-full"
-              size="lg"
-              disabled={!canProceedFromAttributeAssign()}
-              onClick={() => setState({ ...state, phase: "abilities-priority" })}
-            >
-              Continue to Abilities →
-            </Button>
-          </div>
-        )}
-
-        {/* PHASE 3: Ability Priority Selection */}
-        {state.phase === "abilities-priority" && (
-          <Card className="border-2 border-accent">
-            <CardHeader>
-              <CardTitle className="font-cinzel text-2xl">Step 2: Prioritize Abilities</CardTitle>
-              <CardDescription>
-                Choose which ability category gets 13 dots (Primary), 9 dots (Secondary), and 5 dots (Tertiary).
-                <br />No ability can exceed 3 dots during character creation.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {(["talents", "skills", "knowledges"] as const).map(category => (
-                <div key={category} className="flex items-center justify-between p-4 border-2 border-accent/30 rounded-md">
-                  <div>
-                    <h3 className="font-serif font-bold text-lg capitalize">{category}</h3>
-                    <p className="text-sm text-muted-foreground">
-                      {category === "talents" && "Alertness, Art, Athletics, Awareness, Brawl, Empathy, Expression, Intimidation, Leadership, Streetwise, Subterfuge"}
-                      {category === "skills" && "Craft, Drive, Etiquette, Firearms, Martial Arts, Meditation, Melee, Research, Stealth, Survival, Technology"}
-                      {category === "knowledges" && "Academics, Computer, Cosmology, Enigmas, Esoterica, Investigation, Law, Medicine, Occult, Politics, Science"}
-                    </p>
-                  </div>
-                  <div className="flex gap-2">
-                    {(["primary", "secondary", "tertiary"] as const).map(priority => (
-                      <Button
-                        key={priority}
-                        size="sm"
-                        variant={state.abilityPriorities[category] === priority ? "default" : "outline"}
-                        onClick={() => setAbilityPriority(category, priority)}
-                      >
-                        {priority === "primary" && "Primary (13)"}
-                        {priority === "secondary" && "Secondary (9)"}
-                        {priority === "tertiary" && "Tertiary (5)"}
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-              ))}
-              
-              <Button 
-                className="w-full" 
-                size="lg"
-                disabled={!canProceedFromAbilityPriority()}
-                onClick={() => setState({ ...state, phase: "abilities-assign" })}
-              >
-                Continue to Ability Assignment →
-              </Button>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* PHASE 4: Ability Assignment */}
-        {state.phase === "abilities-assign" && (
-          <div className="space-y-6">
-            {(["talents", "skills", "knowledges"] as const).map(category => {
-              const priority = state.abilityPriorities[category]
-              if (!priority) return null
-              
-              const remaining = getAbilityPointsRemaining(category)
-              const total = getAbilityPoints(category)
-              
-              return (
-                <Card key={category} className="border-2 border-accent">
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <CardTitle className="font-cinzel text-2xl capitalize">{category}</CardTitle>
-                        <CardDescription>
-                          {priority.charAt(0).toUpperCase() + priority.slice(1)} - {total} dots (Max 3 per ability)
-                        </CardDescription>
-                      </div>
-                      <Badge variant={remaining === 0 ? "default" : "secondary"} className="text-lg px-4 py-2">
-                        {remaining} / {total} remaining
-                      </Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-2">
-                    {getAbilitiesInCategory(category).map(ability => (
-                      <AbilityDotRating
-                        key={ability}
-                        label={ability.charAt(0).toUpperCase() + ability.replace(/([A-Z])/g, ' $1').trim()}
-                        value={state.abilities[ability]}
-                        onChange={(v) => setAbilityValue(ability, v)}
-                        maxDots={3}
-                      />
-                    ))}
-                  </CardContent>
-                </Card>
-              )
-            })}
-            
-            <Button
-              className="w-full"
-              size="lg"
-              disabled={!canProceedFromAbilityAssign()}
-              onClick={() => setState({ ...state, phase: "complete" })}
-            >
-              Continue to Spheres →
-            </Button>
-          </div>
-        )}
-
-        {/* PHASE 5: Complete */}
-        {state.phase === "complete" && (
-          <Card className="border-2 border-accent">
-            <CardHeader>
-              <CardTitle className="font-cinzel text-2xl text-accent">✨ Character Creation Complete!</CardTitle>
-              <CardDescription>
-                Your character's basic traits are set. Next you'll choose Spheres, Backgrounds, and spend Freebie Points!
-              </CardDescription>
-            </CardHeader>
-          </Card>
-        )}
-      </div>
-    </div>
-  )
-}
-
-// Attribute Dot Component (locked at 1)
-function AttributeDotRating({ label, value, onChange, locked }: { 
-  label: string
-  value: number
-  onChange: (value: number) => void
-  locked?: boolean
-}) {
-  const [hoveredValue, setHoveredValue] = useState<number | null>(null)
-  const displayValue = hoveredValue !== null ? hoveredValue : value
-
-  return (
-    <div className="flex items-center justify-between gap-4 py-3 px-4 rounded-md hover:bg-accent/5 transition-colors">
-      <label className="font-serif text-sm font-semibold text-foreground min-w-[120px]">
-        {label}
-      </label>
-      
-      <div 
-        className="flex gap-1.5"
-        onMouseLeave={() => setHoveredValue(null)}
-      >
-        {Array.from({ length: 5 }, (_, i) => {
-          const dotValue = i + 1
-          const isFilled = dotValue <= displayValue
-          const isLocked = locked && dotValue === 1
-          const isHovered = hoveredValue !== null && dotValue <= hoveredValue
-
-          return (
-            <button
-              key={i}
-              type="button"
-              onClick={() => !isLocked && onChange(dotValue === value ? (locked ? 1 : 0) : dotValue)}
-              onMouseEnter={() => !isLocked && setHoveredValue(dotValue)}
-              disabled={isLocked}
-              className={cn(
-                "relative w-6 h-6 rounded-full border-2 transition-all duration-300 ease-out",
-                !isLocked && "hover:scale-110 active:scale-95 cursor-pointer",
-                "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
-                isLocked && "cursor-not-allowed",
-                isFilled 
-                  ? "bg-primary border-primary shadow-[0_0_8px_rgba(139,71,38,0.6)] animate-dot-fill" 
-                  : "border-primary/40 bg-background",
-                !isFilled && isHovered && "border-primary shadow-[0_0_4px_rgba(139,71,38,0.4)]"
-              )}
-              style={{
-                animationDelay: isFilled ? `${i * 50}ms` : '0ms'
-              }}
-            >
-              {isLocked && (
-                <Lock className="w-3 h-3 absolute inset-0 m-auto text-primary" />
-              )}
-            </button>
-          )
-        })}
-      </div>
-    </div>
-  )
-}
-
-// Ability Dot Component (max 3)
-function AbilityDotRating({ label, value, onChange, maxDots = 3 }: { 
-  label: string
-  value: number
-  onChange: (value: number) => void
-  maxDots?: number
-}) {
-  const [hoveredValue, setHoveredValue] = useState<number | null>(null)
-  const displayValue = hoveredValue !== null ? hoveredValue : value
-
-  return (
-    <div className="flex items-center justify-between gap-4 py-3 px-4 rounded-md hover:bg-accent/5 transition-colors">
-      <label className="font-serif text-sm font-semibold text-foreground min-w-[140px]">
-        {label}
-      </label>
-      
-      <div 
-        className="flex gap-1.5"
-        onMouseLeave={() => setHoveredValue(null)}
-      >
-        {Array.from({ length: maxDots }, (_, i) => {
-          const dotValue = i + 1
-          const isFilled = dotValue <= displayValue
-          const isHovered = hoveredValue !== null && dotValue <= hoveredValue
-
-          return (
-            <button
-              key={i}
-              type="button"
-              onClick={() => onChange(dotValue === value ? 0 : dotValue)}
-              onMouseEnter={() => setHoveredValue(dotValue)}
-              className={cn(
-                "relative w-6 h-6 rounded-full border-2 transition-all duration-300 ease-out",
-                "hover:scale-110 active:scale-95 cursor-pointer",
-                "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
-                isFilled 
-                  ? "bg-accent border-accent shadow-[0_0_8px_rgba(218,165,32,0.6)] animate-dot-fill" 
-                  : "border-accent/40 bg-background",
-                !isFilled && isHovered && "border-accent shadow-[0_0_4px_rgba(218,165,32,0.4)]"
-              )}
-              style={{
-                animationDelay: isFilled ? `${i * 50}ms` : '0ms'
-              }}
-            />
-          )
-        })}
       </div>
     </div>
   )
