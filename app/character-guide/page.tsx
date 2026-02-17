@@ -418,12 +418,21 @@ export default function FullMageSheetCreation() {
                   />
                 </div>
 
-                <SheetButton
-                  onClick={() => setState({ ...state, phase: "attributes-assign" })}
-                  disabled={!canProceedFromAttributePriority()}
-                >
-                  Continue to Assign Attributes <ChevronRight className="w-4 h-4 ml-2" />
-                </SheetButton>
+                <div className="flex gap-3">
+                  <SheetButton
+                    onClick={() => setState({ ...state, phase: "basics" })}
+                    disabled={false}
+                    variant="secondary"
+                  >
+                    ← Back
+                  </SheetButton>
+                  <SheetButton
+                    onClick={() => setState({ ...state, phase: "attributes-assign" })}
+                    disabled={!canProceedFromAttributePriority()}
+                  >
+                    Continue to Assign Attributes <ChevronRight className="w-4 h-4 ml-2" />
+                  </SheetButton>
+                </div>
               </div>
             )}
 
@@ -465,12 +474,21 @@ export default function FullMageSheetCreation() {
                   <SheetDotRating label="Wits" value={state.attributes.wits} onChange={(v) => setAttributeValue("wits", v)} locked />
                 </AttributeSection>
 
-                <SheetButton
-                  onClick={() => setState({ ...state, phase: "abilities-priority" })}
-                  disabled={!canProceedFromAttributeAssign()}
-                >
-                  Continue to Abilities <ChevronRight className="w-4 h-4 ml-2" />
-                </SheetButton>
+                <div className="flex gap-3">
+                  <SheetButton
+                    onClick={() => setState({ ...state, phase: "attributes-priority" })}
+                    disabled={false}
+                    variant="secondary"
+                  >
+                    ← Back
+                  </SheetButton>
+                  <SheetButton
+                    onClick={() => setState({ ...state, phase: "abilities-priority" })}
+                    disabled={!canProceedFromAttributeAssign()}
+                  >
+                    Continue to Abilities <ChevronRight className="w-4 h-4 ml-2" />
+                  </SheetButton>
+                </div>
               </div>
             )}
 
@@ -500,12 +518,21 @@ export default function FullMageSheetCreation() {
                   />
                 </div>
 
-                <SheetButton
-                  onClick={() => setState({ ...state, phase: "abilities-assign" })}
-                  disabled={!canProceedFromAbilityPriority()}
-                >
-                  Continue to Assign Abilities <ChevronRight className="w-4 h-4 ml-2" />
-                </SheetButton>
+                <div className="flex gap-3">
+                  <SheetButton
+                    onClick={() => setState({ ...state, phase: "attributes-assign" })}
+                    disabled={false}
+                    variant="secondary"
+                  >
+                    ← Back
+                  </SheetButton>
+                  <SheetButton
+                    onClick={() => setState({ ...state, phase: "abilities-assign" })}
+                    disabled={!canProceedFromAbilityPriority()}
+                  >
+                    Continue to Assign Abilities <ChevronRight className="w-4 h-4 ml-2" />
+                  </SheetButton>
+                </div>
               </div>
             )}
 
@@ -573,12 +600,21 @@ export default function FullMageSheetCreation() {
                   </AbilityColumn>
                 </div>
 
-                <SheetButton
-                  onClick={() => setState({ ...state, phase: "spheres" })}
-                  disabled={!canProceedFromAbilityAssign()}
-                >
-                  Continue to Spheres <ChevronRight className="w-4 h-4 ml-2" />
-                </SheetButton>
+                <div className="flex gap-3">
+                  <SheetButton
+                    onClick={() => setState({ ...state, phase: "abilities-priority" })}
+                    disabled={false}
+                    variant="secondary"
+                  >
+                    ← Back
+                  </SheetButton>
+                  <SheetButton
+                    onClick={() => setState({ ...state, phase: "spheres" })}
+                    disabled={!canProceedFromAbilityAssign()}
+                  >
+                    Continue to Spheres <ChevronRight className="w-4 h-4 ml-2" />
+                  </SheetButton>
+                </div>
               </div>
             )}
 
@@ -644,12 +680,21 @@ export default function FullMageSheetCreation() {
                   </>
                 )}
 
-                <SheetButton
-                  onClick={() => setState({ ...state, phase: "willpower" })}
-                  disabled={!canProceedFromSpheres()}
-                >
-                  Continue to Finishing Touches <ChevronRight className="w-4 h-4 ml-2" />
-                </SheetButton>
+                <div className="flex gap-3">
+                  <SheetButton
+                    onClick={() => setState({ ...state, phase: "abilities-assign" })}
+                    disabled={false}
+                    variant="secondary"
+                  >
+                    ← Back
+                  </SheetButton>
+                  <SheetButton
+                    onClick={() => setState({ ...state, phase: "willpower" })}
+                    disabled={!canProceedFromSpheres()}
+                  >
+                    Continue to Finishing Touches <ChevronRight className="w-4 h-4 ml-2" />
+                  </SheetButton>
+                </div>
               </div>
             )}
 
@@ -687,9 +732,18 @@ export default function FullMageSheetCreation() {
                   </div>
                 </div>
 
-                <SheetButton onClick={() => setState({ ...state, phase: "complete" })}>
-                  Complete Character Creation <Check className="w-4 h-4 ml-2" />
-                </SheetButton>
+                <div className="flex gap-3">
+                  <SheetButton
+                    onClick={() => setState({ ...state, phase: "spheres" })}
+                    disabled={false}
+                    variant="secondary"
+                  >
+                    ← Back
+                  </SheetButton>
+                  <SheetButton onClick={() => setState({ ...state, phase: "complete" })}>
+                    Complete Character Creation <Check className="w-4 h-4 ml-2" />
+                  </SheetButton>
+                </div>
               </div>
             )}
 
@@ -771,10 +825,11 @@ function SheetInput({ label, value, onChange, placeholder }: {
   )
 }
 
-function SheetButton({ onClick, disabled, children }: {
+function SheetButton({ onClick, disabled, children, variant = "primary" }: {
   onClick: () => void
   disabled?: boolean
   children: React.ReactNode
+  variant?: "primary" | "secondary"
 }) {
   return (
     <Button
@@ -782,8 +837,17 @@ function SheetButton({ onClick, disabled, children }: {
       disabled={disabled}
       className="w-full mt-4 flex items-center justify-center"
       style={{
-        background: disabled ? 'rgba(139, 69, 19, 0.3)' : 'linear-gradient(135deg, #d4af37, #8b6914)',
-        color: disabled ? 'rgba(74, 44, 42, 0.5)' : '#2d1b4e',
+        background: disabled 
+          ? 'rgba(139, 69, 19, 0.3)' 
+          : variant === "secondary"
+          ? 'transparent'
+          : 'linear-gradient(135deg, #d4af37, #8b6914)',
+        color: disabled 
+          ? 'rgba(74, 44, 42, 0.5)' 
+          : variant === "secondary"
+          ? '#4a2c2a'
+          : '#2d1b4e',
+        border: variant === "secondary" ? '2px solid #8b4513' : 'none',
         fontFamily: 'Georgia, serif',
         fontWeight: 'bold'
       }}
@@ -821,9 +885,22 @@ function PrioritySelector({ label, subtitle, selected, onSelect }: {
               opacity: selected === priority ? 1 : 0.6
             }}
           >
-            {priority === "primary" && "13 dots"}
-            {priority === "secondary" && "9 dots"}
-            {priority === "tertiary" && "5 dots"}
+            {/* Check if this is for attributes or abilities based on subtitle */}
+            {subtitle.includes("Strength") || subtitle.includes("Charisma") || subtitle.includes("Perception") ? (
+              // Attributes: 7/5/3
+              <>
+                {priority === "primary" && "7 dots"}
+                {priority === "secondary" && "5 dots"}
+                {priority === "tertiary" && "3 dots"}
+              </>
+            ) : (
+              // Abilities: 13/9/5
+              <>
+                {priority === "primary" && "13 dots"}
+                {priority === "secondary" && "9 dots"}
+                {priority === "tertiary" && "5 dots"}
+              </>
+            )}
           </button>
         ))}
       </div>
