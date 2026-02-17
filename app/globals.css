@@ -2,6 +2,403 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================
+   GUIDED CHARACTER CREATION ANIMATIONS
+   ============================================ */
+
+/* Bounce horizontal (pointing arrow) */
+@keyframes bounce-horizontal {
+  0%, 100% {
+    transform: translateX(0) translateY(-50%);
+  }
+  50% {
+    transform: translateX(-8px) translateY(-50%);
+  }
+}
+
+/* Slide in from right (tutorial card) */
+@keyframes slide-in-right {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Slide out to right */
+@keyframes slide-out-right {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+/* Pulse once (when dot is clicked) */
+@keyframes dot-pulse-once {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.3);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Fade in */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Highlight pulse (for focused sections) */
+@keyframes highlight-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(218, 165, 32, 0);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(218, 165, 32, 0.3);
+  }
+}
+
+/* Gentle shake (to draw attention) */
+@keyframes gentle-shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-4px);
+  }
+  75% {
+    transform: translateX(4px);
+  }
+}
+
+/* Glow intensify */
+@keyframes glow-intensify {
+  0% {
+    filter: drop-shadow(0 0 4px rgba(218, 165, 32, 0.4));
+  }
+  50% {
+    filter: drop-shadow(0 0 12px rgba(218, 165, 32, 0.8));
+  }
+  100% {
+    filter: drop-shadow(0 0 4px rgba(218, 165, 32, 0.4));
+  }
+}
+
+/* Progress fill */
+@keyframes progress-fill {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+/* Tooltip appear */
+@keyframes tooltip-appear {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Success checkmark */
+@keyframes checkmark-draw {
+  0% {
+    stroke-dashoffset: 100;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Confetti burst (celebration) */
+@keyframes confetti-burst {
+  0% {
+    transform: translateY(0) scale(0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-100px) scale(1) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+/* Spotlight effect */
+@keyframes spotlight {
+  0%, 100% {
+    box-shadow: 
+      0 0 0 0 rgba(218, 165, 32, 0),
+      inset 0 0 20px rgba(218, 165, 32, 0.1);
+  }
+  50% {
+    box-shadow: 
+      0 0 40px rgba(218, 165, 32, 0.4),
+      inset 0 0 40px rgba(218, 165, 32, 0.2);
+  }
+}
+
+/* ============================================
+   UTILITY CLASSES FOR TUTORIAL
+   ============================================ */
+
+.animate-bounce-horizontal {
+  animation: bounce-horizontal 2s ease-in-out infinite;
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.animate-slide-out-right {
+  animation: slide-out-right 0.3s ease-out forwards;
+}
+
+.animate-dot-pulse-once {
+  animation: dot-pulse-once 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
+}
+
+.animate-highlight-pulse {
+  animation: highlight-pulse 2s ease-in-out infinite;
+}
+
+.animate-gentle-shake {
+  animation: gentle-shake 0.5s ease-in-out;
+}
+
+.animate-glow-intensify {
+  animation: glow-intensify 2s ease-in-out infinite;
+}
+
+.animate-progress-fill {
+  animation: progress-fill 0.5s ease-out forwards;
+}
+
+.animate-tooltip-appear {
+  animation: tooltip-appear 0.3s ease-out;
+}
+
+.animate-checkmark-draw {
+  animation: checkmark-draw 0.5s ease-out forwards;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+}
+
+.animate-confetti-burst {
+  animation: confetti-burst 1s ease-out forwards;
+}
+
+.animate-spotlight {
+  animation: spotlight 3s ease-in-out infinite;
+}
+
+/* ============================================
+   INTERACTIVE TUTORIAL STATES
+   ============================================ */
+
+/* Highlight current step */
+.tutorial-active {
+  position: relative;
+  z-index: 10;
+}
+
+.tutorial-active::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border: 2px solid hsl(42 42% 59%);
+  border-radius: 8px;
+  pointer-events: none;
+  animation: highlight-pulse 2s ease-in-out infinite;
+}
+
+/* Dim inactive sections */
+.tutorial-inactive {
+  opacity: 0.4;
+  pointer-events: none;
+  filter: grayscale(0.3);
+  transition: all 0.3s ease;
+}
+
+/* Pointer/arrow for tutorial */
+.tutorial-pointer {
+  position: absolute;
+  left: -40px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
+  border-right: 15px solid hsl(42 42% 59%);
+  animation: bounce-horizontal 2s ease-in-out infinite;
+  filter: drop-shadow(0 0 8px rgba(218, 165, 32, 0.6));
+}
+
+/* Progress indicator */
+.tutorial-progress {
+  position: relative;
+  height: 4px;
+  background: rgba(218, 165, 32, 0.2);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.tutorial-progress::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    hsl(42 42% 59%), 
+    hsl(42 42% 70%)
+  );
+  border-radius: 2px;
+  animation: progress-fill 0.5s ease-out forwards;
+}
+
+/* Step completion checkmark */
+.step-complete {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: hsl(142 76% 36%);
+  color: white;
+}
+
+.step-complete svg {
+  width: 12px;
+  height: 12px;
+  animation: checkmark-draw 0.5s ease-out forwards;
+}
+
+/* Tooltip */
+.tutorial-tooltip {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 8px;
+  padding: 8px 12px;
+  background: hsl(42 42% 59%);
+  color: hsl(42 42% 10%);
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 6px;
+  white-space: nowrap;
+  pointer-events: none;
+  animation: tooltip-appear 0.3s ease-out;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.tutorial-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 6px solid hsl(42 42% 59%);
+}
+
+/* Success celebration */
+.tutorial-success {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.8);
+  z-index: 100;
+  animation: fade-in 0.3s ease-out;
+}
+
+.tutorial-success-content {
+  background: hsl(var(--card));
+  border: 3px solid hsl(42 42% 59%);
+  border-radius: 12px;
+  padding: 48px;
+  text-align: center;
+  max-width: 500px;
+  animation: slide-in-right 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ============================================
+   RESPONSIVE ADJUSTMENTS
+   ============================================ */
+
+@media (max-width: 768px) {
+  .tutorial-pointer {
+    left: -30px;
+    border-right-width: 12px;
+  }
+
+  .tutorial-tooltip {
+    font-size: 0.65rem;
+    padding: 6px 10px;
+  }
+
+  .animate-bounce-horizontal {
+    animation: bounce-horizontal 1.5s ease-in-out infinite;
+  }
+}
+
+/* ============================================
+   ACCESSIBILITY
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-bounce-horizontal,
+  .animate-highlight-pulse,
+  .animate-gentle-shake,
+  .animate-glow-intensify,
+  .animate-spotlight,
+  .tutorial-pointer {
+    animation: none !important;
+  }
+
+  .tutorial-active::before {
+    animation: none !important;
+    opacity: 1;
+  }
+}
+
+/* Focus visible for keyboard navigation */
+.tutorial-focus-visible:focus-visible {
+  outline: 3px solid hsl(42 42% 59%);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
 /* Mage Bats Font - Mage: The Ascension symbols */
 @font-face {
   font-family: 'Mage Bats';
