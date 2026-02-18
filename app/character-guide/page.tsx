@@ -263,8 +263,7 @@ export default function FullMageSheetCreation() {
 
   // Sphere helpers
   const getSpherePointsSpent = (): number => {
-    return Object.values(state.spheres).reduce((sum, val) => sum + val, 0) - 
-           (state.affinitySphere ? 1 : 0) // Subtract affinity (free)
+    return Object.values(state.spheres).reduce((sum, val) => sum + val, 0)
   }
 
   const getSpherePointsRemaining = (): number => {
@@ -621,11 +620,14 @@ export default function FullMageSheetCreation() {
             {/* PHASE: SPHERES */}
             {state.phase === "spheres" && (
               <div className="space-y-6">
-                <SectionHeader title="Spheres" subtitle="Choose affinity Sphere (free at 1 dot) • 6 additional dots to spend • Max 3 per Sphere" />
+                <SectionHeader title="Spheres" subtitle="6 dots total • Affinity Sphere uses 1 dot (locked) • 5 additional dots to spend • Max 3 per Sphere" />
 
                 {!state.affinitySphere && (
                   <div className="p-4 border-2 rounded" style={{ borderColor: '#8b4513', background: 'rgba(107, 45, 107, 0.05)' }}>
                     <h3 className="font-semibold mb-3" style={{ color: '#6b2d6b' }}>Choose Your Affinity Sphere (granted by Tradition)</h3>
+                    <p className="text-xs mb-3 italic" style={{ color: '#6b4423' }}>
+                      Your affinity Sphere uses 1 of your 6 dots, leaving 5 dots to spend on other Spheres. It starts at 1 and cannot be reduced.
+                    </p>
                     <div className="grid grid-cols-3 gap-2">
                       {Object.keys(state.spheres).map(sphere => (
                         <button
@@ -653,9 +655,14 @@ export default function FullMageSheetCreation() {
                 {state.affinitySphere && (
                   <>
                     <div className="flex items-center justify-between p-3 rounded" style={{ background: 'rgba(107, 45, 107, 0.1)' }}>
-                      <span className="text-sm font-semibold" style={{ color: '#6b2d6b' }}>
-                        Affinity: {state.affinitySphere.charAt(0).toUpperCase() + state.affinitySphere.slice(1)}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-semibold" style={{ color: '#6b2d6b' }}>
+                          Affinity: {state.affinitySphere.charAt(0).toUpperCase() + state.affinitySphere.slice(1)}
+                        </span>
+                        <span className="text-xs px-2 py-0.5 rounded" style={{ background: '#6b2d6b', color: '#f5f0e8' }}>
+                          ● 1 dot (locked)
+                        </span>
+                      </div>
                       <span className="text-sm font-semibold px-3 py-1 rounded" style={{
                         background: getSpherePointsRemaining() === 0 ? '#6b2d6b' : 'rgba(107, 45, 107, 0.2)',
                         color: getSpherePointsRemaining() === 0 ? '#f5f0e8' : '#4a2c2a'
@@ -707,15 +714,36 @@ export default function FullMageSheetCreation() {
                   <div className="p-6 border-2 rounded" style={{ borderColor: '#8b4513', background: 'rgba(212, 175, 55, 0.05)' }}>
                     <h3 className="font-semibold mb-4" style={{ color: '#4a2c2a' }}>Arete</h3>
                     <p className="text-sm mb-4" style={{ color: '#6b4423' }}>
-                      Your enlightenment rating. Starts at 1. Use Freebie Points to increase (4 points per dot).
+                      Your enlightenment rating starts at 1. You can increase this later with Freebie Points (4 points per dot).
                     </p>
-                    <SheetDotRating
-                      label="Arete"
-                      value={state.arete}
-                      onChange={(v) => setState({ ...state, arete: v })}
-                      maxDots={10}
-                      variant="arete"
-                    />
+                    <div className="flex items-center justify-between py-1">
+                      <span className="text-sm font-serif flex-1" style={{ color: '#4a2c2a' }}>Arete</span>
+                      <div className="flex gap-0.5">
+                        {Array.from({ length: 10 }, (_, i) => {
+                          const dotValue = i + 1
+                          const isFilled = dotValue <= 1
+                          const isLocked = dotValue === 1
+
+                          return (
+                            <div
+                              key={i}
+                              className="w-4 h-4 rounded-full border transition-all duration-200"
+                              style={{
+                                borderColor: '#d4af37',
+                                borderWidth: '2px',
+                                backgroundColor: isFilled ? '#d4af37' : 'transparent',
+                                opacity: isLocked ? 1 : 0.3
+                              }}
+                            >
+                              {isLocked && <Lock className="w-2 h-2 m-auto" style={{ color: '#2d1b4e' }} />}
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
+                    <p className="text-xs mt-3 italic" style={{ color: '#8b6914' }}>
+                      ⚠️ Locked at 1 during character creation
+                    </p>
                   </div>
 
                   <div className="p-6 border-2 rounded" style={{ borderColor: '#8b4513', background: 'rgba(212, 175, 55, 0.05)' }}>
@@ -986,27 +1014,38 @@ function SheetDotRating({ label, value, onChange, locked, maxDots = 5, variant =
         {Array.from({ length: maxDots }, (_, i) => {
           const dotValue = i + 1
           const isFilled = dotValue <= displayValue
-          const isLocked = locked && dotValue === 1
+          const isLockedDot = locked && dotValue === 1
 
           return (
             <button
               key={i}
               type="button"
-              onClick={() => !isLocked && onChange(dotValue === value ? (locked ? 1 : 0) : dotValue)}
-              onMouseEnter={() => !isLocked && setHoveredValue(dotValue)}
-              disabled={isLocked}
+              onClick={() => {
+                // If this is a locked dot (first dot of affinity or first dot of attribute), don't allow changes
+                if (isLockedDot) return
+                
+                // For other dots, allow toggle but respect minimum
+                if (locked && dotValue === value) {
+                  // Trying to click the current value - toggle it, but respect minimum of 1
+                  onChange(1) // For locked (affinity/attribute), minimum is 1
+                } else {
+                  onChange(dotValue === value ? (locked ? 1 : 0) : dotValue)
+                }
+              }}
+              onMouseEnter={() => !isLockedDot && setHoveredValue(dotValue)}
+              disabled={isLockedDot}
               className={cn(
                 "w-4 h-4 rounded-full border transition-all duration-200",
-                !isLocked && "hover:scale-110 cursor-pointer"
+                !isLockedDot && "hover:scale-110 cursor-pointer"
               )}
               style={{
                 borderColor: getColor(),
                 borderWidth: '2px',
                 backgroundColor: isFilled ? getColor() : 'transparent',
-                opacity: isLocked ? 0.5 : 1
+                opacity: isLockedDot ? 0.7 : 1
               }}
             >
-              {isLocked && <Lock className="w-2 h-2 m-auto" style={{ color: '#d4af37' }} />}
+              {isLockedDot && <Lock className="w-2 h-2 m-auto" style={{ color: variant === "sphere" ? '#f5f0e8' : '#d4af37' }} />}
             </button>
           )
         })}
