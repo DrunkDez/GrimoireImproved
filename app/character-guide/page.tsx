@@ -2,10 +2,13 @@
 
 import { useState, useEffect } from "react"
 import { cn } from "@/lib/utils"
-import { Lock, ChevronRight, Check } from "lucide-react"
+import { Lock, ChevronRight, Check, Plus, Minus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
 
 type Priority = "primary" | "secondary" | "tertiary" | null
 
@@ -22,7 +25,20 @@ interface CharacterState {
   concept: string
   
   // Current phase
-  phase: "basics" | "attributes-priority" | "attributes-assign" | "abilities-priority" | "abilities-assign" | "spheres" | "backgrounds" | "complete"
+  phase: "basics" | "attributes-priority" | "attributes-assign" | "abilities-priority" | "abilities-assign" | "spheres" | "backgrounds" | "freebies" | "complete"
+  
+  // Freebie Points tracking
+  freebieDots: {
+    attributes: { [key: string]: number }
+    abilities: { [key: string]: number }
+    spheres: { [key: string]: number }
+    backgrounds: { [key: string]: number }
+    arete: number
+    willpower: number
+  }
+  specialties: { [key: string]: string }
+  merits: Array<{ id: string, name: string, cost: number }>
+  flaws: Array<{ id: string, name: string, cost: number }>
   
   // Priorities
   attributePriorities: {
@@ -147,7 +163,18 @@ const INITIAL_STATE: CharacterState = {
   affinitySphere: "",
   backgrounds: {},
   arete: 1,
-  willpower: 5
+  willpower: 5,
+  freebieDots: {
+    attributes: {},
+    abilities: {},
+    spheres: {},
+    backgrounds: {},
+    arete: 0,
+    willpower: 0
+  },
+  specialties: {},
+  merits: [],
+  flaws: []
 }
 
 // Backgrounds Phase Component
@@ -296,7 +323,7 @@ function BackgroundsPhase({ state, setState, onBack, onContinue }: {
           onClick={onContinue}
           disabled={!canProceed()}
         >
-          Complete Character Creation <Check className="w-4 h-4 ml-2" />
+          Continue to Freebie Points <ChevronRight className="w-4 h-4 ml-2" />
         </SheetButton>
       </div>
     </div>
@@ -930,6 +957,16 @@ export default function FullMageSheetCreation() {
                 state={state}
                 setState={setState}
                 onBack={() => setState({ ...state, phase: "spheres" })}
+                onContinue={() => setState({ ...state, phase: "freebies" })}
+              />
+            )}
+
+            {/* PHASE: FREEBIE POINTS */}
+            {state.phase === "freebies" && (
+              <FreebiePointsPhase
+                state={state}
+                setState={setState}
+                onBack={() => setState({ ...state, phase: "backgrounds" })}
                 onContinue={() => setState({ ...state, phase: "complete" })}
               />
             )}
@@ -1229,6 +1266,522 @@ function SheetDotRating({ label, value, onChange, locked, maxDots = 5, variant =
             </button>
           )
         })}
+      </div>
+    </div>
+  )
+}
+
+// FREEBIE DOT RATING COMPONENT
+function FreebieDotRating({ label, baseDots, freebieDots, onAdd, onRemove, maxDots = 5, cost }: {
+  label: string
+  baseDots: number
+  freebieDots: number
+  onAdd: () => void
+  onRemove: () => void
+  maxDots?: number
+  cost: number
+}) {
+  const totalDots = baseDots + freebieDots
+
+  return (
+    <div className="flex items-center justify-between py-2 px-3 rounded hover:bg-accent/5 transition-colors">
+      <span className="text-sm font-serif flex-1" style={{ color: '#4a2c2a' }}>
+        {label}
+      </span>
+      
+      <div className="flex items-center gap-3">
+        {/* Dots display */}
+        <div className="flex gap-1">
+          {Array.from({ length: maxDots }, (_, i) => {
+            const dotValue = i + 1
+            const isBaseDot = dotValue <= baseDots
+            const isFreebieDot = dotValue > baseDots && dotValue <= totalDots
+
+            return (
+              <div
+                key={i}
+                className="w-5 h-5 rounded-full border-2 relative"
+                style={{
+                  borderColor: '#4a2c2a',
+                  backgroundColor: isBaseDot ? '#4a2c2a' : 'transparent'
+                }}
+              >
+                {isFreebieDot && (
+                  <>
+                    <div className="absolute inset-0 rounded-full" style={{ backgroundColor: '#4a2c2a' }} />
+                    <div 
+                      className="absolute inset-0 rounded-full"
+                      style={{
+                        background: 'linear-gradient(90deg, transparent 50%, #d4af37 50%)',
+                      }}
+                    />
+                  </>
+                )}
+              </div>
+            )
+          })}
+        </div>
+
+        {/* Buttons */}
+        <div className="flex items-center gap-1">
+          <button
+            onClick={onRemove}
+            disabled={freebieDots <= 0}
+            className="w-6 h-6 rounded flex items-center justify-center text-xs font-bold disabled:opacity-30 transition-all hover:scale-110"
+            style={{ background: '#8b4513', color: '#fff' }}
+          >
+            <Minus className="w-3 h-3" />
+          </button>
+          <span className="text-xs font-mono w-8 text-center" style={{ color: '#6b4423' }}>
+            {cost}pt
+          </span>
+          <button
+            onClick={onAdd}
+            disabled={totalDots >= maxDots}
+            className="w-6 h-6 rounded flex items-center justify-center text-xs font-bold disabled:opacity-30 transition-all hover:scale-110"
+            style={{ background: '#d4af37', color: '#2d1b4e' }}
+          >
+            <Plus className="w-3 h-3" />
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// FREEBIE POINTS PHASE COMPONENT
+function FreebiePointsPhase({ state, setState, onBack, onContinue }: {
+  state: CharacterState
+  setState: (state: CharacterState) => void
+  onBack: () => void
+  onContinue: () => void
+}) {
+  const [merits, setMerits] = useState<any[]>([])
+  const [flaws, setFlaws] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    fetch("/api/merits")
+      .then(res => res.json())
+      .then(data => {
+        setMerits(data.filter((m: any) => m.type === "merit"))
+        setFlaws(data.filter((m: any) => m.type === "flaw"))
+      })
+      .catch(err => console.error(err))
+      .finally(() => setIsLoading(false))
+  }, [])
+
+  // Calculate points
+  const calculatePoints = () => {
+    let spent = 0
+    Object.values(state.freebieDots.attributes).forEach(d => spent += d * 5)
+    Object.values(state.freebieDots.abilities).forEach(d => spent += d * 2)
+    Object.values(state.freebieDots.spheres).forEach(d => spent += d * 7)
+    Object.values(state.freebieDots.backgrounds).forEach(d => spent += d * 1)
+    spent += state.freebieDots.arete * 4
+    spent += state.freebieDots.willpower * 1
+    state.merits.forEach(m => spent += m.cost)
+    state.flaws.forEach(f => spent -= f.cost)
+    return 15 - spent
+  }
+
+  const remaining = calculatePoints()
+
+  const addDot = (category: string, name: string, cost: number) => {
+    if (remaining < cost) return
+    const newState = { ...state }
+    if (category === "arete" || category === "willpower") {
+      newState.freebieDots[category] += 1
+    } else {
+      const cat = newState.freebieDots[category as keyof typeof newState.freebieDots] as any
+      cat[name] = (cat[name] || 0) + 1
+    }
+    setState(newState)
+  }
+
+  const removeDot = (category: string, name: string) => {
+    const newState = { ...state }
+    if (category === "arete" || category === "willpower") {
+      if (newState.freebieDots[category] <= 0) return
+      newState.freebieDots[category] -= 1
+    } else {
+      const cat = newState.freebieDots[category as keyof typeof newState.freebieDots] as any
+      if (!cat[name] || cat[name] <= 0) return
+      cat[name] -= 1
+      if (cat[name] === 0) delete cat[name]
+    }
+    setState(newState)
+  }
+
+  const addMerit = (merit: any) => {
+    if (remaining < merit.cost) return
+    setState({
+      ...state,
+      merits: [...state.merits, { id: merit.id, name: merit.name, cost: merit.cost }]
+    })
+  }
+
+  const removeMerit = (index: number) => {
+    const newMerits = [...state.merits]
+    newMerits.splice(index, 1)
+    setState({ ...state, merits: newMerits })
+  }
+
+  const addFlaw = (flaw: any) => {
+    const flawPoints = state.flaws.reduce((sum, f) => sum + f.cost, 0)
+    if (flawPoints + Math.abs(flaw.cost) > 7) {
+      alert("Maximum 7 points from flaws!")
+      return
+    }
+    setState({
+      ...state,
+      flaws: [...state.flaws, { id: flaw.id, name: flaw.name, cost: Math.abs(flaw.cost) }]
+    })
+  }
+
+  const removeFlaw = (index: number) => {
+    const newFlaws = [...state.flaws]
+    newFlaws.splice(index, 1)
+    setState({ ...state, flaws: newFlaws })
+  }
+
+  const getTotalAbilityDots = (abilityName: string) => {
+    const baseDots = state.abilities[abilityName as keyof typeof state.abilities] || 0
+    const freebieDots = state.freebieDots.abilities[abilityName] || 0
+    return baseDots + freebieDots
+  }
+
+  const setSpecialty = (abilityName: string, specialty: string) => {
+    setState({
+      ...state,
+      specialties: { ...state.specialties, [abilityName]: specialty }
+    })
+  }
+
+  return (
+    <div className="space-y-6">
+      <SectionHeader title="Freebie Points" subtitle="15 points to customize your character • Freebie dots shown as half-circles" />
+
+      {/* Points Display */}
+      <div className="flex items-center justify-between p-4 rounded-lg" style={{
+        background: 'linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(139, 105, 20, 0.1))',
+        border: '2px solid #d4af37'
+      }}>
+        <div>
+          <div className="text-sm" style={{ color: '#6b4423' }}>Points Spent</div>
+          <div className="text-2xl font-bold" style={{ color: '#4a2c2a' }}>{15 - remaining} / 15</div>
+        </div>
+        <div className="text-right">
+          <div className="text-sm" style={{ color: '#6b4423' }}>Remaining</div>
+          <div className="text-4xl font-bold" style={{ color: remaining >= 0 ? '#d4af37' : '#dc2626' }}>
+            {remaining}
+          </div>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <Tabs defaultValue="attributes" className="space-y-4">
+        <TabsList className="grid w-full grid-cols-5">
+          <TabsTrigger value="attributes">Attributes</TabsTrigger>
+          <TabsTrigger value="abilities">Abilities</TabsTrigger>
+          <TabsTrigger value="other">Other</TabsTrigger>
+          <TabsTrigger value="merits">Merits</TabsTrigger>
+          <TabsTrigger value="flaws">Flaws</TabsTrigger>
+        </TabsList>
+
+        {/* Attributes Tab */}
+        <TabsContent value="attributes">
+          <Card className="border-2 border-primary">
+            <CardHeader>
+              <CardTitle className="font-cinzel">Attributes (5 points per dot)</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-3 gap-6">
+                <div>
+                  <h4 className="font-semibold mb-2 text-sm" style={{ color: '#4a2c2a' }}>Physical</h4>
+                  <FreebieDotRating label="Strength" baseDots={state.attributes.strength} 
+                    freebieDots={state.freebieDots.attributes.strength || 0}
+                    onAdd={() => addDot("attributes", "strength", 5)}
+                    onRemove={() => removeDot("attributes", "strength")} cost={5} />
+                  <FreebieDotRating label="Dexterity" baseDots={state.attributes.dexterity} 
+                    freebieDots={state.freebieDots.attributes.dexterity || 0}
+                    onAdd={() => addDot("attributes", "dexterity", 5)}
+                    onRemove={() => removeDot("attributes", "dexterity")} cost={5} />
+                  <FreebieDotRating label="Stamina" baseDots={state.attributes.stamina} 
+                    freebieDots={state.freebieDots.attributes.stamina || 0}
+                    onAdd={() => addDot("attributes", "stamina", 5)}
+                    onRemove={() => removeDot("attributes", "stamina")} cost={5} />
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-2 text-sm" style={{ color: '#4a2c2a' }}>Social</h4>
+                  <FreebieDotRating label="Charisma" baseDots={state.attributes.charisma} 
+                    freebieDots={state.freebieDots.attributes.charisma || 0}
+                    onAdd={() => addDot("attributes", "charisma", 5)}
+                    onRemove={() => removeDot("attributes", "charisma")} cost={5} />
+                  <FreebieDotRating label="Manipulation" baseDots={state.attributes.manipulation} 
+                    freebieDots={state.freebieDots.attributes.manipulation || 0}
+                    onAdd={() => addDot("attributes", "manipulation", 5)}
+                    onRemove={() => removeDot("attributes", "manipulation")} cost={5} />
+                  <FreebieDotRating label="Appearance" baseDots={state.attributes.appearance} 
+                    freebieDots={state.freebieDots.attributes.appearance || 0}
+                    onAdd={() => addDot("attributes", "appearance", 5)}
+                    onRemove={() => removeDot("attributes", "appearance")} cost={5} />
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-2 text-sm" style={{ color: '#4a2c2a' }}>Mental</h4>
+                  <FreebieDotRating label="Perception" baseDots={state.attributes.perception} 
+                    freebieDots={state.freebieDots.attributes.perception || 0}
+                    onAdd={() => addDot("attributes", "perception", 5)}
+                    onRemove={() => removeDot("attributes", "perception")} cost={5} />
+                  <FreebieDotRating label="Intelligence" baseDots={state.attributes.intelligence} 
+                    freebieDots={state.freebieDots.attributes.intelligence || 0}
+                    onAdd={() => addDot("attributes", "intelligence", 5)}
+                    onRemove={() => removeDot("attributes", "intelligence")} cost={5} />
+                  <FreebieDotRating label="Wits" baseDots={state.attributes.wits} 
+                    freebieDots={state.freebieDots.attributes.wits || 0}
+                    onAdd={() => addDot("attributes", "wits", 5)}
+                    onRemove={() => removeDot("attributes", "wits")} cost={5} />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Abilities Tab */}
+        <TabsContent value="abilities">
+          <Card className="border-2 border-accent">
+            <CardHeader>
+              <CardTitle className="font-cinzel">Abilities (2 points per dot)</CardTitle>
+              <p className="text-xs mt-2" style={{ color: '#6b4423' }}>Specialty required at 4+ dots</p>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-3 gap-6">
+                <div>
+                  <h4 className="font-semibold mb-2 text-sm" style={{ color: '#4a2c2a' }}>Talents</h4>
+                  {["alertness", "art", "athletics", "awareness", "brawl", "empathy", "expression", "intimidation", "leadership", "streetwise", "subterfuge"].map(ability => {
+                    const total = getTotalAbilityDots(ability)
+                    const label = ability.charAt(0).toUpperCase() + ability.slice(1)
+                    return (
+                      <div key={ability}>
+                        <FreebieDotRating 
+                          label={label}
+                          baseDots={state.abilities[ability as keyof typeof state.abilities]} 
+                          freebieDots={state.freebieDots.abilities[ability] || 0}
+                          onAdd={() => addDot("abilities", ability, 2)}
+                          onRemove={() => removeDot("abilities", ability)} 
+                          cost={2} 
+                        />
+                        {total >= 4 && (
+                          <Input
+                            placeholder="Specialty..."
+                            value={state.specialties[ability] || ""}
+                            onChange={(e) => setSpecialty(ability, e.target.value)}
+                            className="mt-1 text-xs ml-4"
+                          />
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-2 text-sm" style={{ color: '#4a2c2a' }}>Skills</h4>
+                  {["crafts", "drive", "etiquette", "firearms", "martialArts", "meditation", "melee", "research", "stealth", "survival", "technology"].map(ability => {
+                    const total = getTotalAbilityDots(ability)
+                    const label = ability === "martialArts" ? "Martial Arts" : ability.charAt(0).toUpperCase() + ability.slice(1)
+                    return (
+                      <div key={ability}>
+                        <FreebieDotRating 
+                          label={label}
+                          baseDots={state.abilities[ability as keyof typeof state.abilities]} 
+                          freebieDots={state.freebieDots.abilities[ability] || 0}
+                          onAdd={() => addDot("abilities", ability, 2)}
+                          onRemove={() => removeDot("abilities", ability)} 
+                          cost={2} 
+                        />
+                        {total >= 4 && (
+                          <Input
+                            placeholder="Specialty..."
+                            value={state.specialties[ability] || ""}
+                            onChange={(e) => setSpecialty(ability, e.target.value)}
+                            className="mt-1 text-xs ml-4"
+                          />
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-2 text-sm" style={{ color: '#4a2c2a' }}>Knowledges</h4>
+                  {["academics", "computer", "cosmology", "enigmas", "esoterica", "investigation", "law", "medicine", "occult", "politics", "science"].map(ability => {
+                    const total = getTotalAbilityDots(ability)
+                    const label = ability.charAt(0).toUpperCase() + ability.slice(1)
+                    return (
+                      <div key={ability}>
+                        <FreebieDotRating 
+                          label={label}
+                          baseDots={state.abilities[ability as keyof typeof state.abilities]} 
+                          freebieDots={state.freebieDots.abilities[ability] || 0}
+                          onAdd={() => addDot("abilities", ability, 2)}
+                          onRemove={() => removeDot("abilities", ability)} 
+                          cost={2} 
+                        />
+                        {total >= 4 && (
+                          <Input
+                            placeholder="Specialty..."
+                            value={state.specialties[ability] || ""}
+                            onChange={(e) => setSpecialty(ability, e.target.value)}
+                            className="mt-1 text-xs ml-4"
+                          />
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Other Tab */}
+        <TabsContent value="other">
+          <div className="space-y-4">
+            <Card className="border-2 border-accent">
+              <CardHeader>
+                <CardTitle className="font-cinzel">Arete (4 points per dot)</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <FreebieDotRating label="Arete" baseDots={1} 
+                  freebieDots={state.freebieDots.arete}
+                  onAdd={() => addDot("arete", "arete", 4)}
+                  onRemove={() => removeDot("arete", "arete")} 
+                  maxDots={10} cost={4} />
+              </CardContent>
+            </Card>
+            <Card className="border-2 border-primary">
+              <CardHeader>
+                <CardTitle className="font-cinzel">Willpower (1 point per dot)</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <FreebieDotRating label="Willpower" baseDots={5} 
+                  freebieDots={state.freebieDots.willpower}
+                  onAdd={() => addDot("willpower", "willpower", 1)}
+                  onRemove={() => removeDot("willpower", "willpower")} 
+                  maxDots={10} cost={1} />
+              </CardContent>
+            </Card>
+            <Card className="border-2 border-ring">
+              <CardHeader>
+                <CardTitle className="font-cinzel">Spheres (7 points per dot)</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {Object.keys(state.spheres).map(sphere => {
+                  const sphereName = sphere.charAt(0).toUpperCase() + sphere.slice(1)
+                  return (
+                    <FreebieDotRating 
+                      key={sphere}
+                      label={sphereName}
+                      baseDots={state.spheres[sphere as keyof typeof state.spheres]} 
+                      freebieDots={state.freebieDots.spheres[sphere] || 0}
+                      onAdd={() => addDot("spheres", sphere, 7)}
+                      onRemove={() => removeDot("spheres", sphere)} 
+                      cost={7} 
+                    />
+                  )
+                })}
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        {/* Merits Tab */}
+        <TabsContent value="merits">
+          <Card className="border-2 border-primary">
+            <CardHeader>
+              <CardTitle className="font-cinzel">Merits (Cost Points)</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {state.merits.length > 0 && (
+                <div className="mb-4 space-y-2">
+                  <h4 className="font-semibold text-sm">Selected ({state.merits.reduce((s, m) => s + m.cost, 0)} pts)</h4>
+                  {state.merits.map((merit, idx) => (
+                    <div key={idx} className="flex justify-between items-center p-2 bg-accent/10 rounded">
+                      <span className="text-sm">{merit.name} ({merit.cost} pts)</span>
+                      <button onClick={() => removeMerit(idx)} className="text-xs px-2 py-1 bg-red-600 text-white rounded">Remove</button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <div className="space-y-2 max-h-96 overflow-y-auto">
+                {merits.map(merit => (
+                  <div key={merit.id} className="p-3 border rounded">
+                    <div className="flex justify-between items-start mb-2">
+                      <span className="font-semibold text-sm">{merit.name}</span>
+                      <div className="flex items-center gap-2">
+                        <Badge>{merit.cost} pts</Badge>
+                        <button 
+                          onClick={() => addMerit(merit)}
+                          disabled={remaining < merit.cost}
+                          className="text-xs px-3 py-1 rounded disabled:opacity-30"
+                          style={{ background: '#d4af37', color: '#2d1b4e' }}
+                        >Add</button>
+                      </div>
+                    </div>
+                    <p className="text-xs" style={{ color: '#6b4423' }}>{merit.description}</p>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Flaws Tab */}
+        <TabsContent value="flaws">
+          <Card className="border-2 border-primary">
+            <CardHeader>
+              <CardTitle className="font-cinzel">Flaws (Give Points • Max +7)</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {state.flaws.length > 0 && (
+                <div className="mb-4 space-y-2">
+                  <h4 className="font-semibold text-sm text-green-600">Selected (+{state.flaws.reduce((s, f) => s + f.cost, 0)} pts)</h4>
+                  {state.flaws.map((flaw, idx) => (
+                    <div key={idx} className="flex justify-between items-center p-2 bg-green-50 rounded">
+                      <span className="text-sm">{flaw.name} (+{flaw.cost} pts)</span>
+                      <button onClick={() => removeFlaw(idx)} className="text-xs px-2 py-1 bg-red-600 text-white rounded">Remove</button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <div className="space-y-2 max-h-96 overflow-y-auto">
+                {flaws.map(flaw => (
+                  <div key={flaw.id} className="p-3 border rounded">
+                    <div className="flex justify-between items-start mb-2">
+                      <span className="font-semibold text-sm">{flaw.name}</span>
+                      <div className="flex items-center gap-2">
+                        <Badge className="bg-green-600">+{Math.abs(flaw.cost)} pts</Badge>
+                        <button 
+                          onClick={() => addFlaw(flaw)}
+                          className="text-xs px-3 py-1 rounded bg-green-600 text-white"
+                        >Add</button>
+                      </div>
+                    </div>
+                    <p className="text-xs" style={{ color: '#6b4423' }}>{flaw.description}</p>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+
+      {/* Navigation */}
+      <div className="flex gap-3">
+        <SheetButton onClick={onBack} variant="secondary">
+          ← Back to Backgrounds
+        </SheetButton>
+        <SheetButton onClick={onContinue} disabled={remaining !== 0}>
+          {remaining === 0 ? "Complete Character →" : `Spend ${remaining} more points`}
+        </SheetButton>
       </div>
     </div>
   )
