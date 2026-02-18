@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { cn } from "@/lib/utils"
 import { Lock, ChevronRight, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -22,7 +22,7 @@ interface CharacterState {
   concept: string
   
   // Current phase
-  phase: "basics" | "attributes-priority" | "attributes-assign" | "abilities-priority" | "abilities-assign" | "spheres" | "backgrounds" | "willpower" | "complete"
+  phase: "basics" | "attributes-priority" | "attributes-assign" | "abilities-priority" | "abilities-assign" | "spheres" | "backgrounds" | "complete"
   
   // Priorities
   attributePriorities: {
@@ -148,6 +148,225 @@ const INITIAL_STATE: CharacterState = {
   backgrounds: {},
   arete: 1,
   willpower: 5
+}
+
+// Backgrounds Phase Component
+function BackgroundsPhase({ state, setState, onBack, onContinue }: {
+  state: CharacterState
+  setState: (state: CharacterState) => void
+  onBack: () => void
+  onContinue: () => void
+}) {
+  const [backgrounds, setBackgrounds] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    fetchBackgrounds()
+  }, [])
+
+  const fetchBackgrounds = async () => {
+    try {
+      const response = await fetch('/api/backgrounds')
+      if (response.ok) {
+        const data = await response.json()
+        setBackgrounds(data)
+      }
+    } catch (error) {
+      console.error('Error fetching backgrounds:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const getBackgroundPointsSpent = (): number => {
+    return Object.values(state.backgrounds).reduce((sum, val) => sum + val, 0)
+  }
+
+  const getBackgroundPointsRemaining = (): number => {
+    return 7 - getBackgroundPointsSpent()
+  }
+
+  const setBackgroundValue = (backgroundName: string, value: number) => {
+    if (value < 0 || value > 5) return
+    
+    const currentValue = state.backgrounds[backgroundName] || 0
+    const pointDiff = value - currentValue
+    const remaining = getBackgroundPointsRemaining()
+    
+    if (pointDiff > remaining) return
+    
+    const newBackgrounds = { ...state.backgrounds }
+    if (value === 0) {
+      delete newBackgrounds[backgroundName]
+    } else {
+      newBackgrounds[backgroundName] = value
+    }
+    
+    setState({
+      ...state,
+      backgrounds: newBackgrounds
+    })
+  }
+
+  const canProceed = () => getBackgroundPointsRemaining() === 0
+
+  const generalBackgrounds = backgrounds.filter(bg => bg.subtype === 'general')
+  const mageBackgrounds = backgrounds.filter(bg => bg.subtype === 'mage')
+
+  return (
+    <div className="space-y-6">
+      <SectionHeader 
+        title="Backgrounds" 
+        subtitle="7 dots to spend • Represents resources, connections, and advantages"
+      />
+
+      {isLoading ? (
+        <div className="text-center py-8" style={{ color: '#6b4423' }}>
+          Loading backgrounds...
+        </div>
+      ) : (
+        <>
+          <div className="flex items-center justify-between p-3 rounded" style={{ background: 'rgba(139, 69, 19, 0.1)' }}>
+            <span className="text-sm font-semibold" style={{ color: '#4a2c2a' }}>
+              Select backgrounds to enhance your character
+            </span>
+            <span className="text-sm font-semibold px-3 py-1 rounded" style={{
+              background: getBackgroundPointsRemaining() === 0 ? '#d4af37' : 'rgba(212, 175, 55, 0.2)',
+              color: '#4a2c2a'
+            }}>
+              {getBackgroundPointsRemaining()} / 7 remaining
+            </span>
+          </div>
+
+          {/* General Backgrounds */}
+          {generalBackgrounds.length > 0 && (
+            <div className="space-y-4">
+              <h3 className="font-bold text-lg border-b-2 pb-2" style={{ 
+                color: '#4a2c2a',
+                borderColor: '#8b4513'
+              }}>
+                General Backgrounds
+              </h3>
+              <div className="space-y-1">
+                {generalBackgrounds.map(bg => (
+                  <BackgroundRating
+                    key={bg.id}
+                    background={bg}
+                    value={state.backgrounds[bg.name] || 0}
+                    onChange={(v) => setBackgroundValue(bg.name, v)}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Mage Backgrounds */}
+          {mageBackgrounds.length > 0 && (
+            <div className="space-y-4">
+              <h3 className="font-bold text-lg border-b-2 pb-2" style={{ 
+                color: '#6b2d6b',
+                borderColor: '#8b4513'
+              }}>
+                Mage Backgrounds
+              </h3>
+              <div className="space-y-1">
+                {mageBackgrounds.map(bg => (
+                  <BackgroundRating
+                    key={bg.id}
+                    background={bg}
+                    value={state.backgrounds[bg.name] || 0}
+                    onChange={(v) => setBackgroundValue(bg.name, v)}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+        </>
+      )}
+
+      <div className="flex gap-3">
+        <SheetButton
+          onClick={onBack}
+          disabled={false}
+          variant="secondary"
+        >
+          ← Back
+        </SheetButton>
+        <SheetButton
+          onClick={onContinue}
+          disabled={!canProceed()}
+        >
+          Complete Character Creation <Check className="w-4 h-4 ml-2" />
+        </SheetButton>
+      </div>
+    </div>
+  )
+}
+
+// Background Rating Component
+function BackgroundRating({ background, value, onChange }: {
+  background: any
+  value: number
+  onChange: (value: number) => void
+}) {
+  const [showDescription, setShowDescription] = useState(false)
+  const maxDots = 5 // Most backgrounds go to 5
+
+  return (
+    <div className="border rounded p-2 transition-all" style={{ 
+      borderColor: value > 0 ? '#8b4513' : 'rgba(139, 69, 19, 0.2)',
+      background: value > 0 ? 'rgba(139, 69, 19, 0.05)' : 'transparent'
+    }}>
+      <div className="flex items-center justify-between">
+        <button
+          onClick={() => setShowDescription(!showDescription)}
+          className="text-sm font-serif text-left flex-1 hover:text-primary transition-colors"
+          style={{ color: '#4a2c2a' }}
+        >
+          {background.name}
+          {background.cost !== 'Variable' && (
+            <span className="ml-2 text-xs" style={{ color: '#6b4423' }}>
+              ({background.cost})
+            </span>
+          )}
+        </button>
+        
+        <div className="flex gap-0.5 ml-4">
+          {Array.from({ length: maxDots }, (_, i) => {
+            const dotValue = i + 1
+            const isFilled = dotValue <= value
+
+            return (
+              <button
+                key={i}
+                type="button"
+                onClick={() => onChange(dotValue === value ? 0 : dotValue)}
+                className="w-4 h-4 rounded-full border-2 transition-all duration-200 hover:scale-110 cursor-pointer"
+                style={{
+                  borderColor: '#4a2c2a',
+                  backgroundColor: isFilled ? '#4a2c2a' : 'transparent'
+                }}
+              />
+            )
+          })}
+        </div>
+      </div>
+
+      {showDescription && (
+        <div className="mt-2 pt-2 border-t text-xs" style={{ 
+          borderColor: 'rgba(139, 69, 19, 0.2)',
+          color: '#6b4423'
+        }}>
+          {background.description}
+          {background.pageRef && (
+            <div className="mt-1 italic" style={{ color: '#8b6914' }}>
+              Reference: {background.pageRef}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
 }
 
 export default function FullMageSheetCreation() {
@@ -696,113 +915,74 @@ export default function FullMageSheetCreation() {
                     ← Back
                   </SheetButton>
                   <SheetButton
-                    onClick={() => setState({ ...state, phase: "willpower" })}
+                    onClick={() => setState({ ...state, phase: "backgrounds" })}
                     disabled={!canProceedFromSpheres()}
                   >
-                    Continue to Finishing Touches <ChevronRight className="w-4 h-4 ml-2" />
+                    Continue to Backgrounds <ChevronRight className="w-4 h-4 ml-2" />
                   </SheetButton>
                 </div>
               </div>
             )}
 
-            {/* PHASE: WILLPOWER & ARETE */}
-            {state.phase === "willpower" && (
-              <div className="space-y-6">
-                <SectionHeader title="Arete & Willpower" subtitle="Your starting mystical power and mental fortitude" />
-
-                <div className="grid grid-cols-2 gap-6">
-                  <div className="p-6 border-2 rounded" style={{ borderColor: '#8b4513', background: 'rgba(212, 175, 55, 0.05)' }}>
-                    <h3 className="font-semibold mb-4" style={{ color: '#4a2c2a' }}>Arete</h3>
-                    <p className="text-sm mb-4" style={{ color: '#6b4423' }}>
-                      Your enlightenment rating starts at 1. You can increase this later with Freebie Points (4 points per dot).
-                    </p>
-                    <div className="flex items-center justify-between py-1">
-                      <span className="text-sm font-serif flex-1" style={{ color: '#4a2c2a' }}>Arete</span>
-                      <div className="flex gap-0.5">
-                        {Array.from({ length: 10 }, (_, i) => {
-                          const dotValue = i + 1
-                          const isFilled = dotValue <= 1
-                          const isLocked = dotValue === 1
-
-                          return (
-                            <div
-                              key={i}
-                              className="w-4 h-4 rounded-full border transition-all duration-200"
-                              style={{
-                                borderColor: '#d4af37',
-                                borderWidth: '2px',
-                                backgroundColor: isFilled ? '#d4af37' : 'transparent',
-                                opacity: isLocked ? 1 : 0.3
-                              }}
-                            >
-                              {isLocked && <Lock className="w-2 h-2 m-auto" style={{ color: '#2d1b4e' }} />}
-                            </div>
-                          )
-                        })}
-                      </div>
-                    </div>
-                    <p className="text-xs mt-3 italic" style={{ color: '#8b6914' }}>
-                      ⚠️ Locked at 1 during character creation
-                    </p>
-                  </div>
-
-                  <div className="p-6 border-2 rounded" style={{ borderColor: '#8b4513', background: 'rgba(212, 175, 55, 0.05)' }}>
-                    <h3 className="font-semibold mb-4" style={{ color: '#4a2c2a' }}>Willpower</h3>
-                    <p className="text-sm mb-4" style={{ color: '#6b4423' }}>
-                      Your mental fortitude. Starts at 5. Can be increased with Freebie Points (1 point per dot).
-                    </p>
-                    <SheetDotRating
-                      label="Willpower"
-                      value={state.willpower}
-                      onChange={(v) => setState({ ...state, willpower: v })}
-                      maxDots={10}
-                    />
-                  </div>
-                </div>
-
-                <div className="flex gap-3">
-                  <SheetButton
-                    onClick={() => setState({ ...state, phase: "spheres" })}
-                    disabled={false}
-                    variant="secondary"
-                  >
-                    ← Back
-                  </SheetButton>
-                  <SheetButton onClick={() => setState({ ...state, phase: "complete" })}>
-                    Complete Character Creation <Check className="w-4 h-4 ml-2" />
-                  </SheetButton>
-                </div>
-              </div>
+            {/* PHASE: BACKGROUNDS */}
+            {state.phase === "backgrounds" && (
+              <BackgroundsPhase
+                state={state}
+                setState={setState}
+                onBack={() => setState({ ...state, phase: "spheres" })}
+                onContinue={() => setState({ ...state, phase: "complete" })}
+              />
             )}
 
             {/* PHASE: COMPLETE */}
             {state.phase === "complete" && (
-              <div className="space-y-6 text-center py-8">
-                <div className="w-20 h-20 mx-auto rounded-full flex items-center justify-center" style={{
-                  background: 'linear-gradient(135deg, #d4af37, #8b6914)'
-                }}>
-                  <Check className="w-10 h-10" style={{ color: '#2d1b4e' }} />
+              <div className="space-y-6 py-8">
+                <div className="text-center space-y-4">
+                  <div className="w-20 h-20 mx-auto rounded-full flex items-center justify-center" style={{
+                    background: 'linear-gradient(135deg, #d4af37, #8b6914)'
+                  }}>
+                    <Check className="w-10 h-10" style={{ color: '#2d1b4e' }} />
+                  </div>
+                  <h2 className="text-3xl font-bold" style={{ fontFamily: 'Georgia, serif', color: '#4a2c2a' }}>
+                    Character Creation Complete!
+                  </h2>
+                  <p style={{ color: '#6b4423' }}>
+                    {state.name || "Your character"} is ready for the next phase.
+                  </p>
                 </div>
-                <h2 className="text-3xl font-bold" style={{ fontFamily: 'Georgia, serif', color: '#4a2c2a' }}>
-                  Character Creation Complete!
-                </h2>
-                <p style={{ color: '#6b4423' }}>
-                  Your character {state.name || "sheet"} is ready. Next, you can add Backgrounds and spend Freebie Points to customize further!
-                </p>
-                
-                <div className="grid grid-cols-2 gap-4 mt-8 text-left max-w-2xl mx-auto">
-                  <div className="p-4 border-2 rounded" style={{ borderColor: '#8b4513' }}>
-                    <h3 className="font-semibold mb-2" style={{ color: '#4a2c2a' }}>Next: Backgrounds</h3>
-                    <p className="text-sm" style={{ color: '#6b4423' }}>
-                      You have 7 dots to spend on Backgrounds like Avatar, Resources, Allies, Node, etc.
-                    </p>
+
+                {/* Summary */}
+                <div className="grid grid-cols-2 gap-6 max-w-3xl mx-auto">
+                  <div className="p-4 border-2 rounded" style={{ borderColor: '#8b4513', background: 'rgba(139, 69, 19, 0.03)' }}>
+                    <h3 className="font-semibold mb-3 text-center" style={{ color: '#4a2c2a' }}>✅ Completed</h3>
+                    <ul className="text-sm space-y-2" style={{ color: '#6b4423' }}>
+                      <li>✓ Basic Information</li>
+                      <li>✓ Attributes (15 dots)</li>
+                      <li>✓ Abilities (27 dots)</li>
+                      <li>✓ Spheres (6 dots)</li>
+                      <li>✓ Backgrounds (7 dots)</li>
+                      <li>✓ Arete: 1 (locked)</li>
+                      <li>✓ Willpower: 5 (locked)</li>
+                    </ul>
                   </div>
-                  <div className="p-4 border-2 rounded" style={{ borderColor: '#8b4513' }}>
-                    <h3 className="font-semibold mb-2" style={{ color: '#4a2c2a' }}>Next: Freebie Points</h3>
-                    <p className="text-sm" style={{ color: '#6b4423' }}>
-                      You have 15 freebie points to further customize your character (raise Arete, Spheres, etc.)
-                    </p>
+
+                  <div className="p-4 border-2 rounded" style={{ borderColor: '#8b4513', background: 'rgba(212, 175, 55, 0.05)' }}>
+                    <h3 className="font-semibold mb-3 text-center" style={{ color: '#d4af37' }}>⏳ Coming Next</h3>
+                    <ul className="text-sm space-y-2" style={{ color: '#6b4423' }}>
+                      <li>→ Merits & Flaws</li>
+                      <li>→ Freebie Points (15)</li>
+                      <li>→ Raise Arete</li>
+                      <li>→ Raise Willpower</li>
+                      <li>→ Add more dots</li>
+                      <li>→ Final touches</li>
+                    </ul>
                   </div>
+                </div>
+
+                <div className="text-center pt-4">
+                  <p className="text-sm italic mb-4" style={{ color: '#8b6914' }}>
+                    Your character sheet is saved and ready for Merits, Flaws, and Freebie Points!
+                  </p>
                 </div>
               </div>
             )}
