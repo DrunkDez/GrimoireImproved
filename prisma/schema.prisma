@@ -125,3 +125,12 @@ model SiteSettings {
   
   @@index([key])
 }
+model GuideSection {
+  id        String   @id @default(cuid())
+  title     String
+  content   String   @db.Text
+  category  String   // 'overview', 'attributes', 'abilities', 'spheres', 'finishing'
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
