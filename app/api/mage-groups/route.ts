@@ -23,7 +23,14 @@ export async function GET(request: Request) {
       ]
     })
 
-    return NextResponse.json(groups)
+    // Map database fields to frontend fields
+    const mappedGroups = groups.map(group => ({
+      ...group,
+      headerImage: group.logoImage,
+      sidebarImage: group.symbolImage
+    }))
+
+    return NextResponse.json(mappedGroups)
   } catch (error) {
     console.error('Error fetching mage groups:', error)
     return NextResponse.json(
@@ -57,18 +64,25 @@ export async function POST(request: Request) {
         slug,
         category,
         description,
-        philosophy,
-        practices,
-        organization,
-        symbolImage: body.sidebarImage,
-        logoImage: body.headerImage,
-        representativeImage: body.headerImage,
+        philosophy: philosophy || null,
+        practices: practices || null,
+        organization: organization || null,
+        logoImage: headerImage || null,
+        symbolImage: sidebarImage || null,
+        representativeImage: headerImage || null,
         published: published || false,
         sortOrder: sortOrder || 0
       }
     })
 
-    return NextResponse.json(group)
+    // Map back for frontend
+    const mapped = {
+      ...group,
+      headerImage: group.logoImage,
+      sidebarImage: group.symbolImage
+    }
+
+    return NextResponse.json(mapped)
   } catch (error) {
     console.error('Error creating mage group:', error)
     return NextResponse.json(
@@ -82,7 +96,7 @@ export async function POST(request: Request) {
 export async function PUT(request: Request) {
   try {
     const body = await request.json()
-    const { id, ...data } = body
+    const { id, headerImage, sidebarImage, ...restData } = body
 
     if (!id) {
       return NextResponse.json(
@@ -91,12 +105,29 @@ export async function PUT(request: Request) {
       )
     }
 
+    // Map frontend fields to database fields
+    const updateData: any = { ...restData }
+    if (headerImage !== undefined) {
+      updateData.logoImage = headerImage
+      updateData.representativeImage = headerImage
+    }
+    if (sidebarImage !== undefined) {
+      updateData.symbolImage = sidebarImage
+    }
+
     const group = await prisma.mageGroup.update({
       where: { id },
-      data
+      data: updateData
     })
 
-    return NextResponse.json(group)
+    // Map back for frontend
+    const mapped = {
+      ...group,
+      headerImage: group.logoImage,
+      sidebarImage: group.symbolImage
+    }
+
+    return NextResponse.json(mapped)
   } catch (error) {
     console.error('Error updating mage group:', error)
     return NextResponse.json(
