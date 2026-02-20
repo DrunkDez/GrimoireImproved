@@ -85,6 +85,27 @@ model Merit {
   @@index([type])
   @@index([subtype])
 }
+model MageGroup {
+  id                  String   @id @default(cuid())
+  name                String   @unique
+  slug                String   @unique
+  category            String
+  description         String   @db.Text
+  philosophy          String?  @db.Text
+  practices           String?  @db.Text
+  organization        String?  @db.Text
+  symbolImage         String?
+  logoImage           String?
+  representativeImage String?
+  published           Boolean  @default(false)
+  sortOrder           Int      @default(0)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@index([category])
+  @@index([published])
+  @@index([slug])
+}
 
 model Background {
   id          String   @id @default(cuid())
