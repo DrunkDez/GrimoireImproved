@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { ShieldAlert, Lock, X, BookOpen, Star, Library, FileText } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { GuideContentManager } from "./admin/guide-content-manager"
 import { AdminRotesPanel } from "@/components/admin/admin-rotes-panel"
 import { AdminMeritsPanel } from "@/components/admin/admin-merits-panel"
 import { AdminResourcesPanel } from "@/components/admin/admin-resources-panel"
@@ -146,7 +147,7 @@ export function AdminPanel({ rotes, onRotesChange, onClose }: AdminPanelProps) {
       </div>
 
       <Tabs defaultValue="content" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4 max-w-3xl">
+        <TabsList className="grid w-full grid-cols-5 max-w-3xl">
           <TabsTrigger value="content" className="gap-2">
             <FileText className="w-4 h-4" />
             Content
@@ -163,6 +164,7 @@ export function AdminPanel({ rotes, onRotesChange, onClose }: AdminPanelProps) {
             <Library className="w-4 h-4" />
             Resources
           </TabsTrigger>
+          <TabsTrigger value="guide">Guide Content</TabsTrigger>
         </TabsList>
 
         <TabsContent value="content">
@@ -180,6 +182,9 @@ export function AdminPanel({ rotes, onRotesChange, onClose }: AdminPanelProps) {
         <TabsContent value="resources">
           <AdminResourcesPanel />
         </TabsContent>
+        <TabsContent value="guide">
+  <GuideContentManager />
+</TabsContent>
       </Tabs>
     </div>
   )
