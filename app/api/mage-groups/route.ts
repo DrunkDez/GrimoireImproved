@@ -60,8 +60,9 @@ export async function POST(request: Request) {
         philosophy,
         practices,
         organization,
-        headerImage,
-        sidebarImage,
+        symbolImage: body.sidebarImage,
+        logoImage: body.headerImage,
+        representativeImage: body.headerImage,
         published: published || false,
         sortOrder: sortOrder || 0
       }
