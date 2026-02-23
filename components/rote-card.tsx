@@ -3,12 +3,32 @@
 import type { Rote } from "@/lib/mage-data"
 import { getTraditionSymbol, isTechnocracySphere } from "@/lib/mage-data"
 import { SphereDots } from "./sphere-dots"
+import { SphereDisplay } from '@/components/sphere-display'
 
 interface RoteCardProps {
   rote: Rote
   onClick: (rote: Rote) => void
 }
-
+function formatSpheres(spheres: any): string {
+  if (!spheres) return 'None';
+  
+  if (Array.isArray(spheres)) {
+    return spheres.map((combo, i) => {
+      const str = Object.entries(combo)
+        .map(([s, l]) => `${s} ${l}`)
+        .join(', ');
+      return spheres.length > 1 ? `[${i + 1}] ${str}` : str;
+    }).join(' OR ');
+  }
+  
+  if (typeof spheres === 'object') {
+    return Object.entries(spheres)
+      .map(([s, l]) => `${s} ${l}`)
+      .join(', ');
+  }
+  
+  return String(spheres);
+}
 export function RoteCard({ rote, onClick }: RoteCardProps) {
   return (
     <button
@@ -52,7 +72,7 @@ export function RoteCard({ rote, onClick }: RoteCardProps) {
 
       {/* Sphere tags */}
       <div className="flex flex-wrap gap-2 mb-4">
-        {Object.entries(rote.spheres).map(([sphere, level]) => (
+        {Object.entries{formatSpheres(rote.spheres)}.map(([sphere, level]) => (
           <div
             key={sphere}
             className={`flex items-center gap-2 px-2.5 py-1.5 border rounded-sm text-xs font-semibold uppercase tracking-wide font-serif
