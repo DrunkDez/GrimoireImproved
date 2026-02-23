@@ -9,7 +9,29 @@ interface RoteCardProps {
   onClick: (rote: Rote) => void
 }
 
+function formatSpheres(spheres: any): { [key: string]: number } {
+  // If it's an array with single combination, return first item
+  if (Array.isArray(spheres) && spheres.length === 1) {
+    return spheres[0];
+  }
+  
+  // If it's an array with multiple combinations, return first one
+  if (Array.isArray(spheres) && spheres.length > 1) {
+    return spheres[0];
+  }
+  
+  // If it's already an object, return as-is
+  if (typeof spheres === 'object' && !Array.isArray(spheres)) {
+    return spheres;
+  }
+  
+  return {};
+}
+
 export function RoteCard({ rote, onClick }: RoteCardProps) {
+  const sphereData = formatSpheres(rote.spheres);
+  const hasMultipleCombinations = Array.isArray(rote.spheres) && rote.spheres.length > 1;
+
   return (
     <button
       type="button"
@@ -50,9 +72,16 @@ export function RoteCard({ rote, onClick }: RoteCardProps) {
         {rote.description}
       </p>
 
+      {/* Multiple combinations indicator */}
+      {hasMultipleCombinations && (
+        <div className="text-xs text-accent font-semibold mb-2">
+          ✨ Multiple sphere combinations available
+        </div>
+      )}
+
       {/* Sphere tags */}
       <div className="flex flex-wrap gap-2 mb-4">
-        {Object.entries(rote.spheres).map(([sphere, level]) => (
+        {Object.entries(sphereData).map(([sphere, level]) => (
           <div
             key={sphere}
             className={`flex items-center gap-2 px-2.5 py-1.5 border rounded-sm text-xs font-semibold uppercase tracking-wide font-serif

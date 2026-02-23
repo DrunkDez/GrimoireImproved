@@ -9,7 +9,57 @@ interface RoteDetailProps {
   onBack: () => void
 }
 
+function formatSpheres(spheres: any): { [key: string]: number } {
+  // If it's an array with single combination, return first item
+  if (Array.isArray(spheres) && spheres.length === 1) {
+    return spheres[0];
+  }
+  
+  // If it's an array with multiple combinations, return first one
+  if (Array.isArray(spheres) && spheres.length > 1) {
+    return spheres[0]; // For detail view, show first combination
+  }
+  
+  // If it's already an object, return as-is
+  if (typeof spheres === 'object' && !Array.isArray(spheres)) {
+    return spheres;
+  }
+  
+  return {};
+}
+
+function getSphereDisplayText(spheres: any): string {
+  if (!spheres) return 'None';
+  
+  // Handle array (multiple combinations)
+  if (Array.isArray(spheres)) {
+    if (spheres.length === 1) {
+      return Object.entries(spheres[0])
+        .map(([s, l]) => `${s} ${l}`)
+        .join(', ');
+    }
+    return spheres.map((combo, i) => {
+      const str = Object.entries(combo)
+        .map(([s, l]) => `${s} ${l}`)
+        .join(', ');
+      return `Option ${i + 1}: ${str}`;
+    }).join(' OR ');
+  }
+  
+  // Handle object
+  if (typeof spheres === 'object') {
+    return Object.entries(spheres)
+      .map(([s, l]) => `${s} ${l}`)
+      .join(', ');
+  }
+  
+  return String(spheres);
+}
+
 export function RoteDetail({ rote, onBack }: RoteDetailProps) {
+  const sphereData = formatSpheres(rote.spheres);
+  const hasMultipleCombinations = Array.isArray(rote.spheres) && rote.spheres.length > 1;
+
   return (
     <div className="animate-fade-in-up flex flex-col gap-6 p-6 md:p-10">
       {/* Back button */}
@@ -54,6 +104,18 @@ export function RoteDetail({ rote, onBack }: RoteDetailProps) {
           </p>
         </div>
 
+        {/* Multiple combinations warning */}
+        {hasMultipleCombinations && (
+          <div className="bg-accent/10 border-2 border-accent rounded-md p-4 mb-6">
+            <p className="text-sm text-accent font-semibold">
+              ℹ️ This rote has multiple sphere combinations. Showing first option below.
+            </p>
+            <p className="text-xs text-muted-foreground mt-2">
+              All options: {getSphereDisplayText(rote.spheres)}
+            </p>
+          </div>
+        )}
+
         {/* Spheres */}
         <div className="bg-accent/10 border-[3px] border-double border-primary rounded-md p-6 md:p-8 mb-8
           shadow-[inset_0_0_30px_rgba(139,71,38,0.05)]">
@@ -61,7 +123,7 @@ export function RoteDetail({ rote, onBack }: RoteDetailProps) {
             Required Spheres
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            {Object.entries(rote.spheres).map(([sphere, level]) => {
+            {Object.entries(sphereData).map(([sphere, level]) => {
               const isTechno = isTechnocracySphere(sphere)
               return (
                 <div
