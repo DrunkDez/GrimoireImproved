@@ -3,33 +3,35 @@
 import type { Rote } from "@/lib/mage-data"
 import { getTraditionSymbol, isTechnocracySphere } from "@/lib/mage-data"
 import { SphereDots } from "./sphere-dots"
-import { SphereDisplay } from '@/components/sphere-display'
 
 interface RoteCardProps {
   rote: Rote
   onClick: (rote: Rote) => void
 }
-function formatSpheres(spheres: any): string {
-  if (!spheres) return 'None';
-  
-  if (Array.isArray(spheres)) {
-    return spheres.map((combo, i) => {
-      const str = Object.entries(combo)
-        .map(([s, l]) => `${s} ${l}`)
-        .join(', ');
-      return spheres.length > 1 ? `[${i + 1}] ${str}` : str;
-    }).join(' OR ');
+
+function formatSpheres(spheres: any): { [key: string]: number } {
+  // If it's an array with single combination, return first item
+  if (Array.isArray(spheres) && spheres.length === 1) {
+    return spheres[0];
   }
   
-  if (typeof spheres === 'object') {
-    return Object.entries(spheres)
-      .map(([s, l]) => `${s} ${l}`)
-      .join(', ');
+  // If it's an array with multiple combinations, return first one
+  if (Array.isArray(spheres) && spheres.length > 1) {
+    return spheres[0];
   }
   
-  return String(spheres);
+  // If it's already an object, return as-is
+  if (typeof spheres === 'object' && !Array.isArray(spheres)) {
+    return spheres;
+  }
+  
+  return {};
 }
+
 export function RoteCard({ rote, onClick }: RoteCardProps) {
+  const sphereData = formatSpheres(rote.spheres);
+  const hasMultipleCombinations = Array.isArray(rote.spheres) && rote.spheres.length > 1;
+
   return (
     <button
       type="button"
@@ -70,9 +72,16 @@ export function RoteCard({ rote, onClick }: RoteCardProps) {
         {rote.description}
       </p>
 
+      {/* Multiple combinations indicator */}
+      {hasMultipleCombinations && (
+        <div className="text-xs text-accent font-semibold mb-2">
+          ✨ Multiple sphere combinations available
+        </div>
+      )}
+
       {/* Sphere tags */}
       <div className="flex flex-wrap gap-2 mb-4">
-        {Object.entries{formatSpheres(rote.spheres)}.map(([sphere, level]) => (
+        {Object.entries(sphereData).map(([sphere, level]) => (
           <div
             key={sphere}
             className={`flex items-center gap-2 px-2.5 py-1.5 border rounded-sm text-xs font-semibold uppercase tracking-wide font-serif
