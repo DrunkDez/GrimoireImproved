@@ -3,12 +3,32 @@
 import type { Rote } from "@/lib/mage-data"
 import { getTraditionSymbol, isTechnocracySphere } from "@/lib/mage-data"
 import { SphereDots } from "./sphere-dots"
+import { SphereDisplay } from '@/components/sphere-display'
 
 interface RoteDetailProps {
   rote: Rote
   onBack: () => void
 }
-
+function formatSpheres(spheres: any): string {
+  if (!spheres) return 'None';
+  
+  if (Array.isArray(spheres)) {
+    return spheres.map((combo, i) => {
+      const str = Object.entries(combo)
+        .map(([s, l]) => `${s} ${l}`)
+        .join(', ');
+      return spheres.length > 1 ? `[${i + 1}] ${str}` : str;
+    }).join(' OR ');
+  }
+  
+  if (typeof spheres === 'object') {
+    return Object.entries(spheres)
+      .map(([s, l]) => `${s} ${l}`)
+      .join(', ');
+  }
+  
+  return String(spheres);
+}
 export function RoteDetail({ rote, onBack }: RoteDetailProps) {
   return (
     <div className="animate-fade-in-up flex flex-col gap-6 p-6 md:p-10">
@@ -27,6 +47,10 @@ export function RoteDetail({ rote, onBack }: RoteDetailProps) {
         Return to Library
       </button>
 
+      <div className="flex gap-2">
+  <span className="font-semibold">Spheres:</span>
+  <SphereDisplay spheres={formatSpheres(rote.spheres)} />
+      </div>
       {/* Detail card */}
       <div
         className="bg-background border-4 border-double border-primary rounded-lg p-8 md:p-12
