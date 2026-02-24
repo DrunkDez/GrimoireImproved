@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { TraditionCombobox } from "@/components/tradition-combobox"
 import {
   Select,
   SelectContent,
@@ -375,25 +376,15 @@ export function AdminRotesPanel({ rotes, onRotesChange }: AdminRotesPanelProps) 
                 />
               </div>
 
-              {/* Tradition/Craft */}
-              <div className="space-y-2">
-                <Label htmlFor="edit-tradition">Tradition/Craft/Convention</Label>
-                <Select
-                  value={editingRote.tradition}
-                  onValueChange={(value) => setEditingRote({ ...editingRote, tradition: value })}
-                >
-                  <SelectTrigger id="edit-tradition">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {ALL_FACTIONS.map((faction) => (
-                      <SelectItem key={faction} value={faction}>
-                        {faction}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+           {/* Tradition/Craft */}
+<div className="space-y-2">
+  <Label htmlFor="edit-tradition">Tradition/Craft/Convention</Label>
+  <TraditionCombobox
+    value={editingRote.tradition}
+    onValueChange={(value) => setEditingRote({ ...editingRote, tradition: value })}
+    placeholder="Select tradition..."
+  />
+</div>
 
               {/* Description */}
               <div className="space-y-2">
