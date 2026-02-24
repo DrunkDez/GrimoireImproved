@@ -6,7 +6,7 @@ import { RandomLogo } from "@/components/random-logo"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 
-export function ParadoxWheelHeader() {
+export function GrimoireHeader() {
   return (
     <header className="relative bg-card px-6 py-12 text-center border-b-4 border-double border-primary">
       {/* Theme Toggle & User Navigation - Top Right */}
@@ -82,6 +82,3 @@ export function ParadoxWheelHeader() {
     </header>
   )
 }
-
-// Note: Rename file to paradox-wheel-header.tsx
-// Or keep as grimoire-header.tsx and just replace the export name
