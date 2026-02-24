@@ -27,9 +27,10 @@ const imFell = IM_Fell_DW_Pica({
 })
 
 export const metadata: Metadata = {
-  title: 'The Enlightened Grimoire | Mage: The Ascension Rote Library',
+  title: 'The Paradox Wheel | Mage: The Ascension',
   description:
-    'A curated compendium of mystical Rotes from the Nine Traditions and beyond. Browse, search, and contribute to the collective arcane knowledge.',
+    'Your comprehensive digital grimoire for Mage: The Ascension. Navigate the Spheres, browse rotes from the Nine Traditions, Technocracy, and beyond. Where Reality Bends.',
+  keywords: ['Mage the Ascension', 'Paradox Wheel', 'World of Darkness', 'rotes', 'traditions', 'spheres', 'Technocracy', 'character creation'],
 }
 
 export default function RootLayout({
