@@ -2,12 +2,12 @@
 
 import { useSiteSettings } from "@/hooks/use-site-settings"
 
-export function GrimoireFooter() {
+export function ParadoxWheelFooter() {
   const { settings, isLoading } = useSiteSettings()
 
   // Parse footer text into lines
   const footerLines = isLoading
-    ? ["Loading..."]
+    ? ["Turning the Wheel..."]
     : settings.footerText.split('\n').filter(line => line.trim())
 
   return (
@@ -36,10 +36,21 @@ export function GrimoireFooter() {
         ))}
       </div>
 
-      {/* Decorative Mage symbol */}
-      <div className="mt-6 text-3xl text-primary/40 dark:text-accent/40 font-magebats" aria-hidden="true">
-        a
+      {/* Decorative Wheel symbol */}
+      <div className="mt-6 flex items-center justify-center gap-3">
+        <span className="text-3xl text-primary/40 dark:text-accent/40 font-magebats" aria-hidden="true">
+          a
+        </span>
+        <span className="text-3xl text-primary/40 dark:text-accent/40 animate-spin-slow" aria-hidden="true">
+          ⚙
+        </span>
+        <span className="text-3xl text-primary/40 dark:text-accent/40 font-magebats" aria-hidden="true">
+          a
+        </span>
       </div>
     </footer>
   )
 }
+
+// Note: Rename file to paradox-wheel-footer.tsx
+// Or keep as grimoire-footer.tsx and just replace the export name
