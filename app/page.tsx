@@ -151,7 +151,10 @@ export default function Page() {
           >
             {isLoading ? (
               <div className="flex items-center justify-center min-h-[500px]">
-                <p className="text-muted-foreground">Loading grimoire...</p>
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl text-accent animate-spin">⚙</span>
+                  <p className="text-muted-foreground">Turning the Wheel...</p>
+                </div>
               </div>
             ) : selectedRote ? (
               <RoteDetail rote={selectedRote} onBack={handleBackFromDetail} />
