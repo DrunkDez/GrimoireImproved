@@ -2,7 +2,7 @@
 
 import { useSiteSettings } from "@/hooks/use-site-settings"
 
-export function ParadoxWheelFooter() {
+export function GrimoireFooter() {
   const { settings, isLoading } = useSiteSettings()
 
   // Parse footer text into lines
@@ -51,6 +51,3 @@ export function ParadoxWheelFooter() {
     </footer>
   )
 }
-
-// Note: Rename file to paradox-wheel-footer.tsx
-// Or keep as grimoire-footer.tsx and just replace the export name
