@@ -6,7 +6,7 @@ import { RandomLogo } from "@/components/random-logo"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 
-export function GrimoireHeader() {
+export function ParadoxWheelHeader() {
   return (
     <header className="relative bg-card px-6 py-12 text-center border-b-4 border-double border-primary">
       {/* Theme Toggle & User Navigation - Top Right */}
@@ -34,12 +34,20 @@ export function GrimoireHeader() {
       />
 
       <Link href="/" className="block hover:opacity-80 transition-opacity">
-        {/* Random Logo + Title */}
+        {/* Random Logo + Title with Wheel Symbol */}
         <div className="flex items-center justify-center gap-6 mb-4">
           <RandomLogo />
-          <h1 className="font-serif text-4xl md:text-6xl font-black tracking-wider uppercase text-primary leading-tight">
-            The Enlightened Grimoire
-          </h1>
+          <div className="flex items-center gap-4">
+            <h1 className="font-serif text-4xl md:text-6xl font-black tracking-wider uppercase text-primary leading-tight">
+              The Paradox
+            </h1>
+            <div className="text-5xl md:text-7xl text-accent animate-spin-slow" aria-hidden="true">
+              ⚙
+            </div>
+            <h1 className="font-serif text-4xl md:text-6xl font-black tracking-wider uppercase text-primary leading-tight">
+              Wheel
+            </h1>
+          </div>
         </div>
       </Link>
 
@@ -53,7 +61,7 @@ export function GrimoireHeader() {
       />
 
       <p className="font-mono text-lg md:text-xl italic text-muted-foreground tracking-wide mb-6">
-        A Compendium of Mystical Rotes for the Awakened
+        Where Reality Bends • Navigate the Spheres
       </p>
 
       {/* Quick Access Links */}
@@ -74,3 +82,6 @@ export function GrimoireHeader() {
     </header>
   )
 }
+
+// Note: Rename file to paradox-wheel-header.tsx
+// Or keep as grimoire-header.tsx and just replace the export name
