@@ -5,6 +5,7 @@ import type { Rote } from "@/lib/mage-data"
 import { getLinkedSpheres } from "@/lib/mage-data"
 import { RoteCard } from "./rote-card"
 import { SphereDotsInteractive } from "./sphere-dots"
+import { TraditionComboboxSimple } from "./tradition-combobox"
 
 interface SearchPanelProps {
   rotes: Rote[]
@@ -13,6 +14,7 @@ interface SearchPanelProps {
 
 export function SearchPanel({ rotes, onSelectRote }: SearchPanelProps) {
   const [query, setQuery] = useState("")
+  const [traditionFilter, setTraditionFilter] = useState("")
   const [sphereFilters, setSphereFilters] = useState<Record<string, number>>({})
   const [showSphereFilter, setShowSphereFilter] = useState(false)
 
@@ -30,8 +32,9 @@ export function SearchPanel({ rotes, onSelectRote }: SearchPanelProps) {
 
   const activeSphereFilters = Object.entries(sphereFilters).filter(([, v]) => v > 0)
   const hasTextQuery = query.trim().length > 0
-  const hasFilters = activeSphereFilters.length > 0
-  const hasAnySearch = hasTextQuery || hasFilters
+  const hasTraditionFilter = traditionFilter.length > 0
+  const hasSphereFilters = activeSphereFilters.length > 0
+  const hasAnySearch = hasTextQuery || hasTraditionFilter || hasSphereFilters
 
   const results = useMemo(() => {
     if (!hasAnySearch) return []
@@ -48,6 +51,11 @@ export function SearchPanel({ rotes, onSelectRote }: SearchPanelProps) {
         if (!textMatch) return false
       }
 
+      // Tradition filter
+      if (hasTraditionFilter) {
+        if (rote.tradition !== traditionFilter) return false
+      }
+
       // Sphere level filters with alias linking
       for (const [sphere, minLevel] of activeSphereFilters) {
         const linkedSpheres = getLinkedSpheres(sphere)
@@ -57,10 +65,11 @@ export function SearchPanel({ rotes, onSelectRote }: SearchPanelProps) {
 
       return true
     })
-  }, [rotes, query, sphereFilters, hasAnySearch, hasTextQuery, activeSphereFilters])
+  }, [rotes, query, traditionFilter, sphereFilters, hasAnySearch, hasTextQuery, hasTraditionFilter, activeSphereFilters])
 
   const handleClear = () => {
     setQuery("")
+    setTraditionFilter("")
     setSphereFilters({})
   }
 
@@ -75,7 +84,9 @@ export function SearchPanel({ rotes, onSelectRote }: SearchPanelProps) {
           Search the Grimoire
           <span className="ml-auto text-accent text-lg" aria-hidden="true">{'\u25C8'}</span>
         </h2>
-        <div className="flex gap-3">
+        
+        {/* Search input and buttons */}
+        <div className="flex gap-3 mb-4">
           <input
             type="text"
             placeholder="Search by name, tradition, sphere, or description..."
@@ -98,7 +109,7 @@ export function SearchPanel({ rotes, onSelectRote }: SearchPanelProps) {
                 : "bg-secondary text-secondary-foreground border-primary hover:bg-background hover:border-ring"
               }`}
           >
-            Spheres{hasFilters ? ` (${activeSphereFilters.length})` : ""}
+            Spheres{hasSphereFilters ? ` (${activeSphereFilters.length})` : ""}
           </button>
           {hasAnySearch && (
             <button
@@ -112,6 +123,18 @@ export function SearchPanel({ rotes, onSelectRote }: SearchPanelProps) {
               Clear
             </button>
           )}
+        </div>
+
+        {/* Tradition filter */}
+        <div className="flex flex-col gap-2">
+          <label className="font-serif text-xs font-semibold text-primary uppercase tracking-wider">
+            Filter by Tradition
+          </label>
+          <TraditionComboboxSimple
+            value={traditionFilter}
+            onValueChange={setTraditionFilter}
+            placeholder="All traditions"
+          />
         </div>
       </div>
 
@@ -172,7 +195,7 @@ export function SearchPanel({ rotes, onSelectRote }: SearchPanelProps) {
           </div>
 
           {/* Active filters summary */}
-          {hasFilters && (
+          {hasSphereFilters && (
             <div className="mt-4 pt-4 border-t-2 border-primary flex flex-wrap items-center gap-2">
               <span className="font-serif text-xs font-semibold text-primary uppercase tracking-widest">Active:</span>
               {activeSphereFilters.map(([sphere, level]) => (
@@ -202,7 +225,8 @@ export function SearchPanel({ rotes, onSelectRote }: SearchPanelProps) {
           <span className="font-mono text-sm text-muted-foreground italic">
             {results.length} result{results.length !== 1 ? "s" : ""}
             {hasTextQuery && ` for "${query}"`}
-            {hasFilters && ` with sphere filter${activeSphereFilters.length > 1 ? "s" : ""}`}
+            {hasTraditionFilter && ` from ${traditionFilter}`}
+            {hasSphereFilters && ` with sphere filter${activeSphereFilters.length > 1 ? "s" : ""}`}
           </span>
           {results.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -229,7 +253,7 @@ export function SearchPanel({ rotes, onSelectRote }: SearchPanelProps) {
             Seek and You Shall Find
           </h3>
           <p className="font-mono text-muted-foreground italic text-base max-w-lg mx-auto">
-            Enter a name, tradition, sphere, or keyword, or use the Sphere filter to search by minimum sphere level.
+            Enter a name, tradition, sphere, or keyword, or use the filters to search by tradition and minimum sphere level.
           </p>
         </div>
       )}
