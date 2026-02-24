@@ -4,8 +4,9 @@ import React from "react"
 
 import { useState } from "react"
 import type { Rote } from "@/lib/mage-data"
-import { SPHERES, TECHNOCRACY_SPHERES, TRADITIONS, CRAFTS, TECHNOCRACY_CONVENTIONS } from "@/lib/mage-data"
+import { SPHERES, TECHNOCRACY_SPHERES } from "@/lib/mage-data"
 import { SphereDotsInteractive, SphereDots } from "./sphere-dots"
+import { TraditionCombobox } from "./tradition-combobox"
 
 const ROTE_LEVELS = ["Initiate", "Apprentice", "Disciple", "Adept", "Master"]
 
@@ -134,46 +135,17 @@ export function AddRotePanel({ onAdd }: AddRotePanelProps) {
             />
           </div>
 
-          {/* Tradition */}
+          {/* Tradition - UPDATED TO USE COMBOBOX */}
           <div className="flex flex-col gap-2">
             <label htmlFor="rote-tradition" className="font-serif text-sm font-semibold text-primary uppercase tracking-widest flex items-center gap-2">
               <span className="text-ring" aria-hidden="true">{'\u2726'}</span>
               Tradition / Craft / Convention
             </label>
-            <select
-              id="rote-tradition"
-              required
+            <TraditionCombobox
               value={tradition}
-              onChange={(e) => setTradition(e.target.value)}
-              className="w-full px-4 py-3 bg-background/60 border-2 border-primary rounded-sm
-                text-foreground font-mono text-base
-                transition-all duration-300 shadow-[inset_2px_2px_5px_rgba(0,0,0,0.1)]
-                focus:outline-none focus:border-ring focus:bg-background/80
-                focus:shadow-[inset_2px_2px_5px_rgba(0,0,0,0.1),0_0_10px_rgba(107,45,107,0.3)]
-                appearance-none cursor-pointer pr-10"
-              style={{
-                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%234a1a4a' d='M6 8L0 0h12z'/%3E%3C/svg%3E")`,
-                backgroundRepeat: 'no-repeat',
-                backgroundPosition: 'right 1rem center',
-              }}
-            >
-              <option value="">Select a Tradition, Craft, or Convention...</option>
-              <optgroup label="Traditions">
-                {TRADITIONS.map((t) => (
-                  <option key={t} value={t}>{t}</option>
-                ))}
-              </optgroup>
-              <optgroup label="Crafts">
-                {CRAFTS.map((t) => (
-                  <option key={t} value={t}>{t}</option>
-                ))}
-              </optgroup>
-              <optgroup label="Technocracy">
-                {TECHNOCRACY_CONVENTIONS.map((t) => (
-                  <option key={t} value={t}>{t}</option>
-                ))}
-              </optgroup>
-            </select>
+              onValueChange={setTradition}
+              placeholder="Select or search tradition..."
+            />
           </div>
 
           {/* Description */}
@@ -199,71 +171,56 @@ export function AddRotePanel({ onAdd }: AddRotePanelProps) {
           </div>
 
           {/* Spheres */}
-          <div className="flex flex-col gap-3">
-            <span className="font-serif text-sm font-semibold text-primary uppercase tracking-widest flex items-center gap-2">
+          <div className="flex flex-col gap-4">
+            <div className="font-serif text-sm font-semibold text-primary uppercase tracking-widest flex items-center gap-2">
               <span className="text-ring" aria-hidden="true">{'\u2726'}</span>
               Required Spheres
-            </span>
-            
-            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3">
-              {/* Tradition Spheres */}
-              {SPHERES.map((sphere) => (
-                <div
-                  key={sphere}
-                  className="flex items-center justify-between gap-2 bg-background border-2 border-primary rounded-sm px-3 py-3 min-h-[60px]
-                    transition-all duration-300 hover:border-accent"
-                >
-                  <span className="font-serif text-[0.65rem] font-bold text-primary uppercase tracking-wide leading-snug flex-1 break-words">
-                    {sphere}
-                  </span>
-                  <div className="shrink-0">
-                    <SphereDotsInteractive
-                      value={spheres[sphere] || 0}
-                      onChange={(level) => handleSphereChange(sphere, level)}
-                      label={sphere}
-                    />
-                  </div>
-                </div>
-              ))}
-              
-              {/* Technocracy Spheres - same grid, different styling */}
-              {TECHNOCRACY_SPHERES.map((sphere) => (
-                <div
-                  key={sphere}
-                  className="flex items-center justify-between gap-2 bg-foreground/5 border-2 border-foreground/40 rounded-sm px-3 py-3 min-h-[60px]
-                    transition-all duration-300 hover:border-foreground/70"
-                >
-                  <span className="font-serif text-[0.65rem] font-bold text-foreground uppercase tracking-wide leading-snug flex-1 break-words">
-                    {sphere}
-                  </span>
-                  <div className="shrink-0">
-                    <SphereDotsInteractive
-                      value={spheres[sphere] || 0}
-                      onChange={(level) => handleSphereChange(sphere, level)}
-                      label={sphere}
-                    />
-                  </div>
-                </div>
-              ))}
             </div>
 
-            {/* Selected spheres display */}
+            {/* Tradition Spheres */}
+            <div>
+              <h4 className="font-serif text-xs font-bold text-primary uppercase tracking-wider mb-3">Tradition Spheres</h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                {SPHERES.map((sphere) => (
+                  <div key={sphere} className="flex items-center justify-between gap-3 bg-background border-2 border-primary rounded-sm px-3 py-2">
+                    <span className="font-serif text-xs font-bold text-primary uppercase tracking-wider">{sphere}</span>
+                    <SphereDotsInteractive
+                      value={spheres[sphere] || 0}
+                      onChange={(value) => handleSphereChange(sphere, value)}
+                      label={sphere}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Technocracy Spheres */}
+            <div>
+              <h4 className="font-serif text-xs font-bold text-foreground uppercase tracking-wider mb-3">Technocracy Spheres</h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                {TECHNOCRACY_SPHERES.map((sphere) => (
+                  <div key={sphere} className="flex items-center justify-between gap-3 bg-foreground/5 border-2 border-foreground/40 rounded-sm px-3 py-2">
+                    <span className="font-serif text-xs font-bold text-foreground uppercase tracking-wider">{sphere}</span>
+                    <SphereDotsInteractive
+                      value={spheres[sphere] || 0}
+                      onChange={(value) => handleSphereChange(sphere, value)}
+                      label={sphere}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Selected summary */}
             {selectedSpheres.length > 0 && (
-              <div className="bg-primary/5 border-2 border-primary rounded-sm p-4 mt-2">
-                <h4 className="font-serif text-xs font-bold text-primary uppercase tracking-widest mb-2">
-                  Selected Spheres
-                </h4>
-                <div className="flex flex-wrap gap-2">
-                  {selectedSpheres.map(([sphere, lvl]) => (
-                    <div
-                      key={sphere}
-                      className="flex items-center gap-2 px-2.5 py-1.5 bg-primary/10 border border-primary rounded-sm text-primary text-xs font-semibold uppercase font-serif"
-                    >
-                      <span>{sphere}</span>
-                      <SphereDots level={lvl} size="sm" />
-                    </div>
-                  ))}
-                </div>
+              <div className="bg-primary/5 border-2 border-primary rounded-sm p-3">
+                <span className="font-serif text-xs font-semibold text-primary uppercase tracking-wider">Selected: </span>
+                {selectedSpheres.map(([sphere, level]) => (
+                  <span key={sphere} className="inline-flex items-center gap-1.5 ml-2 font-mono text-xs text-foreground">
+                    {sphere}
+                    <SphereDots level={level} size="sm" />
+                  </span>
+                ))}
               </div>
             )}
           </div>
@@ -272,7 +229,7 @@ export function AddRotePanel({ onAdd }: AddRotePanelProps) {
           <div className="flex flex-col gap-2">
             <label htmlFor="rote-level" className="font-serif text-sm font-semibold text-primary uppercase tracking-widest flex items-center gap-2">
               <span className="text-ring" aria-hidden="true">{'\u2726'}</span>
-              Rote Level
+              Rank
             </label>
             <select
               id="rote-level"
@@ -291,24 +248,23 @@ export function AddRotePanel({ onAdd }: AddRotePanelProps) {
                 backgroundPosition: 'right 1rem center',
               }}
             >
-              <option value="">Select a level...</option>
+              <option value="">Select Rank...</option>
               {ROTE_LEVELS.map((l) => (
                 <option key={l} value={l}>{l}</option>
               ))}
             </select>
           </div>
 
-          {/* Page reference */}
+          {/* Page Ref */}
           <div className="flex flex-col gap-2">
-            <label htmlFor="rote-ref" className="font-serif text-sm font-semibold text-primary uppercase tracking-widest flex items-center gap-2">
-              <span className="text-ring" aria-hidden="true">{'\u2726'}</span>
-              Page Reference
-              <span className="font-mono text-xs italic text-muted-foreground normal-case tracking-normal">(optional)</span>
+            <label htmlFor="rote-pageref" className="font-serif text-sm font-semibold text-primary uppercase tracking-widest flex items-center gap-2">
+              <span className="text-muted-foreground" aria-hidden="true">{'\u2726'}</span>
+              Page Reference (optional)
             </label>
             <input
-              id="rote-ref"
+              id="rote-pageref"
               type="text"
-              placeholder="e.g., Book of Shadows, p.142"
+              placeholder="e.g., M20 Core, p. 515"
               value={pageRef}
               onChange={(e) => setPageRef(e.target.value)}
               className="w-full px-4 py-3 bg-background/60 border-2 border-primary rounded-sm
@@ -322,17 +278,16 @@ export function AddRotePanel({ onAdd }: AddRotePanelProps) {
           {/* Submit */}
           <button
             type="submit"
-            className="font-serif px-6 py-4 bg-primary text-primary-foreground border-2 border-accent rounded-sm
-              font-semibold text-sm uppercase tracking-[0.15em] cursor-pointer
-              transition-all duration-300 mt-4
-              shadow-[0_4px_8px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.1)]
-              hover:bg-muted-foreground hover:-translate-y-0.5
-              hover:shadow-[0_6px_12px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.2),0_0_20px_rgba(201,169,97,0.3)]
-              active:translate-y-0 flex items-center justify-center gap-3 w-full"
+            className="font-serif mt-4 px-8 py-4 bg-primary text-primary-foreground border-[3px] border-accent rounded-sm
+              font-bold text-base uppercase tracking-[0.2em] cursor-pointer
+              transition-all duration-300
+              shadow-[0_4px_10px_rgba(0,0,0,0.2)]
+              hover:bg-accent hover:text-accent-foreground hover:border-ring hover:-translate-y-1
+              hover:shadow-[0_6px_15px_rgba(0,0,0,0.3)]
+              active:translate-y-0
+              disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
           >
-            <span aria-hidden="true">{'\u27D0'}</span>
-            Inscribe This Rote
-            <span aria-hidden="true">{'\u27D0'}</span>
+            {'\u2726'} Inscribe Rote {'\u2726'}
           </button>
         </div>
       </form>
