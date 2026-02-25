@@ -143,6 +143,9 @@ model SiteSettings {
   key                 String   @unique // Identifier for the setting
   value               String   @db.Text
   updatedAt           DateTime @updatedAt
+  aboutPage   String   @default("") @db.Text
+  howToUse    String   @default("") @db.Text
+  creditsPage String   @default("") @db.Text
   
   @@index([key])
 }
