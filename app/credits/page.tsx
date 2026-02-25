@@ -1,8 +1,8 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { ParadoxWheelHeader } from "@/components/paradox-wheel-header"
-import { ParadoxWheelFooter } from "@/components/paradox-wheel-footer"
+import { GrimoireHeader } from "@/components/grimoire-header"
+import { GrimoireFooter } from "@/components/grimoire-footer"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft } from "lucide-react"
 import { useRouter } from "next/navigation"
@@ -44,7 +44,7 @@ export default function CreditsPage() {
           aria-hidden="true"
         />
 
-        <ParadoxWheelHeader />
+        <GrimoireHeader />
 
         <main className="min-h-[500px] p-6 md:p-10">
           <div className="max-w-4xl mx-auto">
@@ -84,7 +84,7 @@ export default function CreditsPage() {
           </div>
         </main>
 
-        <ParadoxWheelFooter />
+        <GrimoireFooter />
       </div>
     </div>
   )
