@@ -81,7 +81,7 @@ export function SearchPanel({ rotes, onSelectRote }: SearchPanelProps) {
           <span className="text-ring text-lg drop-shadow-[0_0_8px_rgba(107,45,107,0.5)]" aria-hidden="true">
             {'\u2315'}
           </span>
-          Search the Grimoire
+          Navigate The Wheel
           <span className="ml-auto text-accent text-lg" aria-hidden="true">{'\u25C8'}</span>
         </h2>
         
@@ -241,7 +241,7 @@ export function SearchPanel({ rotes, onSelectRote }: SearchPanelProps) {
                 No Results
               </h3>
               <p className="font-mono text-muted-foreground italic">
-                The Tapestry yields no matching patterns. Try different words of power.
+                The Wheel reveals no patterns. Try different words of power.
               </p>
             </div>
           )}
