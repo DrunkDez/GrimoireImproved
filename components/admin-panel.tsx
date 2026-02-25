@@ -8,23 +8,12 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { MageGroupsManager } from "./admin/mage-groups-manager"
 import { ContentManager } from "./admin/content-manager"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
-import { ShieldAlert, Lock, X, BookOpen, Star, Library, FileText } from "lucide-react"
+import { ShieldAlert, Lock, X, BookOpen, Star, Library, FileText, Users } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { GuideContentManager } from "./admin/guide-content-manager"
 import { AdminRotesPanel } from "@/components/admin/admin-rotes-panel"
 import { AdminMeritsPanel } from "@/components/admin/admin-merits-panel"
 import { AdminResourcesPanel } from "@/components/admin/admin-resources-panel"
-import { AdminContentPanel } from "@/components/admin/admin-content-panel"
 
 interface AdminPanelProps {
   rotes: Rote[]
@@ -139,7 +128,7 @@ export function AdminPanel({ rotes, onRotesChange, onClose }: AdminPanelProps) {
             Admin Panel
           </h1>
           <p className="text-muted-foreground">
-            Manage your grimoire's content and settings
+            Manage The Paradox Wheel's content and settings
           </p>
         </div>
         <Button variant="outline" onClick={onClose} className="gap-2">
@@ -149,7 +138,7 @@ export function AdminPanel({ rotes, onRotesChange, onClose }: AdminPanelProps) {
       </div>
 
       <Tabs defaultValue="content" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-7 max-w-3xl">
+        <TabsList className="grid w-full grid-cols-6 max-w-3xl">
           <TabsTrigger value="content" className="gap-2">
             <FileText className="w-4 h-4" />
             Content
@@ -160,20 +149,24 @@ export function AdminPanel({ rotes, onRotesChange, onClose }: AdminPanelProps) {
           </TabsTrigger>
           <TabsTrigger value="merits" className="gap-2">
             <Star className="w-4 h-4" />
-            Merits & Flaws
+            Merits
           </TabsTrigger>
           <TabsTrigger value="resources" className="gap-2">
             <Library className="w-4 h-4" />
             Resources
           </TabsTrigger>
-          <TabsTrigger value="guide">Guide Content</TabsTrigger>
-          <TabsTrigger value="groups">Mage Groups</TabsTrigger>
-          <TabsTrigger value="content">Content</TabsTrigger>
-
+          <TabsTrigger value="guide" className="gap-2">
+            <BookOpen className="w-4 h-4" />
+            Guide
+          </TabsTrigger>
+          <TabsTrigger value="groups" className="gap-2">
+            <Users className="w-4 h-4" />
+            Groups
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="content">
-          <AdminContentPanel />
+          <ContentManager />
         </TabsContent>
 
         <TabsContent value="rotes">
@@ -187,14 +180,14 @@ export function AdminPanel({ rotes, onRotesChange, onClose }: AdminPanelProps) {
         <TabsContent value="resources">
           <AdminResourcesPanel />
         </TabsContent>
+
         <TabsContent value="guide">
-    </TabsContent>
+          <GuideContentManager />
+        </TabsContent>
+
         <TabsContent value="groups">
-  <MageGroupsManager />
-</TabsContent>
-        <TabsContent value="content">
-  <ContentManager />
-</TabsContent>
+          <MageGroupsManager />
+        </TabsContent>
       </Tabs>
     </div>
   )
