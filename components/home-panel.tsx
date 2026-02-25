@@ -1,9 +1,8 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import type { Rote } from "@/lib/mage-data"
-import { useSiteSettings } from "@/hooks/use-site-settings"
-import { RandomSphereSymbols } from "@/components/random-sphere-symbols"
 
 interface HomePanelProps {
   totalRotes: number
@@ -12,131 +11,160 @@ interface HomePanelProps {
 }
 
 export function HomePanel({ totalRotes, traditions, onNavigate }: HomePanelProps) {
-  const { settings, isLoading } = useSiteSettings()
-  
-  const stats = [
-    { value: totalRotes, label: "Rotes Inscribed", symbol: "a" },
-    { value: traditions, label: "Traditions", symbol: "b" },
-    { value: 12, label: "Spheres", symbol: "c" },
-  ]
+  const [howToUse, setHowToUse] = useState("")
+  const [isLoading, setIsLoading] = useState(true)
 
-  // Parse the welcome text into paragraphs
-  const welcomeParagraphs = isLoading 
-    ? ["Loading..."]
-    : settings.homeWelcomeText.split('\n\n').filter(p => p.trim())
+  useEffect(() => {
+    const fetchHowToUse = async () => {
+      try {
+        const response = await fetch('/api/site-settings')
+        if (response.ok) {
+          const settings = await response.json()
+          setHowToUse(settings.howToUse || "Browse rotes, search by tradition or sphere, and add your own discoveries.")
+        }
+      } catch (error) {
+        console.error('Error fetching how to use:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchHowToUse()
+  }, [])
+
+  const stats = [
+    { value: totalRotes, label: "Rotes Inscribed" },
+    { value: traditions, label: "Traditions" },
+    { value: 12, label: "Spheres" },
+  ]
 
   return (
     <div className="animate-fade-in-up flex flex-col gap-8 p-6 md:p-10">
-      {/* Hero area with random sphere symbols */}
-      <div className="relative bg-card/60 backdrop-blur-sm border-2 border-primary/30 rounded-xl px-6 py-16 text-center shadow-xl hover:shadow-2xl transition-all duration-500 group">
-        {/* Animated background glow */}
-        <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-primary/5 via-transparent to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-        
-        {/* Background symbol using Mage Bats font */}
-        <div className="absolute top-8 left-1/2 -translate-x-1/2 text-6xl text-primary/10 dark:text-primary/20 font-magebats animate-slow-rotate" aria-hidden="true">
-          a
+      {/* Hero area */}
+      <div
+        className="relative bg-card border-4 border-double border-primary rounded-lg px-6 py-16 text-center
+          shadow-[inset_0_0_80px_rgba(139,71,38,0.1),0_10px_30px_rgba(0,0,0,0.2)]"
+      >
+        {/* Background star */}
+        <div className="absolute top-8 left-1/2 -translate-x-1/2 text-6xl text-primary opacity-15 font-serif" aria-hidden="true">
+          {'\u2726'}
         </div>
 
-        {/* Random Sphere Symbols - REPLACES the single mystical icon */}
-        <RandomSphereSymbols />
+        {/* Mystical icon */}
+        <div className="text-6xl text-primary opacity-70 mb-6 animate-mystical-pulse drop-shadow-[0_0_15px_rgba(107,45,107,0.5)]" aria-hidden="true">
+          {'\u2748'}
+        </div>
 
-        <h2 className="relative font-serif text-2xl md:text-3xl font-bold text-primary dark:text-primary uppercase tracking-widest mb-6">
-          {isLoading ? "Welcome, Seeker of Knowledge" : settings.homeWelcomeTitle}
+        <h2 className="font-serif text-2xl md:text-3xl font-bold text-primary uppercase tracking-widest mb-6">
+          Welcome, Newly Awakened
         </h2>
 
-        {welcomeParagraphs.map((paragraph, index) => (
-          <p 
-            key={index}
-            className="relative font-mono text-foreground text-base md:text-lg leading-relaxed max-w-2xl mx-auto mb-3 last:mb-0 last:italic last:text-muted-foreground last:text-sm last:max-w-lg"
-          >
-            {paragraph}
-          </p>
-        ))}
+        <p className="font-mono text-foreground text-base md:text-lg leading-relaxed max-w-2xl mx-auto mb-3">
+          Within these pages lies a curated compendium of mystical Rotes drawn from
+          the Nine Traditions and beyond.
+        </p>
+        <p className="font-mono text-foreground text-base md:text-lg leading-relaxed max-w-2xl mx-auto mb-3">
+          Each Rote represents a proven path through the Tapestry, a well-worn
+          groove in reality that an Awakened will may follow.
+        </p>
+        <p className="font-mono text-muted-foreground italic text-sm max-w-lg mx-auto">
+          Browse the collection, search by Sphere or Tradition, or inscribe your own
+          discoveries for others to study.
+        </p>
       </div>
 
-      {/* Stats - Modernized cards with Mage Bats symbols */}
+      {/* How to Use section */}
+      <div className="bg-card border-[3px] border-primary border-l-[6px] border-l-accent rounded-md p-6 md:p-8
+        shadow-[inset_0_0_40px_rgba(139,71,38,0.05),5px_5px_15px_rgba(0,0,0,0.2)]">
+        <h3 className="font-serif text-xl font-bold text-primary uppercase tracking-[0.15em] mb-4 flex items-center gap-3">
+          <span className="text-ring" aria-hidden="true">{'\u2726'}</span>
+          How to Use The Wheel
+          <span className="ml-auto text-accent" aria-hidden="true">{'\u25C8'}</span>
+        </h3>
+        
+        {isLoading ? (
+          <div className="flex items-center gap-3 justify-center py-4">
+            <span className="text-xl text-accent animate-spin">⚙</span>
+            <p className="text-sm text-muted-foreground">Loading...</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {howToUse.split('\n').filter(line => line.trim()).map((line, index) => (
+              <p key={index} className="font-mono text-foreground text-base leading-relaxed">
+                {line}
+              </p>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {stats.map((stat) => (
           <div
             key={stat.label}
-            className="group relative bg-card/80 backdrop-blur-sm border-2 border-primary/20 rounded-lg p-6 text-center
-              shadow-lg hover:shadow-2xl
+            className="group relative bg-card border-[3px] border-double border-primary rounded-md p-6 text-center
+              shadow-[inset_0_0_20px_rgba(139,71,38,0.05),3px_3px_10px_rgba(0,0,0,0.15)]
               transition-all duration-300
-              hover:border-primary hover:-translate-y-2
-              hover:bg-card
-              overflow-hidden"
+              hover:border-accent hover:-translate-y-1
+              hover:shadow-[inset_0_0_20px_rgba(201,169,97,0.1),3px_3px_15px_rgba(0,0,0,0.2)]"
           >
-            {/* Animated gradient background */}
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            
-            {/* Decorative symbol using Mage Bats font */}
-            <div className="absolute top-2 left-1/2 -translate-x-1/2 text-primary/30 dark:text-primary/40 text-lg group-hover:scale-110 transition-transform duration-300 font-magebats" aria-hidden="true">
-              {stat.symbol}
+            <div className="absolute top-2 left-1/2 -translate-x-1/2 text-primary opacity-30 text-lg" aria-hidden="true">
+              {'\u25C8'}
             </div>
-            
-            <div className="relative text-5xl font-serif text-primary dark:text-accent leading-none mb-2 drop-shadow-lg group-hover:scale-110 transition-transform duration-300">
+            <div className="text-5xl font-serif text-primary leading-none mb-2 drop-shadow-[2px_2px_4px_rgba(0,0,0,0.2)]">
               {stat.value}
             </div>
-            <div className="relative font-serif text-xs text-primary/80 dark:text-accent/80 font-semibold uppercase tracking-[0.12em]">
+            <div className="font-serif text-xs text-primary font-semibold uppercase tracking-[0.12em]">
               {stat.label}
             </div>
           </div>
         ))}
       </div>
 
-      {/* Quick actions - Modernized buttons with Mage Bats symbols */}
+      {/* Quick actions */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <button
           type="button"
           onClick={() => onNavigate("browse")}
-          className="group relative font-serif px-6 py-4 bg-gradient-to-br from-primary to-primary/80 text-primary-foreground border-2 border-accent/50 rounded-lg
+          className="font-serif px-6 py-4 bg-primary text-primary-foreground border-2 border-accent rounded-sm
             font-semibold text-sm uppercase tracking-[0.15em] cursor-pointer
             transition-all duration-300
-            shadow-lg hover:shadow-2xl
-            hover:scale-105 hover:border-accent
-            active:scale-100
-            flex items-center justify-center gap-3
-            overflow-hidden"
+            shadow-[0_4px_8px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.1)]
+            hover:bg-muted-foreground hover:-translate-y-0.5
+            hover:shadow-[0_6px_12px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.2),0_0_20px_rgba(201,169,97,0.3)]
+            active:translate-y-0 flex items-center justify-center gap-3"
         >
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-          <span className="relative font-magebats text-lg" aria-hidden="true">d</span>
-          <span className="relative">Browse the Library</span>
-          <span className="relative font-magebats text-lg" aria-hidden="true">d</span>
+          <span aria-hidden="true">{'\u27D0'}</span>
+          Browse the Library
+          <span aria-hidden="true">{'\u27D0'}</span>
         </button>
-        
         <button
           type="button"
           onClick={() => onNavigate("add")}
-          className="group relative font-serif px-6 py-4 bg-secondary/80 backdrop-blur-sm text-secondary-foreground border-2 border-primary/30 rounded-lg
+          className="font-serif px-6 py-4 bg-secondary text-secondary-foreground border-2 border-primary rounded-sm
             font-semibold text-sm uppercase tracking-[0.15em] cursor-pointer
             transition-all duration-300
-            shadow-lg hover:shadow-2xl
-            hover:bg-secondary hover:border-primary hover:scale-105
-            active:scale-100
-            flex items-center justify-center gap-3
-            overflow-hidden"
+            shadow-[0_4px_8px_rgba(0,0,0,0.15)]
+            hover:bg-background hover:border-ring hover:-translate-y-0.5
+            active:translate-y-0 flex items-center justify-center gap-3"
         >
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-          <span className="relative font-magebats text-lg" aria-hidden="true">e</span>
-          <span className="relative">Inscribe a Rote</span>
-          <span className="relative font-magebats text-lg" aria-hidden="true">e</span>
+          <span aria-hidden="true">{'\u27D0'}</span>
+          Inscribe a Rote
+          <span aria-hidden="true">{'\u27D0'}</span>
         </button>
-        
         <Link
           href="/character-creation"
-          className="group relative font-serif px-6 py-4 bg-secondary/80 backdrop-blur-sm text-secondary-foreground border-2 border-primary/30 rounded-lg
+          className="font-serif px-6 py-4 bg-secondary text-secondary-foreground border-2 border-primary rounded-sm
             font-semibold text-sm uppercase tracking-[0.15em] cursor-pointer
             transition-all duration-300
-            shadow-lg hover:shadow-2xl
-            hover:bg-secondary hover:border-primary hover:scale-105
-            active:scale-100
-            flex items-center justify-center gap-3
-            overflow-hidden"
+            shadow-[0_4px_8px_rgba(0,0,0,0.15)]
+            hover:bg-background hover:border-ring hover:-translate-y-0.5
+            active:translate-y-0 flex items-center justify-center gap-3"
         >
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-          <span className="relative font-magebats text-lg" aria-hidden="true">f</span>
-          <span className="relative">Character Creation</span>
-          <span className="relative font-magebats text-lg" aria-hidden="true">f</span>
+          <span aria-hidden="true">{'\u27D0'}</span>
+          Character Creation
+          <span aria-hidden="true">{'\u27D0'}</span>
         </Link>
       </div>
     </div>
