@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { MageGroupsManager } from "./admin/mage-groups-manager"
+import { ContentManager } from "./admin/content-manager"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -148,7 +149,7 @@ export function AdminPanel({ rotes, onRotesChange, onClose }: AdminPanelProps) {
       </div>
 
       <Tabs defaultValue="content" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-6 max-w-3xl">
+        <TabsList className="grid w-full grid-cols-7 max-w-3xl">
           <TabsTrigger value="content" className="gap-2">
             <FileText className="w-4 h-4" />
             Content
@@ -167,6 +168,8 @@ export function AdminPanel({ rotes, onRotesChange, onClose }: AdminPanelProps) {
           </TabsTrigger>
           <TabsTrigger value="guide">Guide Content</TabsTrigger>
           <TabsTrigger value="groups">Mage Groups</TabsTrigger>
+          <TabsTrigger value="content">Content</TabsTrigger>
+
         </TabsList>
 
         <TabsContent value="content">
@@ -188,6 +191,9 @@ export function AdminPanel({ rotes, onRotesChange, onClose }: AdminPanelProps) {
     </TabsContent>
         <TabsContent value="groups">
   <MageGroupsManager />
+</TabsContent>
+        <TabsContent value="content">
+  <ContentManager />
 </TabsContent>
       </Tabs>
     </div>
