@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast"
 
 export function ContentManager() {
   const { toast } = useToast()
+  const [footerText, setFooterText] = useState("")
   const [aboutPage, setAboutPage] = useState("")
   const [howToUse, setHowToUse] = useState("")
   const [creditsPage, setCreditsPage] = useState("")
@@ -25,6 +26,7 @@ export function ContentManager() {
       const response = await fetch('/api/site-settings')
       if (response.ok) {
         const settings = await response.json()
+        setFooterText(settings.footerText || "")
         setAboutPage(settings.aboutPage || "")
         setHowToUse(settings.howToUse || "")
         setCreditsPage(settings.creditsPage || "")
@@ -36,7 +38,7 @@ export function ContentManager() {
     }
   }
 
-  const handleSave = async (field: 'aboutPage' | 'howToUse' | 'creditsPage', value: string) => {
+  const handleSave = async (field: 'footerText' | 'aboutPage' | 'howToUse' | 'creditsPage', value: string) => {
     setIsSaving(true)
     try {
       const response = await fetch('/api/site-settings', {
@@ -77,11 +79,50 @@ export function ContentManager() {
       <div>
         <h2 className="text-2xl font-bold mb-2">Content Management</h2>
         <p className="text-muted-foreground">
-          Manage the About page, How to Use section, and Credits page content.
+          Manage footer, About page, How to Use section, and Credits page content.
         </p>
       </div>
 
       <div className="grid gap-6">
+        {/* Footer Text */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              <span>Footer Text</span>
+              <span className="text-sm font-normal text-muted-foreground">
+                Shown at bottom of every page
+              </span>
+            </CardTitle>
+            <CardDescription>
+              Text displayed in the site footer. Each line break creates a new line.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="footer-text">Content</Label>
+              <Textarea
+                id="footer-text"
+                value={footerText}
+                onChange={(e) => setFooterText(e.target.value)}
+                rows={4}
+                placeholder="The Paradox Wheel © 2026
+An unofficial fan site for Mage: The Ascension"
+                className="font-mono text-sm"
+              />
+              <p className="text-xs text-muted-foreground">
+                Each new line will be displayed as a separate line in the footer.
+              </p>
+            </div>
+            <Button
+              onClick={() => handleSave('footerText', footerText)}
+              disabled={isSaving}
+            >
+              <Save className="w-4 h-4 mr-2" />
+              Save Footer
+            </Button>
+          </CardContent>
+        </Card>
+
         {/* About Page */}
         <Card>
           <CardHeader>
@@ -146,10 +187,9 @@ Created by passionate fans of the World of Darkness, this tool helps Storyteller
                 value={howToUse}
                 onChange={(e) => setHowToUse(e.target.value)}
                 rows={8}
-                placeholder="1. Browse rotes by tradition or sphere
-2. Search for specific magical effects
-3. Create your own character using our guide
-4. Add your own rotes to share with the community"
+                placeholder="Browse the Wheel's Archives to explore rotes organized by Tradition and Sphere
+Use the Search function to find specific magical effects or techniques
+Create your character using our step-by-step Character Creation guide"
                 className="font-mono text-sm"
               />
               <p className="text-xs text-muted-foreground">
@@ -222,6 +262,9 @@ Resources used:
           <CardTitle className="text-sm">💡 Need Help?</CardTitle>
         </CardHeader>
         <CardContent className="text-xs space-y-2">
+          <p className="text-muted-foreground">
+            <strong>Footer:</strong> Copyright notice and brief site description (2-3 lines).
+          </p>
           <p className="text-muted-foreground">
             <strong>About Page:</strong> Explain what The Paradox Wheel is, who it's for, and what makes it unique.
           </p>
