@@ -66,6 +66,18 @@ export function GrimoireHeader() {
 
       {/* Quick Access Links */}
       <div className="flex justify-center gap-3 flex-wrap">
+        <Link href="/about">
+          <Button variant="outline" size="sm" className="gap-2 font-serif">
+            <span className="text-base">{'\u2139'}</span>
+            About
+          </Button>
+        </Link>
+        <Link href="/credits">
+          <Button variant="outline" size="sm" className="gap-2 font-serif">
+            <span className="text-base">{'\u2726'}</span>
+            Credits
+          </Button>
+        </Link>
         <Link href="/merits-flaws">
           <Button variant="outline" size="sm" className="gap-2 font-serif">
             <span className="text-base">{'\u2726'}</span>
