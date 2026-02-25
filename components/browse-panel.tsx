@@ -68,7 +68,7 @@ export function BrowsePanel({ rotes, onSelectRote }: BrowsePanelProps) {
           <span className="text-ring text-lg drop-shadow-[0_0_8px_rgba(107,45,107,0.5)]" aria-hidden="true">
             {'\u2315'}
           </span>
-          Search the Grimoire
+          Search The Wheel
           <span className="ml-auto text-accent text-lg" aria-hidden="true">{'\u25C8'}</span>
         </h2>
         <input
@@ -100,7 +100,7 @@ export function BrowsePanel({ rotes, onSelectRote }: BrowsePanelProps) {
           <span className="text-ring text-lg drop-shadow-[0_0_8px_rgba(107,45,107,0.5)]" aria-hidden="true">
             {'\u2727'}
           </span>
-          Your Rote Library
+          The Wheel's Archives
           <span className="ml-2 text-accent text-lg" aria-hidden="true">{'\u25C8'}</span>
         </h2>
         <span className="font-mono text-sm text-muted-foreground italic">
