@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
+import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Save, Eye } from "lucide-react"
@@ -11,6 +12,8 @@ import { useToast } from "@/hooks/use-toast"
 export function ContentManager() {
   const { toast } = useToast()
   const [footerText, setFooterText] = useState("")
+  const [welcomeTitle, setWelcomeTitle] = useState("")
+  const [welcomeText, setWelcomeText] = useState("")
   const [aboutPage, setAboutPage] = useState("")
   const [howToUse, setHowToUse] = useState("")
   const [creditsPage, setCreditsPage] = useState("")
@@ -27,6 +30,8 @@ export function ContentManager() {
       if (response.ok) {
         const settings = await response.json()
         setFooterText(settings.footerText || "")
+        setWelcomeTitle(settings.welcomeTitle || "Welcome, Newly Awakened")
+        setWelcomeText(settings.welcomeText || "")
         setAboutPage(settings.aboutPage || "")
         setHowToUse(settings.howToUse || "")
         setCreditsPage(settings.creditsPage || "")
@@ -38,7 +43,7 @@ export function ContentManager() {
     }
   }
 
-  const handleSave = async (field: 'footerText' | 'aboutPage' | 'howToUse' | 'creditsPage', value: string) => {
+  const handleSave = async (field: string, value: string) => {
     setIsSaving(true)
     try {
       const response = await fetch('/api/site-settings', {
@@ -79,11 +84,118 @@ export function ContentManager() {
       <div>
         <h2 className="text-2xl font-bold mb-2">Content Management</h2>
         <p className="text-muted-foreground">
-          Manage footer, About page, How to Use section, and Credits page content.
+          Manage all editable text content on the site.
         </p>
       </div>
 
       <div className="grid gap-6">
+        {/* Welcome Section (Home Page Hero) */}
+        <Card className="border-accent">
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              <span>Welcome Section (Home Page)</span>
+              <span className="text-sm font-normal text-muted-foreground">
+                Main hero section
+              </span>
+            </CardTitle>
+            <CardDescription>
+              The main welcome message shown at the top of the home page.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="welcome-title">Title</Label>
+              <Input
+                id="welcome-title"
+                value={welcomeTitle}
+                onChange={(e) => setWelcomeTitle(e.target.value)}
+                placeholder="Welcome, Newly Awakened"
+                className="font-serif text-lg"
+              />
+              <p className="text-xs text-muted-foreground">
+                The main heading shown at the top of the home page.
+              </p>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="welcome-text">Welcome Text</Label>
+              <Textarea
+                id="welcome-text"
+                value={welcomeText}
+                onChange={(e) => setWelcomeText(e.target.value)}
+                rows={8}
+                placeholder="Within these pages lies a curated compendium of mystical Rotes drawn from the Nine Traditions and beyond.
+
+Each Rote represents a proven path through the Tapestry, a well-worn groove in reality that an Awakened will may follow.
+
+Browse the collection, search by Sphere or Tradition, or inscribe your own discoveries for others to study."
+                className="font-mono text-sm"
+              />
+              <p className="text-xs text-muted-foreground">
+                Use double line breaks to create paragraphs. This appears below the title.
+              </p>
+            </div>
+            
+            <div className="flex gap-3">
+              <Button
+                onClick={() => handleSave('welcomeTitle', welcomeTitle)}
+                disabled={isSaving}
+              >
+                <Save className="w-4 h-4 mr-2" />
+                Save Title
+              </Button>
+              <Button
+                onClick={() => handleSave('welcomeText', welcomeText)}
+                disabled={isSaving}
+                variant="outline"
+              >
+                <Save className="w-4 h-4 mr-2" />
+                Save Text
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* How to Use */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              <span>How to Use</span>
+              <span className="text-sm font-normal text-muted-foreground">
+                Shown below welcome section
+              </span>
+            </CardTitle>
+            <CardDescription>
+              Instructions shown in a box below the welcome section on the home page.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="how-to-use">Content</Label>
+              <Textarea
+                id="how-to-use"
+                value={howToUse}
+                onChange={(e) => setHowToUse(e.target.value)}
+                rows={8}
+                placeholder="Browse the Wheel's Archives to explore rotes organized by Tradition and Sphere
+Use the Search function to find specific magical effects or techniques
+Create your character using our step-by-step Character Creation guide"
+                className="font-mono text-sm"
+              />
+              <p className="text-xs text-muted-foreground">
+                Each line will be displayed as a separate paragraph. Keep it concise!
+              </p>
+            </div>
+            <Button
+              onClick={() => handleSave('howToUse', howToUse)}
+              disabled={isSaving}
+            >
+              <Save className="w-4 h-4 mr-2" />
+              Save How to Use
+            </Button>
+          </CardContent>
+        </Card>
+
         {/* Footer Text */}
         <Card>
           <CardHeader>
@@ -166,46 +278,6 @@ Created by passionate fans of the World of Darkness, this tool helps Storyteller
           </CardContent>
         </Card>
 
-        {/* How to Use */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <span>How to Use</span>
-              <span className="text-sm font-normal text-muted-foreground">
-                Shown on home page
-              </span>
-            </CardTitle>
-            <CardDescription>
-              Instructions shown below "Welcome, Newly Awakened" on the home page.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="how-to-use">Content</Label>
-              <Textarea
-                id="how-to-use"
-                value={howToUse}
-                onChange={(e) => setHowToUse(e.target.value)}
-                rows={8}
-                placeholder="Browse the Wheel's Archives to explore rotes organized by Tradition and Sphere
-Use the Search function to find specific magical effects or techniques
-Create your character using our step-by-step Character Creation guide"
-                className="font-mono text-sm"
-              />
-              <p className="text-xs text-muted-foreground">
-                Each line will be displayed as a separate paragraph. Keep it concise!
-              </p>
-            </div>
-            <Button
-              onClick={() => handleSave('howToUse', howToUse)}
-              disabled={isSaving}
-            >
-              <Save className="w-4 h-4 mr-2" />
-              Save How to Use
-            </Button>
-          </CardContent>
-        </Card>
-
         {/* Credits Page */}
         <Card>
           <CardHeader>
@@ -257,22 +329,25 @@ Resources used:
       </div>
 
       {/* Default Content Templates */}
-      <Card className="border-accent">
+      <Card className="border-accent/50 bg-accent/5">
         <CardHeader>
-          <CardTitle className="text-sm">💡 Need Help?</CardTitle>
+          <CardTitle className="text-sm">💡 Content Tips</CardTitle>
         </CardHeader>
         <CardContent className="text-xs space-y-2">
           <p className="text-muted-foreground">
-            <strong>Footer:</strong> Copyright notice and brief site description (2-3 lines).
+            <strong>Welcome Section:</strong> Your site's first impression. Make it inviting and explain what users will find here.
           </p>
           <p className="text-muted-foreground">
-            <strong>About Page:</strong> Explain what The Paradox Wheel is, who it's for, and what makes it unique.
+            <strong>How to Use:</strong> Quick instructions (3-5 points) to help new users get started.
           </p>
           <p className="text-muted-foreground">
-            <strong>How to Use:</strong> Give new users a quick guide to get started (3-5 bullet points work best).
+            <strong>Footer:</strong> Copyright, disclaimer, and brief site description (2-3 lines).
           </p>
           <p className="text-muted-foreground">
-            <strong>Credits:</strong> Thank contributors, acknowledge White Wolf/Paradox, list your sources.
+            <strong>About Page:</strong> Detailed explanation of your site, its purpose, and what makes it unique.
+          </p>
+          <p className="text-muted-foreground">
+            <strong>Credits:</strong> Thank contributors, acknowledge White Wolf/Paradox, list sources.
           </p>
         </CardContent>
       </Card>

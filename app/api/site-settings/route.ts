@@ -9,6 +9,8 @@ export async function GET() {
     if (!settings) {
       return NextResponse.json({
         footerText: "The Paradox Wheel © 2026",
+        welcomeTitle: "Welcome, Newly Awakened",
+        welcomeText: "",
         aboutPage: "",
         howToUse: "",
         creditsPage: "",
@@ -17,6 +19,8 @@ export async function GET() {
 
     return NextResponse.json({
       footerText: settings.footerText || "The Paradox Wheel © 2026",
+      welcomeTitle: settings.welcomeTitle || "Welcome, Newly Awakened",
+      welcomeText: settings.welcomeText || "",
       aboutPage: settings.aboutPage || "",
       howToUse: settings.howToUse || "",
       creditsPage: settings.creditsPage || "",
