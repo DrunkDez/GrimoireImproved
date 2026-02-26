@@ -72,26 +72,6 @@ export default function CharacterCreationGuide() {
             </p>
           </div>
 
-          {/* Quick Start CTA */}
-          <Card className="border-2 border-accent bg-accent/5">
-            <CardContent className="p-8 text-center space-y-4">
-              <Sparkles className="w-12 h-12 text-accent mx-auto" />
-              <h2 className="text-2xl font-cinzel font-bold text-accent">
-                Ready to Create Your Character?
-              </h2>
-              <p className="text-muted-foreground max-w-xl mx-auto">
-                Use our guided character creation tool to build your mage step-by-step with automatic point tracking and helpful tips!
-              </p>
-              <Link href="/character-guide">
-                <Button size="lg" className="gap-2">
-                  <Sparkles className="w-5 h-5" />
-                  Start Guided Creation
-                  <ChevronRight className="w-5 h-5" />
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
-
           {/* Main Guide */}
           <Tabs defaultValue="overview" className="space-y-6">
             <TabsList className="grid w-full grid-cols-5">
@@ -326,5 +306,6 @@ function ExpandableStep({
     </div>
   )
 }
+
 
 
