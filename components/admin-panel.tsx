@@ -8,13 +8,12 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { MageGroupsManager } from "./admin/mage-groups-manager"
 import { ContentManager } from "./admin/content-manager"
+import { CharacterCreationManager } from "./admin/character-creation-manager"
 import { ShieldAlert, Lock, X, BookOpen, Star, Library, FileText, Users } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
-import { GuideContentManager } from "./admin/guide-content-manager"
 import { AdminRotesPanel } from "@/components/admin/admin-rotes-panel"
 import { AdminMeritsPanel } from "@/components/admin/admin-merits-panel"
 import { AdminResourcesPanel } from "@/components/admin/admin-resources-panel"
-import { CharacterCreationManager } from "./admin/character-creation-manager"
 
 interface AdminPanelProps {
   rotes: Rote[]
@@ -139,7 +138,7 @@ export function AdminPanel({ rotes, onRotesChange, onClose }: AdminPanelProps) {
       </div>
 
       <Tabs defaultValue="content" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-7 max-w-3xl">
+        <TabsList className="grid w-full grid-cols-6 max-w-3xl">
           <TabsTrigger value="content" className="gap-2">
             <FileText className="w-4 h-4" />
             Content
@@ -164,7 +163,6 @@ export function AdminPanel({ rotes, onRotesChange, onClose }: AdminPanelProps) {
             <Users className="w-4 h-4" />
             Groups
           </TabsTrigger>
-          <TabsTrigger value="chargen">Char Creation</TabsTrigger> 
         </TabsList>
 
         <TabsContent value="content">
@@ -184,14 +182,11 @@ export function AdminPanel({ rotes, onRotesChange, onClose }: AdminPanelProps) {
         </TabsContent>
 
         <TabsContent value="guide">
-          <GuideContentManager />
+          <CharacterCreationManager />
         </TabsContent>
 
         <TabsContent value="groups">
           <MageGroupsManager />
-        </TabsContent>
-        <TabsContent value="chargen">
-         <CharacterCreationManager />
         </TabsContent>
       </Tabs>
     </div>
