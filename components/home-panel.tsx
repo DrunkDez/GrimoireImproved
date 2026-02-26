@@ -11,25 +11,29 @@ interface HomePanelProps {
 }
 
 export function HomePanel({ totalRotes, traditions, onNavigate }: HomePanelProps) {
+  const [welcomeTitle, setWelcomeTitle] = useState("Welcome, Newly Awakened")
+  const [welcomeText, setWelcomeText] = useState("")
   const [howToUse, setHowToUse] = useState("")
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    const fetchHowToUse = async () => {
+    const fetchContent = async () => {
       try {
         const response = await fetch('/api/site-settings')
         if (response.ok) {
           const settings = await response.json()
+          setWelcomeTitle(settings.welcomeTitle || "Welcome, Newly Awakened")
+          setWelcomeText(settings.welcomeText || "Within these pages lies a curated compendium of mystical Rotes drawn from the Nine Traditions and beyond.\n\nEach Rote represents a proven path through the Tapestry, a well-worn groove in reality that an Awakened will may follow.\n\nBrowse the collection, search by Sphere or Tradition, or inscribe your own discoveries for others to study.")
           setHowToUse(settings.howToUse || "Browse rotes, search by tradition or sphere, and add your own discoveries.")
         }
       } catch (error) {
-        console.error('Error fetching how to use:', error)
+        console.error('Error fetching content:', error)
       } finally {
         setIsLoading(false)
       }
     }
 
-    fetchHowToUse()
+    fetchContent()
   }, [])
 
   const stats = [
@@ -56,21 +60,14 @@ export function HomePanel({ totalRotes, traditions, onNavigate }: HomePanelProps
         </div>
 
         <h2 className="font-serif text-2xl md:text-3xl font-bold text-primary uppercase tracking-widest mb-6">
-          Welcome, Newly Awakened
+          {welcomeTitle}
         </h2>
 
-        <p className="font-mono text-foreground text-base md:text-lg leading-relaxed max-w-2xl mx-auto mb-3">
-          Within these pages lies a curated compendium of mystical Rotes drawn from
-          the Nine Traditions and beyond.
-        </p>
-        <p className="font-mono text-foreground text-base md:text-lg leading-relaxed max-w-2xl mx-auto mb-3">
-          Each Rote represents a proven path through the Tapestry, a well-worn
-          groove in reality that an Awakened will may follow.
-        </p>
-        <p className="font-mono text-muted-foreground italic text-sm max-w-lg mx-auto">
-          Browse the collection, search by Sphere or Tradition, or inscribe your own
-          discoveries for others to study.
-        </p>
+        {welcomeText.split('\n\n').filter(p => p.trim()).map((paragraph, index) => (
+          <p key={index} className="font-mono text-foreground text-base md:text-lg leading-relaxed max-w-2xl mx-auto mb-3">
+            {paragraph}
+          </p>
+        ))}
       </div>
 
       {/* How to Use section */}
