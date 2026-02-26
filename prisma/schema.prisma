@@ -146,6 +146,11 @@ model SiteSettings {
   aboutPage   String   @default("") @db.Text
   howToUse    String   @default("") @db.Text
   creditsPage String   @default("") @db.Text
+  welcomeTitle String  @default("Welcome, Newly Awakened") @db.Text
+  welcomeText  String  @default("") @db.Text
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
   
   @@index([key])
 }
