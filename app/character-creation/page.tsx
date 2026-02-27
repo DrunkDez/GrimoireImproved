@@ -3,26 +3,17 @@
 import { useState, useEffect } from "react"
 import { GrimoireHeader } from "@/components/grimoire-header"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Badge } from "@/components/ui/badge"
 import { 
   Sparkles, 
-  Users, 
-  Brain, 
   Dumbbell, 
-  Zap, 
   BookOpen,
   Star,
-  Heart,
   Target,
-  Gift,
-  ChevronRight,
   ChevronDown,
   ChevronUp,
   Info
 } from "lucide-react"
-import Link from "next/link"
 
 interface ExpandedContent {
   [key: string]: string
@@ -31,9 +22,16 @@ interface ExpandedContent {
 export default function CharacterCreationGuide() {
   const [expandedSteps, setExpandedSteps] = useState<string[]>([])
   const [expandedContent, setExpandedContent] = useState<ExpandedContent>({})
+  const [overviewContent, setOverviewContent] = useState("")
+  const [attributesContent, setAttributesContent] = useState("")
+  const [abilitiesContent, setAbilitiesContent] = useState("")
+  const [spheresContent, setSpheresContent] = useState("")
+  const [finishingContent, setFinishingContent] = useState("")
+  const [isLoadingContent, setIsLoadingContent] = useState(true)
 
   useEffect(() => {
     fetchExpandedContent()
+    fetchCharacterCreationContent()
   }, [])
 
   const fetchExpandedContent = async () => {
@@ -45,6 +43,24 @@ export default function CharacterCreationGuide() {
       }
     } catch (error) {
       console.error('Error fetching expanded content:', error)
+    }
+  }
+
+  const fetchCharacterCreationContent = async () => {
+    try {
+      const response = await fetch('/api/character-creation-content')
+      if (response.ok) {
+        const data = await response.json()
+        setOverviewContent(data.overview || "")
+        setAttributesContent(data.attributes || "")
+        setAbilitiesContent(data.abilities || "")
+        setSpheresContent(data.spheres || "")
+        setFinishingContent(data.finishing || "")
+      }
+    } catch (error) {
+      console.error('Error fetching character creation content:', error)
+    } finally {
+      setIsLoadingContent(false)
     }
   }
 
@@ -84,6 +100,27 @@ export default function CharacterCreationGuide() {
 
             {/* Overview Tab */}
             <TabsContent value="overview" className="space-y-6">
+              {/* Editable Overview Content */}
+              {overviewContent && (
+                <Card className="border-2 border-accent">
+                  <CardHeader>
+                    <CardTitle className="font-cinzel text-2xl flex items-center gap-2">
+                      <Info className="w-6 h-6" />
+                      Getting Started
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="prose prose-sm max-w-none">
+                      {overviewContent.split('\n\n').filter(p => p.trim()).map((paragraph, index) => (
+                        <p key={index} className="mb-4 text-foreground leading-relaxed">
+                          {paragraph}
+                        </p>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
               <Card className="border-2 border-primary">
                 <CardHeader>
                   <CardTitle className="font-cinzel text-2xl">Character Creation Steps</CardTitle>
@@ -91,7 +128,7 @@ export default function CharacterCreationGuide() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid gap-4 md:grid-cols-2">
-                    {/* Step 1 - Concept & Tradition */}
+                    {/* All your existing expandable steps */}
                     <ExpandableStep
                       id="concept"
                       number={1}
@@ -104,7 +141,6 @@ export default function CharacterCreationGuide() {
                       bgColor="bg-primary"
                     />
 
-                    {/* Step 2 - Attributes */}
                     <ExpandableStep
                       id="attributes"
                       number={2}
@@ -117,7 +153,6 @@ export default function CharacterCreationGuide() {
                       bgColor="bg-primary"
                     />
 
-                    {/* Step 3 - Abilities */}
                     <ExpandableStep
                       id="abilities"
                       number={3}
@@ -130,7 +165,6 @@ export default function CharacterCreationGuide() {
                       bgColor="bg-accent"
                     />
 
-                    {/* Step 4 - Spheres */}
                     <ExpandableStep
                       id="spheres"
                       number={4}
@@ -143,7 +177,6 @@ export default function CharacterCreationGuide() {
                       bgColor="bg-ring"
                     />
 
-                    {/* Step 5 - Backgrounds */}
                     <ExpandableStep
                       id="backgrounds"
                       number={5}
@@ -156,7 +189,6 @@ export default function CharacterCreationGuide() {
                       bgColor="bg-primary"
                     />
 
-                    {/* Step 6 - Freebie Points */}
                     <ExpandableStep
                       id="freebies"
                       number={6}
@@ -172,7 +204,7 @@ export default function CharacterCreationGuide() {
                 </CardContent>
               </Card>
 
-              {/* Quick Reference Card - Keep as is */}
+              {/* Quick Reference Card */}
               <Card className="border-2 border-ring">
                 <CardHeader>
                   <CardTitle className="font-cinzel text-2xl">Quick Reference</CardTitle>
@@ -209,8 +241,29 @@ export default function CharacterCreationGuide() {
               </Card>
             </TabsContent>
 
-            {/* Keep all other tabs as they were in your base file */}
+            {/* Attributes Tab */}
             <TabsContent value="attributes" className="space-y-6">
+              {/* Editable Attributes Content */}
+              {attributesContent && (
+                <Card className="border-2 border-accent">
+                  <CardHeader>
+                    <CardTitle className="font-cinzel text-2xl flex items-center gap-2">
+                      <BookOpen className="w-6 h-6" />
+                      Understanding Attributes
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="prose prose-sm max-w-none">
+                      {attributesContent.split('\n\n').filter(p => p.trim()).map((paragraph, index) => (
+                        <p key={index} className="mb-4 text-foreground leading-relaxed whitespace-pre-line">
+                          {paragraph}
+                        </p>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
               <Card className="border-2 border-primary">
                 <CardHeader>
                   <CardTitle className="font-cinzel text-2xl flex items-center gap-2">
@@ -221,22 +274,90 @@ export default function CharacterCreationGuide() {
                     Your character's innate capabilities - each starts at 1 dot
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-6">
-                  {/* Rest of your existing attributes content */}
-                  <div className="bg-primary/10 border border-primary/30 rounded-md p-4">
+                <CardContent>
+                  <div className="bg-primary/10 border border-primary/30 rounded-md p-4 mb-4">
                     <p className="text-sm">
-                      <strong>How it works:</strong> Each of the 9 attributes automatically starts at 1 dot (representing basic human capability). 
-                      You then prioritize the three categories - Physical, Social, and Mental - choosing which gets 7 additional dots (Primary), 
-                      5 additional dots (Secondary), and 3 additional dots (Tertiary).
+                      <strong>How it works:</strong> Each of the 9 attributes starts at 1 dot. 
+                      Prioritize Physical, Social, and Mental - choosing which gets 7 dots (Primary), 
+                      5 dots (Secondary), and 3 dots (Tertiary).
                     </p>
                   </div>
-                  {/* ... rest of your attributes content ... */}
                 </CardContent>
               </Card>
             </TabsContent>
 
-            {/* Keep abilities, spheres, and finishing tabs exactly as they are in your base file */}
-            
+            {/* Abilities Tab */}
+            <TabsContent value="abilities" className="space-y-6">
+              {/* Editable Abilities Content */}
+              {abilitiesContent && (
+                <Card className="border-2 border-accent">
+                  <CardHeader>
+                    <CardTitle className="font-cinzel text-2xl flex items-center gap-2">
+                      <BookOpen className="w-6 h-6" />
+                      Understanding Abilities
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="prose prose-sm max-w-none">
+                      {abilitiesContent.split('\n\n').filter(p => p.trim()).map((paragraph, index) => (
+                        <p key={index} className="mb-4 text-foreground leading-relaxed whitespace-pre-line">
+                          {paragraph}
+                        </p>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </TabsContent>
+
+            {/* Spheres Tab */}
+            <TabsContent value="spheres" className="space-y-6">
+              {/* Editable Spheres Content */}
+              {spheresContent && (
+                <Card className="border-2 border-accent">
+                  <CardHeader>
+                    <CardTitle className="font-cinzel text-2xl flex items-center gap-2">
+                      <Sparkles className="w-6 h-6" />
+                      Understanding Spheres
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="prose prose-sm max-w-none">
+                      {spheresContent.split('\n\n').filter(p => p.trim()).map((paragraph, index) => (
+                        <p key={index} className="mb-4 text-foreground leading-relaxed whitespace-pre-line">
+                          {paragraph}
+                        </p>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </TabsContent>
+
+            {/* Finishing Tab */}
+            <TabsContent value="finishing" className="space-y-6">
+              {/* Editable Finishing Content */}
+              {finishingContent && (
+                <Card className="border-2 border-accent">
+                  <CardHeader>
+                    <CardTitle className="font-cinzel text-2xl flex items-center gap-2">
+                      <Target className="w-6 h-6" />
+                      Finishing Touches
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="prose prose-sm max-w-none">
+                      {finishingContent.split('\n\n').filter(p => p.trim()).map((paragraph, index) => (
+                        <p key={index} className="mb-4 text-foreground leading-relaxed whitespace-pre-line">
+                          {paragraph}
+                        </p>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </TabsContent>
+
           </Tabs>
         </div>
       </div>
@@ -306,6 +427,3 @@ function ExpandableStep({
     </div>
   )
 }
-
-
-

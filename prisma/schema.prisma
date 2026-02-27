@@ -154,3 +154,14 @@ model SiteSettings {
   
   @@index([key])
 }
+model CharacterCreationContent {
+  id         String   @id @default(cuid())
+  key        String   @unique @default("main")
+  overview   String   @default("") @db.Text
+  attributes String   @default("") @db.Text
+  abilities  String   @default("") @db.Text
+  spheres    String   @default("") @db.Text
+  finishing  String   @default("") @db.Text
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
