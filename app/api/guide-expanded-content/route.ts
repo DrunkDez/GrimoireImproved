@@ -1,60 +1,63 @@
-import { NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
+import { NextResponse } from "next/server"
+import { prisma } from "@/lib/db"
 
-const prisma = new PrismaClient()
-
-// GET - Fetch all expanded content as key-value pairs
+// GET - Fetch guide expanded content
 export async function GET() {
   try {
-    const settings = await prisma.siteSettings.findMany({
-      where: {
-        key: {
-          startsWith: 'guide_expanded_'
-        }
-      }
+    const content = await prisma.guideExpandedContent.findFirst({
+      where: { key: 'main' }
     })
+    
+    if (!content) {
+      return NextResponse.json({
+        concept: "",
+        attributes: "",
+        abilities: "",
+        spheres: "",
+        backgrounds: "",
+        freebies: "",
+      })
+    }
 
-    // Convert to simple object
-    const content: { [key: string]: string } = {}
-    settings.forEach(setting => {
-      const key = setting.key.replace('guide_expanded_', '')
-      content[key] = setting.value
+    return NextResponse.json({
+      concept: content.concept || "",
+      attributes: content.attributes || "",
+      abilities: content.abilities || "",
+      spheres: content.spheres || "",
+      backgrounds: content.backgrounds || "",
+      freebies: content.freebies || "",
+    })
+  } catch (error) {
+    console.error("Error fetching guide expanded content:", error)
+    return NextResponse.json(
+      { error: "Failed to fetch content" },
+      { status: 500 }
+    )
+  }
+}
+
+// PUT - Update guide expanded content
+export async function PUT(request: Request) {
+  try {
+    const data = await request.json()
+    
+    const content = await prisma.guideExpandedContent.upsert({
+      where: { key: 'main' },
+      update: {
+        ...data,
+        updatedAt: new Date(),
+      },
+      create: {
+        key: 'main',
+        ...data,
+      },
     })
 
     return NextResponse.json(content)
   } catch (error) {
-    console.error('Error fetching expanded content:', error)
-    return NextResponse.json({}, { status: 200 }) // Return empty object on error
-  }
-}
-
-// PUT - Update expanded content
-export async function PUT(request: Request) {
-  try {
-    const body = await request.json()
-    const { step, content } = body
-
-    if (!step || content === undefined) {
-      return NextResponse.json(
-        { error: 'Step and content required' },
-        { status: 400 }
-      )
-    }
-
-    const key = `guide_expanded_${step}`
-
-    // Upsert the setting
-    const setting = await prisma.siteSettings.upsert({
-      where: { key },
-      update: { value: content },
-      create: { key, value: content }
-    })
-
-    return NextResponse.json(setting)
-  } catch (error) {
-    console.error('Error updating expanded content:', error)
+    console.error("Error updating guide expanded content:", error)
     return NextResponse.json(
-      { error: 'Failed to update content' },
+      { error: "Failed to update content" },
       { status: 500 }
     )
   }

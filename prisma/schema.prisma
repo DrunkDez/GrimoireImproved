@@ -165,3 +165,15 @@ model CharacterCreationContent {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 }
+model GuideExpandedContent {
+  id          String   @id @default(cuid())
+  key         String   @unique @default("main")
+  concept     String   @default("") @db.Text
+  attributes  String   @default("") @db.Text
+  abilities   String   @default("") @db.Text
+  spheres     String   @default("") @db.Text
+  backgrounds String   @default("") @db.Text
+  freebies    String   @default("") @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
