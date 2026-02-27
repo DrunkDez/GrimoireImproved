@@ -6,6 +6,7 @@ import { GrimoireFooter } from "@/components/grimoire-footer"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { MarkdownRenderer } from "@/components/ui/markdown-renderer"
 
 export default function AboutPage() {
   const router = useRouter()
@@ -72,13 +73,7 @@ export default function AboutPage() {
                   </div>
                 </div>
               ) : (
-                <div className="prose prose-lg max-w-none">
-                  {content.split('\n\n').map((paragraph, index) => (
-                    <p key={index} className="font-mono text-foreground text-base leading-relaxed mb-4">
-                      {paragraph}
-                    </p>
-                  ))}
-                </div>
+                <MarkdownRenderer content={content} />
               )}
             </div>
           </div>
