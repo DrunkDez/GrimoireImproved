@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import type { Rote } from "@/lib/mage-data"
+import { MarkdownRenderer } from "@/components/ui/markdown-renderer"
 
 interface HomePanelProps {
   totalRotes: number
@@ -63,11 +64,9 @@ export function HomePanel({ totalRotes, traditions, onNavigate }: HomePanelProps
           {welcomeTitle}
         </h2>
 
-        {welcomeText.split('\n\n').filter(p => p.trim()).map((paragraph, index) => (
-          <p key={index} className="font-mono text-foreground text-base md:text-lg leading-relaxed max-w-2xl mx-auto mb-3">
-            {paragraph}
-          </p>
-        ))}
+        <div className="max-w-2xl mx-auto">
+          <MarkdownRenderer content={welcomeText} className="text-base md:text-lg" />
+        </div>
       </div>
 
       {/* How to Use section */}
@@ -85,13 +84,7 @@ export function HomePanel({ totalRotes, traditions, onNavigate }: HomePanelProps
             <p className="text-sm text-muted-foreground">Loading...</p>
           </div>
         ) : (
-          <div className="space-y-3">
-            {howToUse.split('\n').filter(line => line.trim()).map((line, index) => (
-              <p key={index} className="font-mono text-foreground text-base leading-relaxed">
-                {line}
-              </p>
-            ))}
-          </div>
+          <MarkdownRenderer content={howToUse} />
         )}
       </div>
 
@@ -165,5 +158,7 @@ export function HomePanel({ totalRotes, traditions, onNavigate }: HomePanelProps
         </Link>
       </div>
     </div>
+  )
+}
   )
 }
