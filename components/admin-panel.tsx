@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { MageGroupsManager } from "./admin/mage-groups-manager"
 import { ContentManager } from "./admin/content-manager"
 import { CharacterCreationManager } from "./admin/character-creation-manager"
+import { ExpandableStepsManager } from "./admin/expandable-steps-manager"
 import { ShieldAlert, Lock, X, BookOpen, Star, Library, FileText, Users } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { AdminRotesPanel } from "@/components/admin/admin-rotes-panel"
@@ -138,7 +139,7 @@ export function AdminPanel({ rotes, onRotesChange, onClose }: AdminPanelProps) {
       </div>
 
       <Tabs defaultValue="content" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-6 max-w-3xl">
+        <TabsList className="grid w-full grid-cols-7 max-w-3xl">
           <TabsTrigger value="content" className="gap-2">
             <FileText className="w-4 h-4" />
             Content
@@ -154,6 +155,10 @@ export function AdminPanel({ rotes, onRotesChange, onClose }: AdminPanelProps) {
           <TabsTrigger value="resources" className="gap-2">
             <Library className="w-4 h-4" />
             Resources
+          </TabsTrigger>
+          <TabsTrigger value="overview" className="gap-2">
+            <BookOpen className="w-4 h-4" />
+            Overview Steps
           </TabsTrigger>
           <TabsTrigger value="guide" className="gap-2">
             <BookOpen className="w-4 h-4" />
@@ -179,6 +184,10 @@ export function AdminPanel({ rotes, onRotesChange, onClose }: AdminPanelProps) {
 
         <TabsContent value="resources">
           <AdminResourcesPanel />
+        </TabsContent>
+
+        <TabsContent value="overview">
+          <ExpandableStepsManager />
         </TabsContent>
 
         <TabsContent value="guide">
