@@ -139,21 +139,19 @@ model Resource {
 }
 
 model SiteSettings {
-  id                  String   @id @default(cuid())
-  key                 String   @unique // Identifier for the setting
-  value               String   @db.Text
-  updatedAt           DateTime @updatedAt
-  aboutPage   String   @default("") @db.Text
-  howToUse    String   @default("") @db.Text
-  creditsPage String   @default("") @db.Text
-  welcomeTitle String  @default("Welcome, Newly Awakened") @db.Text
-  welcomeText  String  @default("") @db.Text
-  
-  createdAt   DateTime @default(now())
-
-  
-  @@index([key])
+  id           String   @id @default(cuid())
+  key          String   @unique
+  value        String   @db.Text
+  footerText   String   @default("") @db.Text
+  welcomeTitle String   @default("Welcome, Newly Awakened") @db.Text
+  welcomeText  String   @default("") @db.Text
+  aboutPage    String   @default("") @db.Text
+  howToUse     String   @default("") @db.Text
+  creditsPage  String   @default("") @db.Text
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
+
 model CharacterCreationContent {
   id         String   @id @default(cuid())
   key        String   @unique @default("main")
