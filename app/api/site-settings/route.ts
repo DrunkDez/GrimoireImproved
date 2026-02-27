@@ -4,7 +4,10 @@ import { prisma } from "@/lib/db"
 // GET /api/site-settings - Get all site settings
 export async function GET() {
   try {
-    const settings = await prisma.siteSettings.findFirst()
+    // Find the record with key 'main' specifically
+    const settings = await prisma.siteSettings.findUnique({
+      where: { key: 'main' }
+    })
     
     if (!settings) {
       return NextResponse.json({
@@ -39,6 +42,8 @@ export async function PUT(request: Request) {
   try {
     const data = await request.json()
     
+    console.log('Updating site settings with data:', data) // Debug log
+    
     const settings = await prisma.siteSettings.upsert({
       where: { key: 'main' },
       update: {
@@ -51,6 +56,8 @@ export async function PUT(request: Request) {
         ...data,
       },
     })
+
+    console.log('Settings updated successfully:', settings) // Debug log
 
     return NextResponse.json(settings)
   } catch (error) {
