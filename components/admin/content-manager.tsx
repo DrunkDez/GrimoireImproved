@@ -118,24 +118,18 @@ export function ContentManager() {
               </p>
             </div>
             
-            <div className="space-y-2">
-              <Label htmlFor="welcome-text">Welcome Text</Label>
-              <Textarea
-                id="welcome-text"
-                value={welcomeText}
-                onChange={(e) => setWelcomeText(e.target.value)}
-                rows={8}
-                placeholder="Within these pages lies a curated compendium of mystical Rotes drawn from the Nine Traditions and beyond.
+            <RichTextEditor
+              id="welcome-text"
+              label="Welcome Text"
+              value={welcomeText}
+              onChange={setWelcomeText}
+              rows={8}
+              placeholder="Within these pages lies a curated compendium of mystical Rotes drawn from the Nine Traditions and beyond.
 
 Each Rote represents a proven path through the Tapestry, a well-worn groove in reality that an Awakened will may follow.
 
 Browse the collection, search by Sphere or Tradition, or inscribe your own discoveries for others to study."
-                className="font-mono text-sm"
-              />
-              <p className="text-xs text-muted-foreground">
-                Use double line breaks to create paragraphs. This appears below the title.
-              </p>
-            </div>
+            />
             
             <div className="flex gap-3">
               <Button
@@ -171,22 +165,16 @@ Browse the collection, search by Sphere or Tradition, or inscribe your own disco
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="how-to-use">Content</Label>
-              <Textarea
-                id="how-to-use"
-                value={howToUse}
-                onChange={(e) => setHowToUse(e.target.value)}
-                rows={8}
-                placeholder="Browse the Wheel's Archives to explore rotes organized by Tradition and Sphere
+            <RichTextEditor
+              id="how-to-use"
+              label="Content"
+              value={howToUse}
+              onChange={setHowToUse}
+              rows={8}
+              placeholder="Browse the Wheel's Archives to explore rotes organized by Tradition and Sphere
 Use the Search function to find specific magical effects or techniques
 Create your character using our step-by-step Character Creation guide"
-                className="font-mono text-sm"
-              />
-              <p className="text-xs text-muted-foreground">
-                Each line will be displayed as a separate paragraph. Keep it concise!
-              </p>
-            </div>
+            />
             <Button
               onClick={() => handleSave('howToUse', howToUse)}
               disabled={isSaving}
@@ -253,22 +241,16 @@ An unofficial fan site for Mage: The Ascension"
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="about-page">Content</Label>
-              <Textarea
-                id="about-page"
-                value={aboutPage}
-                onChange={(e) => setAboutPage(e.target.value)}
-                rows={12}
-                placeholder="The Paradox Wheel is a comprehensive digital grimoire for Mage: The Ascension...
+            <RichTextEditor
+              id="about-page"
+              label="Content"
+              value={aboutPage}
+              onChange={setAboutPage}
+              rows={12}
+              placeholder="The Paradox Wheel is a comprehensive digital grimoire for Mage: The Ascension...
 
 Created by passionate fans of the World of Darkness, this tool helps Storytellers and players..."
-                className="font-mono text-sm"
-              />
-              <p className="text-xs text-muted-foreground">
-                Tip: Use double line breaks (press Enter twice) to create new paragraphs.
-              </p>
-            </div>
+            />
             <Button
               onClick={() => handleSave('aboutPage', aboutPage)}
               disabled={isSaving}
@@ -296,14 +278,13 @@ Created by passionate fans of the World of Darkness, this tool helps Storyteller
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="credits-page">Content</Label>
-              <Textarea
-                id="credits-page"
-                value={creditsPage}
-                onChange={(e) => setCreditsPage(e.target.value)}
-                rows={12}
-                placeholder="Created by [Your Name]
+            <RichTextEditor
+              id="credits-page"
+              label="Content"
+              value={creditsPage}
+              onChange={setCreditsPage}
+              rows={12}
+              placeholder="Created by [Your Name]
 
 Special thanks to the Mage: The Ascension community for their contributions and feedback.
 
@@ -312,12 +293,7 @@ Mage: The Ascension is a trademark of Paradox Interactive AB. This is an unoffic
 Resources used:
 - Mage 20th Anniversary Edition
 - Various sourcebooks and supplements"
-                className="font-mono text-sm"
-              />
-              <p className="text-xs text-muted-foreground">
-                Include acknowledgments, disclaimers, and attribution for resources used.
-              </p>
-            </div>
+            />
             <Button
               onClick={() => handleSave('creditsPage', creditsPage)}
               disabled={isSaving}
