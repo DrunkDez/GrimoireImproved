@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Save, Eye } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { RichTextEditor } from "@/components/ui/rich-text-editor"
 
 export function ContentManager() {
   const { toast } = useToast()
