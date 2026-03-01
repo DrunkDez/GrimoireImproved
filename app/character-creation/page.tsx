@@ -227,13 +227,13 @@ export default function CharacterCreationGuide() {
                     <div className="space-y-2">
                       <h3 className="font-semibold text-accent">Freebie Point Costs</h3>
                       <ul className="space-y-1 text-sm">
-                        <li>• <strong>Attribute:</strong> 5 points per dot</li>
-                        <li>• <strong>Ability:</strong> 2 points per dot</li>
-                        <li>• <strong>Sphere:</strong> 7 points per dot</li>
-                        <li>• <strong>Background:</strong> 1 point per dot</li>
-                        <li>• <strong>Arete:</strong> 4 points per dot</li>
-                        <li>• <strong>Willpower:</strong> 1 point per dot</li>
-                        <li>• <strong>Quintessence:</strong> 4 points for 4 points</li>
+                        <li>• <strong>Attribute:</strong> 5 Freebie points per dot</li>
+                        <li>• <strong>Ability:</strong> 2 Freebie points per dot</li>
+                        <li>• <strong>Sphere:</strong> 7 Freebie points per dot</li>
+                        <li>• <strong>Background:</strong> 1 Freebie point per dot</li>
+                        <li>• <strong>Arete:</strong> 4 Freebie points per dot</li>
+                        <li>• <strong>Willpower:</strong> 1 Freebie point per dot</li>
+                        <li>• <strong>Quintessence:</strong> 1 Freebie point for 4 points</li>
                       </ul>
                     </div>
                   </div>
@@ -426,4 +426,5 @@ function ExpandableStep({
       )}
     </div>
   )
+
 }
