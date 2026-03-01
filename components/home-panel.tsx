@@ -39,7 +39,7 @@ export function HomePanel({ totalRotes, traditions, onNavigate }: HomePanelProps
 
   const stats = [
     { value: totalRotes, label: "Rotes Inscribed" },
-    { value: traditions, label: "Traditions" },
+    { value: traditions, label: "Traditions, Groups and Practices" },
     { value: 12, label: "Spheres" },
   ]
 
