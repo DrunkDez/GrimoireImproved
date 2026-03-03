@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import type { Rote } from "@/lib/mage-data"
 import { MarkdownRenderer } from "@/components/ui/markdown-renderer"
+import { RandomSphereSymbols } from "@/components/random-sphere-symbols"
 
 interface HomePanelProps {
   totalRotes: number
@@ -39,7 +40,7 @@ export function HomePanel({ totalRotes, traditions, onNavigate }: HomePanelProps
 
   const stats = [
     { value: totalRotes, label: "Rotes Inscribed" },
-    { value: traditions, label: "Traditions, Groups and Practices" },
+    { value: traditions, label: "Traditions" },
     { value: 12, label: "Spheres" },
   ]
 
@@ -52,13 +53,11 @@ export function HomePanel({ totalRotes, traditions, onNavigate }: HomePanelProps
       >
         {/* Background star */}
         <div className="absolute top-8 left-1/2 -translate-x-1/2 text-6xl text-primary opacity-15 font-serif" aria-hidden="true">
-          {'\u2726'}
+          ✦
         </div>
 
-        {/* Mystical icon */}
-        <div className="text-6xl text-primary opacity-70 mb-6 animate-mystical-pulse drop-shadow-[0_0_15px_rgba(107,45,107,0.5)]" aria-hidden="true">
-          {'\u2748'}
-        </div>
+        {/* Random Sphere Symbols - 2 random spheres with random gold/white versions */}
+        <RandomSphereSymbols />
 
         <h2 className="font-serif text-2xl md:text-3xl font-bold text-primary uppercase tracking-widest mb-6">
           {welcomeTitle}
@@ -73,9 +72,9 @@ export function HomePanel({ totalRotes, traditions, onNavigate }: HomePanelProps
       <div className="bg-card border-[3px] border-primary border-l-[6px] border-l-accent rounded-md p-6 md:p-8
         shadow-[inset_0_0_40px_rgba(139,71,38,0.05),5px_5px_15px_rgba(0,0,0,0.2)]">
         <h3 className="font-serif text-xl font-bold text-primary uppercase tracking-[0.15em] mb-4 flex items-center gap-3">
-          <span className="text-ring" aria-hidden="true">{'\u2726'}</span>
+          <span className="text-ring" aria-hidden="true">✦</span>
           How to Use The Wheel
-          <span className="ml-auto text-accent" aria-hidden="true">{'\u25C8'}</span>
+          <span className="ml-auto text-accent" aria-hidden="true">◈</span>
         </h3>
         
         {isLoading ? (
@@ -100,7 +99,7 @@ export function HomePanel({ totalRotes, traditions, onNavigate }: HomePanelProps
               hover:shadow-[inset_0_0_20px_rgba(201,169,97,0.1),3px_3px_15px_rgba(0,0,0,0.2)]"
           >
             <div className="absolute top-2 left-1/2 -translate-x-1/2 text-primary opacity-30 text-lg" aria-hidden="true">
-              {'\u25C8'}
+              ◈
             </div>
             <div className="text-5xl font-serif text-primary leading-none mb-2 drop-shadow-[2px_2px_4px_rgba(0,0,0,0.2)]">
               {stat.value}
@@ -125,9 +124,9 @@ export function HomePanel({ totalRotes, traditions, onNavigate }: HomePanelProps
             hover:shadow-[0_6px_12px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.2),0_0_20px_rgba(201,169,97,0.3)]
             active:translate-y-0 flex items-center justify-center gap-3"
         >
-          <span aria-hidden="true">{'\u27D0'}</span>
+          <span aria-hidden="true">⟐</span>
           Browse the Library
-          <span aria-hidden="true">{'\u27D0'}</span>
+          <span aria-hidden="true">⟐</span>
         </button>
         <button
           type="button"
@@ -139,9 +138,9 @@ export function HomePanel({ totalRotes, traditions, onNavigate }: HomePanelProps
             hover:bg-background hover:border-ring hover:-translate-y-0.5
             active:translate-y-0 flex items-center justify-center gap-3"
         >
-          <span aria-hidden="true">{'\u27D0'}</span>
+          <span aria-hidden="true">⟐</span>
           Inscribe a Rote
-          <span aria-hidden="true">{'\u27D0'}</span>
+          <span aria-hidden="true">⟐</span>
         </button>
         <Link
           href="/character-creation"
@@ -152,9 +151,9 @@ export function HomePanel({ totalRotes, traditions, onNavigate }: HomePanelProps
             hover:bg-background hover:border-ring hover:-translate-y-0.5
             active:translate-y-0 flex items-center justify-center gap-3"
         >
-          <span aria-hidden="true">{'\u27D0'}</span>
+          <span aria-hidden="true">⟐</span>
           Character Creation
-          <span aria-hidden="true">{'\u27D0'}</span>
+          <span aria-hidden="true">⟐</span>
         </Link>
       </div>
     </div>
