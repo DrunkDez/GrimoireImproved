@@ -16,6 +16,38 @@ export function HomePanel({ totalRotes, traditions, onNavigate }: HomePanelProps
   const [welcomeText, setWelcomeText] = useState("")
   const [howToUse, setHowToUse] = useState("")
   const [isLoading, setIsLoading] = useState(true)
+  const [leftSphere, setLeftSphere] = useState("")
+  const [rightSphere, setRightSphere] = useState("")
+
+  useEffect(() => {
+    // Randomly select sphere images
+    const goldSpheres = [
+      '/spheres/correspondence_gold.png',
+      '/spheres/entropy_gold.png',
+      '/spheres/forces_gold.png',
+      '/spheres/life_gold.png',
+      '/spheres/matter_gold.png',
+      '/spheres/mind_gold.png',
+      '/spheres/prime_gold.png',
+      '/spheres/spirit_gold.png',
+      '/spheres/time_gold.png'
+    ]
+    
+    const regularSpheres = [
+      '/spheres/correspondence_15.png',
+      '/spheres/entropy_15.png',
+      '/spheres/forces_15.png',
+      '/spheres/life_15.png',
+      '/spheres/matter_15.png',
+      '/spheres/mind_15.png',
+      '/spheres/prime_15.png',
+      '/spheres/spirit_15.png',
+      '/spheres/time_15.png'
+    ]
+    
+    setLeftSphere(goldSpheres[Math.floor(Math.random() * goldSpheres.length)])
+    setRightSphere(regularSpheres[Math.floor(Math.random() * regularSpheres.length)])
+  }, [])
 
   useEffect(() => {
     const fetchContent = async () => {
@@ -39,7 +71,7 @@ export function HomePanel({ totalRotes, traditions, onNavigate }: HomePanelProps
 
   const stats = [
     { value: totalRotes, label: "Rotes Inscribed" },
-    { value: traditions, label: "Traditions, Groups and Practices" },
+    { value: traditions, label: "Traditions" },
     { value: 12, label: "Spheres" },
   ]
 
@@ -50,14 +82,36 @@ export function HomePanel({ totalRotes, traditions, onNavigate }: HomePanelProps
         className="relative bg-card border-4 border-double border-primary rounded-lg px-6 py-16 text-center
           shadow-[inset_0_0_80px_rgba(139,71,38,0.1),0_10px_30px_rgba(0,0,0,0.2)]"
       >
+        {/* Left spinning sphere (gold) */}
+        {leftSphere && (
+          <div className="absolute left-8 top-1/2 -translate-y-1/2 hidden md:block">
+            <img 
+              src={leftSphere} 
+              alt="Sphere symbol" 
+              className="w-20 h-20 opacity-30 animate-slow-rotate"
+            />
+          </div>
+        )}
+
+        {/* Right spinning sphere (regular) */}
+        {rightSphere && (
+          <div className="absolute right-8 top-1/2 -translate-y-1/2 hidden md:block">
+            <img 
+              src={rightSphere} 
+              alt="Sphere symbol" 
+              className="w-20 h-20 opacity-30 animate-slow-rotate"
+            />
+          </div>
+        )}
+
         {/* Background star */}
         <div className="absolute top-8 left-1/2 -translate-x-1/2 text-6xl text-primary opacity-15 font-serif" aria-hidden="true">
-          {'\u2726'}
+          ✦
         </div>
 
         {/* Mystical icon */}
         <div className="text-6xl text-primary opacity-70 mb-6 animate-mystical-pulse drop-shadow-[0_0_15px_rgba(107,45,107,0.5)]" aria-hidden="true">
-          {'\u2748'}
+          ✨
         </div>
 
         <h2 className="font-serif text-2xl md:text-3xl font-bold text-primary uppercase tracking-widest mb-6">
@@ -73,9 +127,9 @@ export function HomePanel({ totalRotes, traditions, onNavigate }: HomePanelProps
       <div className="bg-card border-[3px] border-primary border-l-[6px] border-l-accent rounded-md p-6 md:p-8
         shadow-[inset_0_0_40px_rgba(139,71,38,0.05),5px_5px_15px_rgba(0,0,0,0.2)]">
         <h3 className="font-serif text-xl font-bold text-primary uppercase tracking-[0.15em] mb-4 flex items-center gap-3">
-          <span className="text-ring" aria-hidden="true">{'\u2726'}</span>
+          <span className="text-ring" aria-hidden="true">✦</span>
           How to Use The Wheel
-          <span className="ml-auto text-accent" aria-hidden="true">{'\u25C8'}</span>
+          <span className="ml-auto text-accent" aria-hidden="true">◈</span>
         </h3>
         
         {isLoading ? (
@@ -100,7 +154,7 @@ export function HomePanel({ totalRotes, traditions, onNavigate }: HomePanelProps
               hover:shadow-[inset_0_0_20px_rgba(201,169,97,0.1),3px_3px_15px_rgba(0,0,0,0.2)]"
           >
             <div className="absolute top-2 left-1/2 -translate-x-1/2 text-primary opacity-30 text-lg" aria-hidden="true">
-              {'\u25C8'}
+              ◈
             </div>
             <div className="text-5xl font-serif text-primary leading-none mb-2 drop-shadow-[2px_2px_4px_rgba(0,0,0,0.2)]">
               {stat.value}
@@ -125,9 +179,9 @@ export function HomePanel({ totalRotes, traditions, onNavigate }: HomePanelProps
             hover:shadow-[0_6px_12px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.2),0_0_20px_rgba(201,169,97,0.3)]
             active:translate-y-0 flex items-center justify-center gap-3"
         >
-          <span aria-hidden="true">{'\u27D0'}</span>
+          <span aria-hidden="true">⟐</span>
           Browse the Library
-          <span aria-hidden="true">{'\u27D0'}</span>
+          <span aria-hidden="true">⟐</span>
         </button>
         <button
           type="button"
@@ -139,9 +193,9 @@ export function HomePanel({ totalRotes, traditions, onNavigate }: HomePanelProps
             hover:bg-background hover:border-ring hover:-translate-y-0.5
             active:translate-y-0 flex items-center justify-center gap-3"
         >
-          <span aria-hidden="true">{'\u27D0'}</span>
+          <span aria-hidden="true">⟐</span>
           Inscribe a Rote
-          <span aria-hidden="true">{'\u27D0'}</span>
+          <span aria-hidden="true">⟐</span>
         </button>
         <Link
           href="/character-creation"
@@ -152,9 +206,9 @@ export function HomePanel({ totalRotes, traditions, onNavigate }: HomePanelProps
             hover:bg-background hover:border-ring hover:-translate-y-0.5
             active:translate-y-0 flex items-center justify-center gap-3"
         >
-          <span aria-hidden="true">{'\u27D0'}</span>
+          <span aria-hidden="true">⟐</span>
           Character Creation
-          <span aria-hidden="true">{'\u27D0'}</span>
+          <span aria-hidden="true">⟐</span>
         </Link>
       </div>
     </div>
