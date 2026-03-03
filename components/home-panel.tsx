@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import type { Rote } from "@/lib/mage-data"
 import { MarkdownRenderer } from "@/components/ui/markdown-renderer"
+import { RandomSphereSymbols } from "@/components/random-sphere-symbols"
 
 interface HomePanelProps {
   totalRotes: number
@@ -16,38 +17,6 @@ export function HomePanel({ totalRotes, traditions, onNavigate }: HomePanelProps
   const [welcomeText, setWelcomeText] = useState("")
   const [howToUse, setHowToUse] = useState("")
   const [isLoading, setIsLoading] = useState(true)
-  const [leftSphere, setLeftSphere] = useState("")
-  const [rightSphere, setRightSphere] = useState("")
-
-  useEffect(() => {
-    // Randomly select sphere images
-    const goldSpheres = [
-      '/spheres/correspondence_gold.png',
-      '/spheres/entropy_gold.png',
-      '/spheres/forces_gold.png',
-      '/spheres/life_gold.png',
-      '/spheres/matter_gold.png',
-      '/spheres/mind_gold.png',
-      '/spheres/prime_gold.png',
-      '/spheres/spirit_gold.png',
-      '/spheres/time_gold.png'
-    ]
-    
-    const regularSpheres = [
-      '/spheres/correspondence_15.png',
-      '/spheres/entropy_15.png',
-      '/spheres/forces_15.png',
-      '/spheres/life_15.png',
-      '/spheres/matter_15.png',
-      '/spheres/mind_15.png',
-      '/spheres/prime_15.png',
-      '/spheres/spirit_15.png',
-      '/spheres/time_15.png'
-    ]
-    
-    setLeftSphere(goldSpheres[Math.floor(Math.random() * goldSpheres.length)])
-    setRightSphere(regularSpheres[Math.floor(Math.random() * regularSpheres.length)])
-  }, [])
 
   useEffect(() => {
     const fetchContent = async () => {
@@ -82,37 +51,13 @@ export function HomePanel({ totalRotes, traditions, onNavigate }: HomePanelProps
         className="relative bg-card border-4 border-double border-primary rounded-lg px-6 py-16 text-center
           shadow-[inset_0_0_80px_rgba(139,71,38,0.1),0_10px_30px_rgba(0,0,0,0.2)]"
       >
-        {/* Left spinning sphere (gold) */}
-        {leftSphere && (
-          <div className="absolute left-8 top-1/2 -translate-y-1/2 hidden md:block">
-            <img 
-              src={leftSphere} 
-              alt="Sphere symbol" 
-              className="w-20 h-20 opacity-30 animate-slow-rotate"
-            />
-          </div>
-        )}
-
-        {/* Right spinning sphere (regular) */}
-        {rightSphere && (
-          <div className="absolute right-8 top-1/2 -translate-y-1/2 hidden md:block">
-            <img 
-              src={rightSphere} 
-              alt="Sphere symbol" 
-              className="w-20 h-20 opacity-30 animate-slow-rotate"
-            />
-          </div>
-        )}
-
         {/* Background star */}
         <div className="absolute top-8 left-1/2 -translate-x-1/2 text-6xl text-primary opacity-15 font-serif" aria-hidden="true">
           ✦
         </div>
 
-        {/* Mystical icon */}
-        <div className="text-6xl text-primary opacity-70 mb-6 animate-mystical-pulse drop-shadow-[0_0_15px_rgba(107,45,107,0.5)]" aria-hidden="true">
-          ✨
-        </div>
+        {/* Random Sphere Symbols - 2 random spheres with random gold/white versions */}
+        <RandomSphereSymbols />
 
         <h2 className="font-serif text-2xl md:text-3xl font-bold text-primary uppercase tracking-widest mb-6">
           {welcomeTitle}
