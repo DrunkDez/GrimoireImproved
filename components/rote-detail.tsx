@@ -15,9 +15,9 @@ function formatSpheres(spheres: any): { [key: string]: number } {
     return spheres[0];
   }
   
-  // If it's an array with multiple combinations, return first one
+  // If it's an array with multiple combinations, return first one for primary display
   if (Array.isArray(spheres) && spheres.length > 1) {
-    return spheres[0]; // For detail view, show first combination
+    return spheres[0];
   }
   
   // If it's already an object, return as-is
@@ -28,37 +28,22 @@ function formatSpheres(spheres: any): { [key: string]: number } {
   return {};
 }
 
-function getSphereDisplayText(spheres: any): string {
-  if (!spheres) return 'None';
-  
-  // Handle array (multiple combinations)
+function getAllCombinations(spheres: any): Array<{ [key: string]: number }> {
   if (Array.isArray(spheres)) {
-    if (spheres.length === 1) {
-      return Object.entries(spheres[0])
-        .map(([s, l]) => `${s} ${l}`)
-        .join(', ');
-    }
-    return spheres.map((combo, i) => {
-      const str = Object.entries(combo)
-        .map(([s, l]) => `${s} ${l}`)
-        .join(', ');
-      return `Option ${i + 1}: ${str}`;
-    }).join(' OR ');
+    return spheres;
   }
   
-  // Handle object
-  if (typeof spheres === 'object') {
-    return Object.entries(spheres)
-      .map(([s, l]) => `${s} ${l}`)
-      .join(', ');
+  if (typeof spheres === 'object' && !Array.isArray(spheres)) {
+    return [spheres];
   }
   
-  return String(spheres);
+  return [];
 }
 
 export function RoteDetail({ rote, onBack }: RoteDetailProps) {
   const sphereData = formatSpheres(rote.spheres);
-  const hasMultipleCombinations = Array.isArray(rote.spheres) && rote.spheres.length > 1;
+  const allCombinations = getAllCombinations(rote.spheres);
+  const hasMultipleCombinations = allCombinations.length > 1;
 
   return (
     <div className="animate-fade-in-up flex flex-col gap-6 p-6 md:p-10">
@@ -104,47 +89,76 @@ export function RoteDetail({ rote, onBack }: RoteDetailProps) {
           </p>
         </div>
 
-        {/* Multiple combinations warning */}
-        {hasMultipleCombinations && (
-          <div className="bg-accent/10 border-2 border-accent rounded-md p-4 mb-6">
-            <p className="text-sm text-accent font-semibold">
-              ℹ️ This rote has multiple sphere combinations. Showing first option below.
-            </p>
-            <p className="text-xs text-muted-foreground mt-2">
-              All options: {getSphereDisplayText(rote.spheres)}
-            </p>
-          </div>
-        )}
-
-        {/* Spheres */}
+        {/* Spheres - Show all combinations */}
         <div className="bg-accent/10 border-[3px] border-double border-primary rounded-md p-6 md:p-8 mb-8
           shadow-[inset_0_0_30px_rgba(139,71,38,0.05)]">
           <h3 className="font-serif text-xl font-bold text-primary uppercase tracking-[0.15em] mb-6">
-            Required Spheres
+            {hasMultipleCombinations ? "Sphere Combinations" : "Required Spheres"}
           </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            {Object.entries(sphereData).map(([sphere, level]) => {
-              const isTechno = isTechnocracySphere(sphere)
-              return (
-                <div
-                  key={sphere}
-                  className={`rounded-md px-5 py-4 flex flex-col gap-2
-                    ${isTechno
-                      ? "bg-foreground/5 border-2 border-foreground/40 border-l-[5px] border-l-foreground/60"
-                      : "bg-background border-2 border-primary border-l-[5px] border-l-accent"
-                    }`}
-                >
-                  <span className={`font-serif text-sm font-bold uppercase tracking-widest ${isTechno ? "text-foreground" : "text-primary"}`}>
-                    {sphere}
-                  </span>
-                  <SphereDots level={level} size="lg" />
-                  <span className="font-mono text-xs text-muted-foreground italic">
-                    Level {level}
-                  </span>
+          
+          {hasMultipleCombinations ? (
+            <div className="space-y-6">
+              {allCombinations.map((combo, index) => (
+                <div key={index}>
+                  <h4 className="font-serif text-sm font-semibold text-accent uppercase tracking-widest mb-3">
+                    Option {index + 1}:
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    {Object.entries(combo).map(([sphere, level]) => {
+                      const isTechno = isTechnocracySphere(sphere)
+                      return (
+                        <div
+                          key={sphere}
+                          className={`rounded-md px-5 py-4 flex flex-col gap-2
+                            ${isTechno
+                              ? "bg-foreground/5 border-2 border-foreground/40 border-l-[5px] border-l-foreground/60"
+                              : "bg-background border-2 border-primary border-l-[5px] border-l-accent"
+                            }`}
+                        >
+                          <span className={`font-serif text-sm font-bold uppercase tracking-widest ${isTechno ? "text-foreground" : "text-primary"}`}>
+                            {sphere}
+                          </span>
+                          <SphereDots level={level} size="lg" />
+                          <span className="font-mono text-xs text-muted-foreground italic">
+                            Level {level}
+                          </span>
+                        </div>
+                      )
+                    })}
+                  </div>
+                  {index < allCombinations.length - 1 && (
+                    <div className="mt-4 text-center text-sm font-serif font-bold text-muted-foreground">
+                      — OR —
+                    </div>
+                  )}
                 </div>
-              )
-            })}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              {Object.entries(sphereData).map(([sphere, level]) => {
+                const isTechno = isTechnocracySphere(sphere)
+                return (
+                  <div
+                    key={sphere}
+                    className={`rounded-md px-5 py-4 flex flex-col gap-2
+                      ${isTechno
+                        ? "bg-foreground/5 border-2 border-foreground/40 border-l-[5px] border-l-foreground/60"
+                        : "bg-background border-2 border-primary border-l-[5px] border-l-accent"
+                      }`}
+                  >
+                    <span className={`font-serif text-sm font-bold uppercase tracking-widest ${isTechno ? "text-foreground" : "text-primary"}`}>
+                      {sphere}
+                    </span>
+                    <SphereDots level={level} size="lg" />
+                    <span className="font-mono text-xs text-muted-foreground italic">
+                      Level {level}
+                    </span>
+                  </div>
+                )
+              })}
+            </div>
+          )}
         </div>
 
         {/* Level badge */}
