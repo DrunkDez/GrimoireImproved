@@ -28,9 +28,22 @@ function formatSpheres(spheres: any): { [key: string]: number } {
   return {};
 }
 
+function getAllCombinations(spheres: any): Array<{ [key: string]: number }> {
+  if (Array.isArray(spheres)) {
+    return spheres;
+  }
+  
+  if (typeof spheres === 'object' && !Array.isArray(spheres)) {
+    return [spheres];
+  }
+  
+  return [];
+}
+
 export function RoteCard({ rote, onClick }: RoteCardProps) {
   const sphereData = formatSpheres(rote.spheres);
-  const hasMultipleCombinations = Array.isArray(rote.spheres) && rote.spheres.length > 1;
+  const allCombinations = getAllCombinations(rote.spheres);
+  const hasMultipleCombinations = allCombinations.length > 1;
 
   return (
     <button
@@ -72,29 +85,49 @@ export function RoteCard({ rote, onClick }: RoteCardProps) {
         {rote.description}
       </p>
 
-      {/* Multiple combinations indicator */}
-      {hasMultipleCombinations && (
-        <div className="text-xs text-accent font-semibold mb-2">
-          ✨ Multiple sphere combinations available
+      {/* Sphere combinations */}
+      {hasMultipleCombinations ? (
+        <div className="space-y-2 mb-4">
+          <div className="text-xs text-accent font-semibold mb-2 flex items-center gap-1">
+            <span>✨</span>
+            Multiple combinations:
+          </div>
+          {allCombinations.map((combo, index) => (
+            <div key={index} className="flex flex-wrap gap-1.5 pl-3">
+              <span className="text-xs text-muted-foreground font-mono">{index + 1}.</span>
+              {Object.entries(combo).map(([sphere, level]) => (
+                <div
+                  key={sphere}
+                  className={`flex items-center gap-1.5 px-2 py-1 border rounded-sm text-xs font-semibold uppercase tracking-wide font-serif
+                    ${isTechnocracySphere(sphere)
+                      ? "bg-foreground/5 border-foreground/40 text-foreground"
+                      : "bg-primary/10 border-primary text-primary"
+                    }`}
+                >
+                  <span>{sphere}</span>
+                  <SphereDots level={level} size="sm" />
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="flex flex-wrap gap-2 mb-4">
+          {Object.entries(sphereData).map(([sphere, level]) => (
+            <div
+              key={sphere}
+              className={`flex items-center gap-2 px-2.5 py-1.5 border rounded-sm text-xs font-semibold uppercase tracking-wide font-serif
+                ${isTechnocracySphere(sphere)
+                  ? "bg-foreground/5 border-foreground/40 text-foreground"
+                  : "bg-primary/10 border-primary text-primary"
+                }`}
+            >
+              <span>{sphere}</span>
+              <SphereDots level={level} size="sm" />
+            </div>
+          ))}
         </div>
       )}
-
-      {/* Sphere tags */}
-      <div className="flex flex-wrap gap-2 mb-4">
-        {Object.entries(sphereData).map(([sphere, level]) => (
-          <div
-            key={sphere}
-            className={`flex items-center gap-2 px-2.5 py-1.5 border rounded-sm text-xs font-semibold uppercase tracking-wide font-serif
-              ${isTechnocracySphere(sphere)
-                ? "bg-foreground/5 border-foreground/40 text-foreground"
-                : "bg-primary/10 border-primary text-primary"
-              }`}
-          >
-            <span>{sphere}</span>
-            <SphereDots level={level} size="sm" />
-          </div>
-        ))}
-      </div>
 
       {/* Footer */}
       <div className="flex justify-between items-center pt-3 border-t-2 border-primary font-serif text-xs text-muted-foreground font-semibold uppercase tracking-widest">
