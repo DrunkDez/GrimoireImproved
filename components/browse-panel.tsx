@@ -42,14 +42,36 @@ export function BrowsePanel({ rotes, onSelectRote }: BrowsePanelProps) {
       
       if (activeSphereFilters.length > 0) {
         if (mixAndMatch) {
-          // Mix & Match mode: Rote must match at least ONE of the selected spheres
-          const hasAnyMatch = activeSphereFilters.some(([sphere, minLevel]) => {
+          // Mix & Match mode: Rote must have at least ONE of the selected spheres
+          // at the specified level OR LOWER, but ONLY the selected spheres
+          const selectedSphereNames = activeSphereFilters.map(([sphere, _]) => {
             const linkedSpheres = getLinkedSpheres(sphere)
-            return linkedSpheres.some((s) => (rote.spheres[s] || 0) >= minLevel)
+            return linkedSpheres
+          }).flat()
+
+          // Check if rote has at least one of the selected spheres
+          const hasAtLeastOne = activeSphereFilters.some(([sphere, maxLevel]) => {
+            const linkedSpheres = getLinkedSpheres(sphere)
+            return linkedSpheres.some((s) => {
+              const roteLevel = rote.spheres[s] || 0
+              return roteLevel > 0 && roteLevel <= maxLevel
+            })
           })
-          if (!hasAnyMatch) return false
+
+          if (!hasAtLeastOne) return false
+
+          // Make sure rote doesn't have spheres we didn't select
+          for (const roteSphere of Object.keys(rote.spheres)) {
+            if (rote.spheres[roteSphere] > 0) {
+              // Check if this sphere is in our selected list
+              const isSelected = selectedSphereNames.some(s => 
+                s.toLowerCase() === roteSphere.toLowerCase()
+              )
+              if (!isSelected) return false
+            }
+          }
         } else {
-          // Standard mode: Rote must match ALL selected spheres
+          // Standard mode: Rote must match ALL selected spheres at minimum level
           for (const [sphere, minLevel] of activeSphereFilters) {
             const linkedSpheres = getLinkedSpheres(sphere)
             const hasLevel = linkedSpheres.some((s) => (rote.spheres[s] || 0) >= minLevel)
@@ -146,21 +168,26 @@ export function BrowsePanel({ rotes, onSelectRote }: BrowsePanelProps) {
               </Label>
               <p className="text-xs text-muted-foreground font-mono mt-1">
                 {mixAndMatch 
-                  ? "Showing rotes with ANY of the selected sphere combinations" 
-                  : "Showing rotes with ALL selected sphere combinations"}
+                  ? "Showing rotes with ONLY the selected spheres (at or below specified levels)" 
+                  : "Showing rotes with ALL selected spheres (at or above specified levels)"}
               </p>
             </div>
           </div>
           
           {mixAndMatch && (
             <div className="mt-3 p-3 bg-accent/10 border border-accent/30 rounded text-xs font-mono text-foreground">
-              <span className="font-semibold">Example:</span> With Life 4, Prime 2, Forces 2 selected, you'll see:
+              <span className="font-semibold">Example:</span> With Life 2, Correspondence 3 selected, you'll see rotes with:
               <ul className="mt-1 ml-4 space-y-0.5">
-                <li>• Rotes with Life 4+</li>
-                <li>• Rotes with Prime 2+</li>
-                <li>• Rotes with Forces 2+</li>
-                <li>• And any combinations thereof</li>
+                <li>• Life 2 + Correspondence 3</li>
+                <li>• Life 1 + Correspondence 3</li>
+                <li>• Life 2 + Correspondence 2</li>
+                <li>• Life 2 + Correspondence 1</li>
+                <li>• Just Life 1-2 alone</li>
+                <li>• Just Correspondence 1-3 alone</li>
               </ul>
+              <p className="mt-2 text-muted-foreground italic">
+                Will NOT show rotes with other spheres (like Entropy, Forces, etc.)
+              </p>
             </div>
           )}
         </div>
