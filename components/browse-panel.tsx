@@ -5,6 +5,9 @@ import type { Rote } from "@/lib/mage-data"
 import { getLinkedSpheres } from "@/lib/mage-data"
 import { RoteCard } from "./rote-card"
 import { SphereFilter } from "./sphere-filter"
+import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Label } from "@/components/ui/label"
 
 interface BrowsePanelProps {
   rotes: Rote[]
@@ -15,6 +18,8 @@ export function BrowsePanel({ rotes, onSelectRote }: BrowsePanelProps) {
   const [sphereFilters, setSphereFilters] = useState<Record<string, number>>({})
   const [traditionFilter, setTraditionFilter] = useState("")
   const [searchTerm, setSearchTerm] = useState("")
+  const [mixAndMatch, setMixAndMatch] = useState(false)
+  const [displayLimit, setDisplayLimit] = useState(20)
 
   const filteredRotes = useMemo(() => {
     return rotes.filter((rote) => {
@@ -32,18 +37,34 @@ export function BrowsePanel({ rotes, onSelectRote }: BrowsePanelProps) {
       // Tradition filter
       if (traditionFilter && rote.tradition !== traditionFilter) return false
 
-      // Sphere filters with alias linking
-      for (const [sphere, minLevel] of Object.entries(sphereFilters)) {
-        if (minLevel > 0) {
-          const linkedSpheres = getLinkedSpheres(sphere)
-          const hasLevel = linkedSpheres.some((s) => (rote.spheres[s] || 0) >= minLevel)
-          if (!hasLevel) return false
+      // Sphere filters
+      const activeSphereFilters = Object.entries(sphereFilters).filter(([_, level]) => level > 0)
+      
+      if (activeSphereFilters.length > 0) {
+        if (mixAndMatch) {
+          // Mix & Match mode: Rote must match at least ONE of the selected spheres
+          const hasAnyMatch = activeSphereFilters.some(([sphere, minLevel]) => {
+            const linkedSpheres = getLinkedSpheres(sphere)
+            return linkedSpheres.some((s) => (rote.spheres[s] || 0) >= minLevel)
+          })
+          if (!hasAnyMatch) return false
+        } else {
+          // Standard mode: Rote must match ALL selected spheres
+          for (const [sphere, minLevel] of activeSphereFilters) {
+            const linkedSpheres = getLinkedSpheres(sphere)
+            const hasLevel = linkedSpheres.some((s) => (rote.spheres[s] || 0) >= minLevel)
+            if (!hasLevel) return false
+          }
         }
       }
 
       return true
     })
-  }, [rotes, sphereFilters, traditionFilter, searchTerm])
+  }, [rotes, sphereFilters, traditionFilter, searchTerm, mixAndMatch])
+
+  const displayedRotes = useMemo(() => {
+    return filteredRotes.slice(0, displayLimit)
+  }, [filteredRotes, displayLimit])
 
   const handleSphereChange = (sphere: string, level: number) => {
     setSphereFilters((prev) => ({ ...prev, [sphere]: level }))
@@ -53,6 +74,12 @@ export function BrowsePanel({ rotes, onSelectRote }: BrowsePanelProps) {
     setSphereFilters({})
     setTraditionFilter("")
     setSearchTerm("")
+    setMixAndMatch(false)
+    setDisplayLimit(20)
+  }
+
+  const handleLoadMore = () => {
+    setDisplayLimit(prev => prev + 20)
   }
 
   const activeFilterCount =
@@ -60,16 +87,19 @@ export function BrowsePanel({ rotes, onSelectRote }: BrowsePanelProps) {
     (traditionFilter ? 1 : 0) +
     (searchTerm ? 1 : 0)
 
+  const hasMore = displayedRotes.length < filteredRotes.length
+  const remainingCount = filteredRotes.length - displayedRotes.length
+
   return (
     <div className="animate-fade-in-up flex flex-col gap-8 p-6 md:p-10">
       {/* Search Input */}
       <div className="bg-card border-2 border-primary rounded-md p-5 shadow-[inset_0_0_20px_rgba(139,71,38,0.05)]">
         <h2 className="font-serif text-xl font-bold text-primary uppercase tracking-[0.15em] mb-4 flex items-center gap-3">
           <span className="text-ring text-lg drop-shadow-[0_0_8px_rgba(107,45,107,0.5)]" aria-hidden="true">
-            {'\u2315'}
+            ⌕
           </span>
           Search The Wheel
-          <span className="ml-auto text-accent text-lg" aria-hidden="true">{'\u25C8'}</span>
+          <span className="ml-auto text-accent text-lg" aria-hidden="true">◈</span>
         </h2>
         <input
           type="text"
@@ -94,34 +124,118 @@ export function BrowsePanel({ rotes, onSelectRote }: BrowsePanelProps) {
         onReset={handleReset}
       />
 
+      {/* Mix & Match Toggle */}
+      {Object.values(sphereFilters).filter((v) => v > 0).length > 1 && (
+        <div className="bg-card border-2 border-accent rounded-md p-4 shadow-[inset_0_0_20px_rgba(201,169,97,0.05)]">
+          <div className="flex items-center space-x-3">
+            <Checkbox
+              id="mix-and-match"
+              checked={mixAndMatch}
+              onCheckedChange={(checked) => {
+                setMixAndMatch(checked as boolean)
+                setDisplayLimit(20) // Reset pagination when toggling
+              }}
+            />
+            <div className="flex-1">
+              <Label 
+                htmlFor="mix-and-match"
+                className="font-serif text-base font-semibold text-primary cursor-pointer flex items-center gap-2"
+              >
+                <span className="text-accent" aria-hidden="true">✦</span>
+                Mix & Match Mode
+              </Label>
+              <p className="text-xs text-muted-foreground font-mono mt-1">
+                {mixAndMatch 
+                  ? "Showing rotes with ANY of the selected sphere combinations" 
+                  : "Showing rotes with ALL selected sphere combinations"}
+              </p>
+            </div>
+          </div>
+          
+          {mixAndMatch && (
+            <div className="mt-3 p-3 bg-accent/10 border border-accent/30 rounded text-xs font-mono text-foreground">
+              <span className="font-semibold">Example:</span> With Life 4, Prime 2, Forces 2 selected, you'll see:
+              <ul className="mt-1 ml-4 space-y-0.5">
+                <li>• Rotes with Life 4+</li>
+                <li>• Rotes with Prime 2+</li>
+                <li>• Rotes with Forces 2+</li>
+                <li>• And any combinations thereof</li>
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Results header */}
       <div className="flex items-center justify-between flex-wrap gap-4">
         <h2 className="font-serif text-xl font-bold text-primary uppercase tracking-[0.15em] flex items-center gap-3">
           <span className="text-ring text-lg drop-shadow-[0_0_8px_rgba(107,45,107,0.5)]" aria-hidden="true">
-            {'\u2727'}
+            ✧
           </span>
           The Wheel's Archives
-          <span className="ml-2 text-accent text-lg" aria-hidden="true">{'\u25C8'}</span>
+          <span className="ml-2 text-accent text-lg" aria-hidden="true">◈</span>
         </h2>
         <span className="font-mono text-sm text-muted-foreground italic">
-          {filteredRotes.length} of {rotes.length} rotes
-          {activeFilterCount > 0 && ` (${activeFilterCount} filter${activeFilterCount > 1 ? 's' : ''} active)`}
+          Showing {displayedRotes.length} of {filteredRotes.length} rotes
+          {filteredRotes.length !== rotes.length && ` (filtered from ${rotes.length} total)`}
+          {activeFilterCount > 0 && ` • ${activeFilterCount} filter${activeFilterCount > 1 ? 's' : ''} active`}
         </span>
       </div>
 
       {/* Rote grid */}
-      {filteredRotes.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {filteredRotes.map((rote) => (
-            <RoteCard key={rote.id} rote={rote} onClick={onSelectRote} />
-          ))}
-        </div>
+      {displayedRotes.length > 0 ? (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            {displayedRotes.map((rote) => (
+              <RoteCard key={rote.id} rote={rote} onClick={onSelectRote} />
+            ))}
+          </div>
+
+          {/* Load More Button */}
+          {hasMore && (
+            <div className="flex flex-col items-center gap-4 py-8">
+              <div className="text-center">
+                <p className="font-mono text-sm text-muted-foreground mb-2">
+                  {remainingCount} more rote{remainingCount !== 1 ? 's' : ''} available
+                </p>
+                <Button
+                  onClick={handleLoadMore}
+                  size="lg"
+                  className="font-serif px-8 py-6 bg-secondary text-secondary-foreground border-2 border-primary rounded-sm
+                    font-semibold text-base uppercase tracking-[0.15em]
+                    transition-all duration-300
+                    shadow-[0_4px_8px_rgba(0,0,0,0.15)]
+                    hover:bg-background hover:border-ring hover:-translate-y-1
+                    hover:shadow-[0_6px_12px_rgba(0,0,0,0.2),0_0_20px_rgba(107,45,107,0.2)]
+                    active:translate-y-0"
+                >
+                  <span className="text-accent mr-2" aria-hidden="true">📖</span>
+                  Turn 20 More Pages
+                  <span className="text-accent ml-2" aria-hidden="true">📖</span>
+                </Button>
+              </div>
+              
+              {/* Progress indicator */}
+              <div className="w-full max-w-md">
+                <div className="h-2 bg-muted rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-gradient-to-r from-primary to-accent transition-all duration-500"
+                    style={{ width: `${(displayedRotes.length / filteredRotes.length) * 100}%` }}
+                  />
+                </div>
+                <p className="text-center text-xs text-muted-foreground mt-2 font-mono">
+                  {Math.round((displayedRotes.length / filteredRotes.length) * 100)}% of archives explored
+                </p>
+              </div>
+            </div>
+          )}
+        </>
       ) : (
         <div
           className="bg-card border-4 border-double border-primary rounded-lg px-6 py-16 text-center
             shadow-[inset_0_0_60px_rgba(139,71,38,0.08)]"
         >
-          <div className="text-5xl text-primary opacity-40 mb-4" aria-hidden="true">{'\u2727'}</div>
+          <div className="text-5xl text-primary opacity-40 mb-4" aria-hidden="true">✧</div>
           <h3 className="font-serif text-xl font-bold text-primary uppercase tracking-widest mb-3">
             No Rotes Found
           </h3>
