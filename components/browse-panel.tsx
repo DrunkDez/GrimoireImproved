@@ -185,12 +185,12 @@ export function BrowsePanel({ rotes, onSelectRote }: BrowsePanelProps) {
         onReset={handleReset}
       />
 
-      {/* Mix & Match Toggle */}
-      {Object.values(sphereFilters).filter((v) => v > 0).length > 1 && (
+      {/* What Can I Do? Toggle */}
+      {Object.values(sphereFilters).filter((v) => v > 0).length > 0 && (
         <div className="bg-card border-2 border-accent rounded-md p-4 shadow-[inset_0_0_20px_rgba(201,169,97,0.05)]">
           <div className="flex items-center space-x-3">
             <Checkbox
-              id="mix-and-match"
+              id="what-can-i-do"
               checked={mixAndMatch}
               onCheckedChange={(checked) => {
                 setMixAndMatch(checked as boolean)
@@ -199,21 +199,37 @@ export function BrowsePanel({ rotes, onSelectRote }: BrowsePanelProps) {
             />
             <div className="flex-1">
               <Label 
-                htmlFor="mix-and-match"
+                htmlFor="what-can-i-do"
                 className="font-serif text-base font-semibold text-primary cursor-pointer flex items-center gap-2"
               >
                 <span className="text-accent" aria-hidden="true">✦</span>
-                Mix & Match Mode
+                What Can I Do? Mode
               </Label>
               <p className="text-xs text-muted-foreground font-mono mt-1">
                 {mixAndMatch 
-                  ? "Showing rotes with ONLY selected spheres (at or below levels)" 
-                  : "Showing rotes with ONLY selected spheres (at EXACT levels)"}
+                  ? "Showing what you can do with ONLY these spheres (at or below your levels)" 
+                  : "Showing rotes with selected spheres at EXACT levels"}
               </p>
             </div>
           </div>
           
-          {mixAndMatch && (
+          {mixAndMatch && Object.values(sphereFilters).filter((v) => v > 0).length === 1 && (
+            <div className="mt-3 p-3 bg-accent/10 border border-accent/30 rounded text-xs font-mono text-foreground">
+              <span className="font-semibold">Example:</span> With Correspondence 3 selected:
+              <ul className="mt-1 ml-4 space-y-0.5">
+                <li>✓ Correspondence 3 alone</li>
+                <li>✓ Correspondence 2 alone</li>
+                <li>✓ Correspondence 1 alone</li>
+                <li>✗ Correspondence 4 (too high)</li>
+                <li>✗ Correspondence 3 + Life 2 (has other sphere)</li>
+              </ul>
+              <p className="mt-2 text-muted-foreground italic">
+                Perfect for discovering what you can cast with just this sphere!
+              </p>
+            </div>
+          )}
+          
+          {mixAndMatch && Object.values(sphereFilters).filter((v) => v > 0).length > 1 && (
             <div className="mt-3 p-3 bg-accent/10 border border-accent/30 rounded text-xs font-mono text-foreground">
               <span className="font-semibold">Example:</span> With Life 2, Correspondence 3 selected:
               <ul className="mt-1 ml-4 space-y-0.5">
@@ -222,21 +238,39 @@ export function BrowsePanel({ rotes, onSelectRote }: BrowsePanelProps) {
                 <li>✓ Correspondence 3 alone</li>
                 <li>✓ Life 2 + Correspondence 3</li>
                 <li>✓ Life 1 + Correspondence 2</li>
-                <li>✗ Life 2 + Entropy 3 (has Entropy)</li>
+                <li>✗ Life 2 + Entropy 3 (has unselected sphere)</li>
                 <li>✗ Life 3 alone (too high)</li>
               </ul>
+              <p className="mt-2 text-muted-foreground italic">
+                Shows all combinations possible with ONLY your selected spheres!
+              </p>
             </div>
           )}
           
           {!mixAndMatch && (
             <div className="mt-3 p-3 bg-primary/10 border border-primary/30 rounded text-xs font-mono text-foreground">
-              <span className="font-semibold">Standard mode:</span> With Life 2, Correspondence 3 selected:
+              <span className="font-semibold">Exact Match Mode:</span> {Object.values(sphereFilters).filter((v) => v > 0).length === 1 ? (
+                <>With Correspondence 3 selected:</>
+              ) : (
+                <>With Life 2, Correspondence 3 selected:</>
+              )}
               <ul className="mt-1 ml-4 space-y-0.5">
-                <li>✓ Life 2 + Correspondence 3 (exact match)</li>
-                <li>✗ Life 3 + Correspondence 3 (Life too high)</li>
-                <li>✗ Life 2 + Correspondence 2 (Correspondence too low)</li>
-                <li>✗ Life 2 + Correspondence 3 + Prime 1 (has extra sphere)</li>
-                <li>✗ Life 2 alone (missing Correspondence)</li>
+                {Object.values(sphereFilters).filter((v) => v > 0).length === 1 ? (
+                  <>
+                    <li>✓ Correspondence 3 alone (exact match)</li>
+                    <li>✗ Correspondence 2 (too low)</li>
+                    <li>✗ Correspondence 4 (too high)</li>
+                    <li>✗ Correspondence 3 + Life 2 (has extra sphere)</li>
+                  </>
+                ) : (
+                  <>
+                    <li>✓ Life 2 + Correspondence 3 (exact match)</li>
+                    <li>✗ Life 3 + Correspondence 3 (Life too high)</li>
+                    <li>✗ Life 2 + Correspondence 2 (Correspondence too low)</li>
+                    <li>✗ Life 2 + Correspondence 3 + Prime 1 (has extra sphere)</li>
+                    <li>✗ Life 2 alone (missing Correspondence)</li>
+                  </>
+                )}
               </ul>
             </div>
           )}
