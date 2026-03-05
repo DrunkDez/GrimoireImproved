@@ -29,54 +29,93 @@ export function BrowsePanel({ rotes, onSelectRote }: BrowsePanelProps) {
         const textMatch =
           rote.name.toLowerCase().includes(q) ||
           rote.tradition.toLowerCase().includes(q) ||
-          rote.description.toLowerCase().includes(q) ||
-          Object.keys(rote.spheres).some((s) => s.toLowerCase().includes(q))
+          rote.description.toLowerCase().includes(q)
         if (!textMatch) return false
       }
 
       // Tradition filter
       if (traditionFilter && rote.tradition !== traditionFilter) return false
 
-      // Sphere filters
+      // Sphere filters - EXACT MATCHING
       const activeSphereFilters = Object.entries(sphereFilters).filter(([_, level]) => level > 0)
       
       if (activeSphereFilters.length > 0) {
+        // Normalize rote.spheres to always be an array of combinations
+        const roteCombinations = Array.isArray(rote.spheres) ? rote.spheres : [rote.spheres]
+        
         if (mixAndMatch) {
-          // Mix & Match mode: Rote must have at least ONE of the selected spheres
-          // at the specified level OR LOWER, but ONLY the selected spheres
+          // Mix & Match: Must have at least ONE selected sphere (at or below level)
+          // AND must NOT have any unselected spheres
+          
           const selectedSphereNames = activeSphereFilters.map(([sphere, _]) => {
-            const linkedSpheres = getLinkedSpheres(sphere)
-            return linkedSpheres
-          }).flat()
+            return getLinkedSpheres(sphere)
+          }).flat().map(s => s.toLowerCase())
 
-          // Check if rote has at least one of the selected spheres
-          const hasAtLeastOne = activeSphereFilters.some(([sphere, maxLevel]) => {
-            const linkedSpheres = getLinkedSpheres(sphere)
-            return linkedSpheres.some((s) => {
-              const roteLevel = rote.spheres[s] || 0
-              return roteLevel > 0 && roteLevel <= maxLevel
+          let hasMatchingCombo = false
+
+          for (const combo of roteCombinations) {
+            // Check if this combo has at least one selected sphere
+            const hasAtLeastOne = activeSphereFilters.some(([sphere, maxLevel]) => {
+              const linkedSpheres = getLinkedSpheres(sphere)
+              return linkedSpheres.some((s) => {
+                const roteLevel = combo[s] || 0
+                return roteLevel > 0 && roteLevel <= maxLevel
+              })
             })
-          })
 
-          if (!hasAtLeastOne) return false
+            if (!hasAtLeastOne) continue
 
-          // Make sure rote doesn't have spheres we didn't select
-          for (const roteSphere of Object.keys(rote.spheres)) {
-            if (rote.spheres[roteSphere] > 0) {
-              // Check if this sphere is in our selected list
-              const isSelected = selectedSphereNames.some(s => 
-                s.toLowerCase() === roteSphere.toLowerCase()
-              )
-              if (!isSelected) return false
+            // Check that combo ONLY has selected spheres
+            const onlySelectedSpheres = Object.keys(combo).every((roteSphere) => {
+              const level = combo[roteSphere]
+              if (!level || level === 0) return true
+              return selectedSphereNames.includes(roteSphere.toLowerCase())
+            })
+
+            if (onlySelectedSpheres) {
+              hasMatchingCombo = true
+              break
             }
           }
+
+          if (!hasMatchingCombo) return false
+          
         } else {
-          // Standard mode: Rote must match ALL selected spheres at minimum level
-          for (const [sphere, minLevel] of activeSphereFilters) {
-            const linkedSpheres = getLinkedSpheres(sphere)
-            const hasLevel = linkedSpheres.some((s) => (rote.spheres[s] || 0) >= minLevel)
-            if (!hasLevel) return false
+          // Standard mode: Must match ALL selected spheres EXACTLY
+          // AND must have ONLY those spheres (no extras, no higher levels)
+          
+          let hasMatchingCombo = false
+
+          for (const combo of roteCombinations) {
+            // Check that ALL selected spheres are present at EXACT level
+            const allPresentExactly = activeSphereFilters.every(([sphere, exactLevel]) => {
+              const linkedSpheres = getLinkedSpheres(sphere)
+              return linkedSpheres.some((s) => (combo[s] || 0) === exactLevel)
+            })
+
+            if (!allPresentExactly) continue
+
+            // Check that combo has ONLY the selected spheres (no extras)
+            const onlySelectedSpheres = Object.keys(combo).every((roteSphere) => {
+              const level = combo[roteSphere]
+              if (!level || level === 0) return true
+              
+              // This sphere must be one we selected
+              return activeSphereFilters.some(([sphere, _]) => {
+                const linkedSpheres = getLinkedSpheres(sphere)
+                return linkedSpheres.some(s => 
+                  s.toLowerCase() === roteSphere.toLowerCase()
+                )
+              })
+            })
+
+            if (onlySelectedSpheres) {
+              hasMatchingCombo = true
+              break
+            }
           }
+
+          if (!hasMatchingCombo) return false
         }
       }
 
@@ -125,7 +164,7 @@ export function BrowsePanel({ rotes, onSelectRote }: BrowsePanelProps) {
         </h2>
         <input
           type="text"
-          placeholder="Search by name, tradition, sphere, or description..."
+          placeholder="Search by name, tradition, or description..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="w-full px-4 py-3 bg-background/60 border-2 border-primary rounded-sm
@@ -155,7 +194,7 @@ export function BrowsePanel({ rotes, onSelectRote }: BrowsePanelProps) {
               checked={mixAndMatch}
               onCheckedChange={(checked) => {
                 setMixAndMatch(checked as boolean)
-                setDisplayLimit(20) // Reset pagination when toggling
+                setDisplayLimit(20)
               }}
             />
             <div className="flex-1">
@@ -168,26 +207,37 @@ export function BrowsePanel({ rotes, onSelectRote }: BrowsePanelProps) {
               </Label>
               <p className="text-xs text-muted-foreground font-mono mt-1">
                 {mixAndMatch 
-                  ? "Showing rotes with ONLY the selected spheres (at or below specified levels)" 
-                  : "Showing rotes with ALL selected spheres (at or above specified levels)"}
+                  ? "Showing rotes with ONLY selected spheres (at or below levels)" 
+                  : "Showing rotes with ONLY selected spheres (at EXACT levels)"}
               </p>
             </div>
           </div>
           
           {mixAndMatch && (
             <div className="mt-3 p-3 bg-accent/10 border border-accent/30 rounded text-xs font-mono text-foreground">
-              <span className="font-semibold">Example:</span> With Life 2, Correspondence 3 selected, you'll see rotes with:
+              <span className="font-semibold">Example:</span> With Life 2, Correspondence 3 selected:
               <ul className="mt-1 ml-4 space-y-0.5">
-                <li>• Life 2 + Correspondence 3</li>
-                <li>• Life 1 + Correspondence 3</li>
-                <li>• Life 2 + Correspondence 2</li>
-                <li>• Life 2 + Correspondence 1</li>
-                <li>• Just Life 1-2 alone</li>
-                <li>• Just Correspondence 1-3 alone</li>
+                <li>✓ Life 2 alone</li>
+                <li>✓ Life 1 alone</li>
+                <li>✓ Correspondence 3 alone</li>
+                <li>✓ Life 2 + Correspondence 3</li>
+                <li>✓ Life 1 + Correspondence 2</li>
+                <li>✗ Life 2 + Entropy 3 (has Entropy)</li>
+                <li>✗ Life 3 alone (too high)</li>
               </ul>
-              <p className="mt-2 text-muted-foreground italic">
-                Will NOT show rotes with other spheres (like Entropy, Forces, etc.)
-              </p>
+            </div>
+          )}
+          
+          {!mixAndMatch && (
+            <div className="mt-3 p-3 bg-primary/10 border border-primary/30 rounded text-xs font-mono text-foreground">
+              <span className="font-semibold">Standard mode:</span> With Life 2, Correspondence 3 selected:
+              <ul className="mt-1 ml-4 space-y-0.5">
+                <li>✓ Life 2 + Correspondence 3 (exact match)</li>
+                <li>✗ Life 3 + Correspondence 3 (Life too high)</li>
+                <li>✗ Life 2 + Correspondence 2 (Correspondence too low)</li>
+                <li>✗ Life 2 + Correspondence 3 + Prime 1 (has extra sphere)</li>
+                <li>✗ Life 2 alone (missing Correspondence)</li>
+              </ul>
             </div>
           )}
         </div>
