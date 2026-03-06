@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback, useEffect } from "react"
+import { useState, useCallback, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import type { Rote } from "@/lib/mage-data"
 import { SAMPLE_ROTES, TRADITIONS } from "@/lib/mage-data"
@@ -23,6 +23,12 @@ export default function Page() {
   const [selectedRote, setSelectedRote] = useState<Rote | null>(null)
   const [showAdminPanel, setShowAdminPanel] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  
+  // Store browse panel state when viewing a rote
+  const browsePanelStateRef = useRef<{
+    scrollPosition: number
+    timestamp: number
+  } | null>(null)
 
   // Fetch rotes from API
   const fetchRotes = useCallback(async () => {
@@ -44,11 +50,27 @@ export default function Page() {
   }, [fetchRotes])
 
   const handleSelectRote = useCallback((rote: Rote) => {
+    // Save current scroll position before viewing rote
+    browsePanelStateRef.current = {
+      scrollPosition: window.scrollY,
+      timestamp: Date.now()
+    }
     setSelectedRote(rote)
   }, [])
 
   const handleBackFromDetail = useCallback(() => {
     setSelectedRote(null)
+    
+    // Restore scroll position after state updates
+    if (browsePanelStateRef.current) {
+      // Use setTimeout to ensure DOM has updated
+      setTimeout(() => {
+        window.scrollTo({
+          top: browsePanelStateRef.current?.scrollPosition || 0,
+          behavior: 'instant'
+        })
+      }, 0)
+    }
   }, [])
 
   const handleAddRote = useCallback(async (rote: Rote) => {
@@ -168,7 +190,14 @@ export default function Page() {
                   />
                 )}
                 {activeTab === "browse" && (
-                  <BrowsePanel rotes={rotes} onSelectRote={handleSelectRote} />
+                  <BrowsePanel 
+                    rotes={rotes} 
+                    onSelectRote={handleSelectRote}
+                    shouldRestoreState={browsePanelStateRef.current !== null}
+                    onStateRestored={() => {
+                      browsePanelStateRef.current = null
+                    }}
+                  />
                 )}
                 {activeTab === "add" && (
                   <AddRotePanel onAdd={handleAddRote} />
