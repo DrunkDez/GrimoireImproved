@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import type { Rote } from "@/lib/mage-data"
 import { getLinkedSpheres } from "@/lib/mage-data"
 import { RoteCard } from "./rote-card"
@@ -12,14 +12,52 @@ import { Label } from "@/components/ui/label"
 interface BrowsePanelProps {
   rotes: Rote[]
   onSelectRote: (rote: Rote) => void
+  shouldRestoreState?: boolean
+  onStateRestored?: () => void
 }
 
-export function BrowsePanel({ rotes, onSelectRote }: BrowsePanelProps) {
+export function BrowsePanel({ rotes, onSelectRote, shouldRestoreState, onStateRestored }: BrowsePanelProps) {
   const [sphereFilters, setSphereFilters] = useState<Record<string, number>>({})
   const [traditionFilter, setTraditionFilter] = useState("")
   const [searchTerm, setSearchTerm] = useState("")
   const [mixAndMatch, setMixAndMatch] = useState(false)
   const [displayLimit, setDisplayLimit] = useState(20)
+  
+  // Save state to sessionStorage before navigating away
+  useEffect(() => {
+    const saveState = () => {
+      const state = {
+        sphereFilters,
+        traditionFilter,
+        searchTerm,
+        mixAndMatch,
+        displayLimit
+      }
+      sessionStorage.setItem('browsePanelState', JSON.stringify(state))
+    }
+    
+    saveState()
+  }, [sphereFilters, traditionFilter, searchTerm, mixAndMatch, displayLimit])
+  
+  // Restore state when coming back from rote detail
+  useEffect(() => {
+    if (shouldRestoreState) {
+      const savedState = sessionStorage.getItem('browsePanelState')
+      if (savedState) {
+        try {
+          const state = JSON.parse(savedState)
+          setSphereFilters(state.sphereFilters || {})
+          setTraditionFilter(state.traditionFilter || "")
+          setSearchTerm(state.searchTerm || "")
+          setMixAndMatch(state.mixAndMatch || false)
+          setDisplayLimit(state.displayLimit || 20)
+        } catch (e) {
+          console.error('Failed to restore state:', e)
+        }
+      }
+      onStateRestored?.()
+    }
+  }, [shouldRestoreState, onStateRestored])
 
   const filteredRotes = useMemo(() => {
     return rotes.filter((rote) => {
