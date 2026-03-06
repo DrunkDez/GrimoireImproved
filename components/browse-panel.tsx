@@ -44,7 +44,8 @@ export function BrowsePanel({ rotes, onSelectRote }: BrowsePanelProps) {
         const roteCombinations = Array.isArray(rote.spheres) ? rote.spheres : [rote.spheres]
         
         if (mixAndMatch) {
-          // Mix & Match: Must have at least ONE selected sphere (at or below level)
+          // What Can I Do?: Must have at least ONE selected sphere
+          // ALL spheres in combo must be at or BELOW the levels you selected
           // AND must NOT have any unselected spheres
           
           const selectedSphereNames = activeSphereFilters.map(([sphere, _]) => {
@@ -72,7 +73,24 @@ export function BrowsePanel({ rotes, onSelectRote }: BrowsePanelProps) {
               return selectedSphereNames.includes(roteSphere.toLowerCase())
             })
 
-            if (onlySelectedSpheres) {
+            if (!onlySelectedSpheres) continue
+
+            // NEW CHECK: All spheres in combo must be at or below your levels
+            const allSpheresWithinLimits = Object.entries(combo).every(([roteSphere, roteLevel]) => {
+              if (!roteLevel || roteLevel === 0) return true
+              
+              // Find the max level we set for this sphere (or its linked spheres)
+              const maxAllowedLevel = activeSphereFilters.find(([sphere, _]) => {
+                const linkedSpheres = getLinkedSpheres(sphere)
+                return linkedSpheres.some(s => s.toLowerCase() === roteSphere.toLowerCase())
+              })?.[1]
+
+              // If we didn't select this sphere, it shouldn't be in the combo (already checked above)
+              // If we did select it, make sure rote's level doesn't exceed ours
+              return maxAllowedLevel !== undefined && roteLevel <= maxAllowedLevel
+            })
+
+            if (allSpheresWithinLimits) {
               hasMatchingCombo = true
               break
             }
