@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Search, ExternalLink, Star, BookOpen, Headphones, Video, Globe } from "lucide-react"
+import { MarkdownRenderer } from "@/components/ui/markdown-renderer"
 
 interface Resource {
   id: string
@@ -18,6 +19,7 @@ interface Resource {
   url?: string
   author?: string
   imageUrl?: string
+  imageLayout?: "top" | "side"
   featured: boolean
 }
 
@@ -26,6 +28,7 @@ export default function RecommendedPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedType, setSelectedType] = useState("all")
+  const [selectedResource, setSelectedResource] = useState<Resource | null>(null)
 
   useEffect(() => {
     fetchResources()
@@ -82,183 +85,310 @@ export default function RecommendedPage() {
         <GrimoireHeader />
         
         <div className="p-6 md:p-10 space-y-6">
-          {/* Header */}
-          <div className="text-center space-y-4">
-            <h1 className="text-4xl md:text-5xl font-cinzel font-bold text-primary">
-              Recommended Resources
-            </h1>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Curated content to deepen your understanding of Mage: The Ascension
-            </p>
-          </div>
+          {/* Show detail view if resource is selected */}
+          {selectedResource ? (
+            <div className="animate-fade-in-up space-y-6">
+              {/* Back button */}
+              <Button
+                variant="ghost"
+                onClick={() => setSelectedResource(null)}
+                className="gap-2"
+              >
+                <span aria-hidden="true">←</span>
+                Back to Resources
+              </Button>
 
-          {/* Search and Filter */}
-          <div className="max-w-2xl mx-auto space-y-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                placeholder="Search resources..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            
-            {allTypes.length > 0 && (
-              <div className="flex flex-wrap gap-2 justify-center">
-                <Button
-                  variant={selectedType === "all" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setSelectedType("all")}
-                >
-                  All Types
-                </Button>
-                {allTypes.map(type => (
-                  <Button
-                    key={type}
-                    variant={selectedType === type ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setSelectedType(type)}
-                    className="gap-2"
-                  >
-                    {getTypeIcon(type)}
-                    {type}
-                  </Button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {isLoading ? (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">Loading resources...</p>
-            </div>
-          ) : filteredResources.length === 0 ? (
-            <Card className="border-2 border-primary">
-              <CardContent className="p-12 text-center">
-                <p className="text-muted-foreground">
-                  {searchTerm || selectedType !== "all" 
-                    ? "No resources match your search or filter" 
-                    : "No resources have been added yet. Check back soon!"}
-                </p>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="space-y-8">
-              {/* Featured Resources */}
-              {featuredResources.length > 0 && (
-                <div className="space-y-4">
-                  <h2 className="text-2xl font-cinzel font-bold text-primary flex items-center gap-2">
-                    <Star className="w-6 h-6 text-accent fill-accent" />
-                    Featured
-                  </h2>
-                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                    {featuredResources.map(resource => (
-                      <Card key={resource.id} className="border-2 border-accent hover:shadow-lg transition-all">
-                        <CardHeader>
-                          <div className="flex items-start gap-3">
-                            <div className="p-2 bg-accent/10 rounded-lg">
-                              {getTypeIcon(resource.type)}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <CardTitle className="text-lg font-cinzel truncate">
-                                {resource.name}
-                              </CardTitle>
-                              <div className="flex flex-wrap gap-2 mt-1">
-                                <Badge variant="secondary" className="text-xs">
-                                  {resource.type}
-                                </Badge>
-                                {resource.category && (
-                                  <Badge variant="outline" className="text-xs">
-                                    {resource.category}
-                                  </Badge>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                          {resource.author && (
-                            <CardDescription className="text-xs">
-                              by {resource.author}
-                            </CardDescription>
-                          )}
-                        </CardHeader>
-                        <CardContent className="space-y-3">
-                          <p className="text-sm text-foreground leading-relaxed line-clamp-3">
-                            {resource.description}
-                          </p>
-                          {resource.url && (
-                            <Button asChild className="w-full gap-2">
-                              <a href={resource.url} target="_blank" rel="noopener noreferrer">
-                                Visit Resource
-                                <ExternalLink className="w-4 h-4" />
-                              </a>
-                            </Button>
-                          )}
-                        </CardContent>
-                      </Card>
-                    ))}
+              {/* Resource detail card */}
+              <Card className="border-4 border-double border-primary">
+                <CardHeader className="space-y-4">
+                  {/* Type badge and featured star */}
+                  <div className="flex items-center gap-2">
+                    <Badge variant="secondary" className="gap-2">
+                      {getTypeIcon(selectedResource.type)}
+                      {selectedResource.type}
+                    </Badge>
+                    {selectedResource.category && (
+                      <Badge variant="outline">
+                        {selectedResource.category}
+                      </Badge>
+                    )}
+                    {selectedResource.featured && (
+                      <Star className="w-5 h-5 text-accent fill-accent ml-auto" />
+                    )}
                   </div>
-                </div>
-              )}
 
-              {/* Regular Resources */}
-              {regularResources.length > 0 && (
-                <div className="space-y-4">
-                  {featuredResources.length > 0 && (
-                    <h2 className="text-2xl font-cinzel font-bold text-primary flex items-center gap-2">
-                      <span className="text-accent">{'\u2726'}</span>
-                      All Resources
-                    </h2>
+                  {/* Title */}
+                  <CardTitle className="text-3xl md:text-4xl font-cinzel text-primary">
+                    {selectedResource.name}
+                  </CardTitle>
+
+                  {/* Author */}
+                  {selectedResource.author && (
+                    <CardDescription className="text-base">
+                      by {selectedResource.author}
+                    </CardDescription>
                   )}
-                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                    {regularResources.map(resource => (
-                      <Card key={resource.id} className="border-2 border-primary hover:border-accent transition-colors">
-                        <CardHeader>
-                          <div className="flex items-start gap-3">
-                            <div className="p-2 bg-primary/10 rounded-lg">
-                              {getTypeIcon(resource.type)}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <CardTitle className="text-lg font-cinzel truncate">
-                                {resource.name}
-                              </CardTitle>
-                              <div className="flex flex-wrap gap-2 mt-1">
-                                <Badge variant="secondary" className="text-xs">
-                                  {resource.type}
-                                </Badge>
-                                {resource.category && (
-                                  <Badge variant="outline" className="text-xs">
-                                    {resource.category}
-                                  </Badge>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                          {resource.author && (
-                            <CardDescription className="text-xs">
-                              by {resource.author}
-                            </CardDescription>
-                          )}
-                        </CardHeader>
-                        <CardContent className="space-y-3">
-                          <p className="text-sm text-foreground leading-relaxed line-clamp-3">
-                            {resource.description}
-                          </p>
-                          {resource.url && (
-                            <Button asChild variant="outline" className="w-full gap-2">
-                              <a href={resource.url} target="_blank" rel="noopener noreferrer">
-                                Visit Resource
-                                <ExternalLink className="w-4 h-4" />
-                              </a>
-                            </Button>
-                          )}
-                        </CardContent>
-                      </Card>
+                </CardHeader>
+
+                <CardContent className="space-y-6">
+                  {/* Image and Description - Layout depends on imageLayout */}
+                  {selectedResource.imageUrl && selectedResource.imageLayout === "top" ? (
+                    /* Top Layout: Full width image above text */
+                    <>
+                      <div className="relative w-full max-w-2xl mx-auto overflow-hidden rounded-lg border-2 border-primary">
+                        <img
+                          src={selectedResource.imageUrl}
+                          alt={selectedResource.name}
+                          className="w-full h-auto object-cover"
+                          onError={(e) => {
+                            e.currentTarget.parentElement!.style.display = 'none'
+                          }}
+                        />
+                      </div>
+                      <div className="prose prose-sm md:prose-base max-w-none">
+                        <div className="bg-accent/10 border-l-4 border-accent rounded-r-md p-6">
+                          <MarkdownRenderer content={selectedResource.description} />
+                        </div>
+                      </div>
+                    </>
+                  ) : selectedResource.imageUrl && selectedResource.imageLayout === "side" ? (
+                    /* Side Layout: Small image on left, text on right */
+                    <div className="flex flex-col md:flex-row gap-6">
+                      <div className="flex-shrink-0 w-full md:w-48 overflow-hidden rounded-lg border-2 border-primary">
+                        <img
+                          src={selectedResource.imageUrl}
+                          alt={selectedResource.name}
+                          className="w-full h-auto object-cover"
+                          onError={(e) => {
+                            e.currentTarget.parentElement!.style.display = 'none'
+                          }}
+                        />
+                      </div>
+                      <div className="flex-1 prose prose-sm md:prose-base max-w-none">
+                        <div className="bg-accent/10 border-l-4 border-accent rounded-r-md p-6">
+                          <MarkdownRenderer content={selectedResource.description} />
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    /* No Image: Just text */
+                    <div className="prose prose-sm md:prose-base max-w-none">
+                      <div className="bg-accent/10 border-l-4 border-accent rounded-r-md p-6">
+                        <MarkdownRenderer content={selectedResource.description} />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Visit button */}
+                  {selectedResource.url && (
+                    <div className="flex justify-center pt-4">
+                      <Button asChild size="lg" className="gap-2 text-base">
+                        <a href={selectedResource.url} target="_blank" rel="noopener noreferrer">
+                          Visit Resource
+                          <ExternalLink className="w-5 h-5" />
+                        </a>
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          ) : (
+            /* List view - existing code */
+            <>
+              {/* Header */}
+              <div className="text-center space-y-4">
+                <h1 className="text-4xl md:text-5xl font-cinzel font-bold text-primary">
+                  Recommended Resources
+                </h1>
+                <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                  Curated content to deepen your understanding of Mage: The Ascension
+                </p>
+              </div>
+
+              {/* Search and Filter */}
+              <div className="max-w-2xl mx-auto space-y-4">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search resources..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+                
+                {allTypes.length > 0 && (
+                  <div className="flex flex-wrap gap-2 justify-center">
+                    <Button
+                      variant={selectedType === "all" ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setSelectedType("all")}
+                    >
+                      All Types
+                    </Button>
+                    {allTypes.map(type => (
+                      <Button
+                        key={type}
+                        variant={selectedType === type ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setSelectedType(type)}
+                        className="gap-2"
+                      >
+                        {getTypeIcon(type)}
+                        {type}
+                      </Button>
                     ))}
                   </div>
+                )}
+              </div>
+
+              {isLoading ? (
+                <div className="text-center py-12">
+                  <p className="text-muted-foreground">Loading resources...</p>
+                </div>
+              ) : filteredResources.length === 0 ? (
+                <Card className="border-2 border-primary">
+                  <CardContent className="p-12 text-center">
+                    <p className="text-muted-foreground">
+                      {searchTerm || selectedType !== "all" 
+                        ? "No resources match your search or filter" 
+                        : "No resources have been added yet. Check back soon!"}
+                    </p>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="space-y-8">
+                  {/* Featured Resources */}
+                  {featuredResources.length > 0 && (
+                    <div className="space-y-4">
+                      <h2 className="text-2xl font-cinzel font-bold text-primary flex items-center gap-2">
+                        <Star className="w-6 h-6 text-accent fill-accent" />
+                        Featured
+                      </h2>
+                      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                        {featuredResources.map(resource => (
+                          <Card 
+                            key={resource.id} 
+                            className="border-2 border-accent hover:shadow-lg transition-all cursor-pointer group"
+                            onClick={() => setSelectedResource(resource)}
+                          >
+                            <CardHeader>
+                              <div className="flex items-start gap-3">
+                                <div className="p-2 bg-accent/10 rounded-lg group-hover:bg-accent/20 transition-colors">
+                                  {getTypeIcon(resource.type)}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <CardTitle className="text-lg font-cinzel truncate group-hover:text-accent transition-colors">
+                                    {resource.name}
+                                  </CardTitle>
+                                  <div className="flex flex-wrap gap-2 mt-1">
+                                    <Badge variant="secondary" className="text-xs">
+                                      {resource.type}
+                                    </Badge>
+                                    {resource.category && (
+                                      <Badge variant="outline" className="text-xs">
+                                        {resource.category}
+                                      </Badge>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                              {resource.author && (
+                                <CardDescription className="text-xs">
+                                  by {resource.author}
+                                </CardDescription>
+                              )}
+                            </CardHeader>
+                            <CardContent className="space-y-3">
+                              <p className="text-sm text-foreground leading-relaxed line-clamp-3">
+                                {resource.description}
+                              </p>
+                              <Button 
+                                variant="outline" 
+                                className="w-full gap-2 group-hover:border-accent group-hover:text-accent transition-colors"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  setSelectedResource(resource)
+                                }}
+                              >
+                                View Details
+                                <ExternalLink className="w-4 h-4" />
+                              </Button>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Regular Resources */}
+                  {regularResources.length > 0 && (
+                    <div className="space-y-4">
+                      {featuredResources.length > 0 && (
+                        <h2 className="text-2xl font-cinzel font-bold text-primary flex items-center gap-2">
+                          <span className="text-accent">✦</span>
+                          All Resources
+                        </h2>
+                      )}
+                      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                        {regularResources.map(resource => (
+                          <Card 
+                            key={resource.id} 
+                            className="border-2 border-primary hover:border-accent transition-colors cursor-pointer group"
+                            onClick={() => setSelectedResource(resource)}
+                          >
+                            <CardHeader>
+                              <div className="flex items-start gap-3">
+                                <div className="p-2 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
+                                  {getTypeIcon(resource.type)}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <CardTitle className="text-lg font-cinzel truncate group-hover:text-primary transition-colors">
+                                    {resource.name}
+                                  </CardTitle>
+                                  <div className="flex flex-wrap gap-2 mt-1">
+                                    <Badge variant="secondary" className="text-xs">
+                                      {resource.type}
+                                    </Badge>
+                                    {resource.category && (
+                                      <Badge variant="outline" className="text-xs">
+                                        {resource.category}
+                                      </Badge>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                              {resource.author && (
+                                <CardDescription className="text-xs">
+                                  by {resource.author}
+                                </CardDescription>
+                              )}
+                            </CardHeader>
+                            <CardContent className="space-y-3">
+                              <p className="text-sm text-foreground leading-relaxed line-clamp-3">
+                                {resource.description}
+                              </p>
+                              <Button 
+                                variant="outline" 
+                                className="w-full gap-2 group-hover:border-primary transition-colors"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  setSelectedResource(resource)
+                                }}
+                              >
+                                View Details
+                                <ExternalLink className="w-4 h-4" />
+                              </Button>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
-            </div>
+            </>
           )}
         </div>
       </div>

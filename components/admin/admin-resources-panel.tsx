@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import { RichTextEditor } from "@/components/ui/rich-text-editor"
 import {
   Select,
   SelectContent,
@@ -43,6 +44,7 @@ interface Resource {
   url?: string
   author?: string
   imageUrl?: string
+  imageLayout?: "top" | "side" // top = full width above text, side = small on left
   featured: boolean
 }
 
@@ -82,6 +84,7 @@ export function AdminResourcesPanel() {
     url: "",
     author: "",
     imageUrl: "",
+    imageLayout: "top",
     featured: false,
   })
 
@@ -144,6 +147,7 @@ export function AdminResourcesPanel() {
       url: resource.url || "",
       author: resource.author || "",
       imageUrl: resource.imageUrl || "",
+      imageLayout: resource.imageLayout || "top",
       featured: resource.featured,
     })
     setEditingId(resource.id!)
@@ -187,6 +191,7 @@ export function AdminResourcesPanel() {
       url: "",
       author: "",
       imageUrl: "",
+      imageLayout: "top",
       featured: false,
     })
     setEditingId(null)
@@ -304,30 +309,54 @@ export function AdminResourcesPanel() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="description">Description *</Label>
-                <Textarea
+                <RichTextEditor
                   id="description"
-                  required
-                  rows={4}
+                  label="Description *"
                   value={formData.description}
-                  onChange={(e) =>
-                    setFormData({ ...formData, description: e.target.value })
-                  }
+                  onChange={(value) => setFormData({ ...formData, description: value })}
+                  rows={8}
                   placeholder="Describe what makes this resource valuable..."
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="imageUrl">Image URL (Optional)</Label>
-                <Input
-                  id="imageUrl"
-                  type="url"
-                  value={formData.imageUrl}
-                  onChange={(e) =>
-                    setFormData({ ...formData, imageUrl: e.target.value })
-                  }
-                  placeholder="https://example.com/logo.png"
-                />
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="imageUrl">Image URL (Optional)</Label>
+                  <Input
+                    id="imageUrl"
+                    type="url"
+                    value={formData.imageUrl}
+                    onChange={(e) =>
+                      setFormData({ ...formData, imageUrl: e.target.value })
+                    }
+                    placeholder="https://example.com/logo.png"
+                  />
+                </div>
+
+                {formData.imageUrl && (
+                  <div className="space-y-2">
+                    <Label htmlFor="imageLayout">Image Layout</Label>
+                    <Select
+                      value={formData.imageLayout}
+                      onValueChange={(value: "top" | "side") =>
+                        setFormData({ ...formData, imageLayout: value })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="top">Full Width Above Text</SelectItem>
+                        <SelectItem value="side">Small Image on Side</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground">
+                      {formData.imageLayout === "top" 
+                        ? "Image displays full width above the description" 
+                        : "Image displays as thumbnail on the left side"}
+                    </p>
+                  </div>
+                )}
               </div>
 
               <div className="flex items-center space-x-2">
