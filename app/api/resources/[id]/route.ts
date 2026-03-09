@@ -35,7 +35,7 @@ export async function PUT(
   try {
     const params = await context.params
     const body = await request.json()
-    const { name, type, category, description, url, author, imageUrl, featured } = body
+    const { name, type, category, description, url, author, imageUrl, imageLayout, featured } = body
 
     const resource = await prisma.resource.update({
       where: { id: params.id },
@@ -47,6 +47,7 @@ export async function PUT(
         url: url || null,
         author: author || null,
         imageUrl: imageUrl || null,
+        imageLayout: imageLayout || "top",
         featured: featured || false,
       },
     })
