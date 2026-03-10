@@ -24,23 +24,7 @@ export function BrowsePanel({ rotes, onSelectRote, shouldRestoreState, onStateRe
   const [mixAndMatch, setMixAndMatch] = useState(false)
   const [displayLimit, setDisplayLimit] = useState(20)
   const [viewMode, setViewMode] = useState<"card" | "compact">("card")
-  
-  // Save state to sessionStorage before navigating away
-  useEffect(() => {
-    const saveState = () => {
-      const state = {
-        sphereFilters,
-        traditionFilter,
-        searchTerm,
-        mixAndMatch,
-        displayLimit,
-        viewMode
-      }
-      sessionStorage.setItem('browsePanelState', JSON.stringify(state))
-    }
-    
-    saveState()
-  }, [sphereFilters, traditionFilter, searchTerm, mixAndMatch, displayLimit, viewMode])
+  const [hasRestoredState, setHasRestoredState] = useState(false)
   
   // Restore state when coming back from rote detail
   useEffect(() => {
@@ -55,6 +39,7 @@ export function BrowsePanel({ rotes, onSelectRote, shouldRestoreState, onStateRe
           setMixAndMatch(state.mixAndMatch || false)
           setDisplayLimit(state.displayLimit || 20)
           setViewMode(state.viewMode || "card")
+          setHasRestoredState(true)
         } catch (e) {
           console.error('Failed to restore state:', e)
         }
@@ -62,6 +47,28 @@ export function BrowsePanel({ rotes, onSelectRote, shouldRestoreState, onStateRe
       onStateRestored?.()
     }
   }, [shouldRestoreState, onStateRestored])
+
+  // Save state to sessionStorage - but ONLY after initial restoration
+  useEffect(() => {
+    if (!hasRestoredState && shouldRestoreState) {
+      // Don't save yet - we're still restoring
+      return
+    }
+    
+    const saveState = () => {
+      const state = {
+        sphereFilters,
+        traditionFilter,
+        searchTerm,
+        mixAndMatch,
+        displayLimit,
+        viewMode
+      }
+      sessionStorage.setItem('browsePanelState', JSON.stringify(state))
+    }
+    
+    saveState()
+  }, [sphereFilters, traditionFilter, searchTerm, mixAndMatch, displayLimit, viewMode, hasRestoredState, shouldRestoreState])
 
   const filteredRotes = useMemo(() => {
     return rotes.filter((rote) => {
