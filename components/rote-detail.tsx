@@ -3,6 +3,7 @@
 import type { Rote } from "@/lib/mage-data"
 import { getTraditionSymbol, isTechnocracySphere } from "@/lib/mage-data"
 import { SphereDots } from "./sphere-dots"
+import { MarkdownRenderer } from "@/components/ui/markdown-renderer"
 
 interface RoteDetailProps {
   rote: Rote
@@ -84,9 +85,9 @@ export function RoteDetail({ rote, onBack }: RoteDetailProps) {
           className="bg-background/30 border-2 border-primary border-l-[5px] border-l-ring rounded-md p-6 md:p-8 mb-8
             shadow-[inset_2px_2px_10px_rgba(0,0,0,0.05)]"
         >
-          <p className="font-mono text-foreground text-lg leading-loose text-justify">
-            {rote.description}
-          </p>
+          <div className="font-mono text-foreground text-lg leading-loose">
+            <MarkdownRenderer content={rote.description} />
+          </div>
         </div>
 
         {/* Spheres - Show all combinations */}
