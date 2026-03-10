@@ -24,6 +24,9 @@ export default function Page() {
   const [showAdminPanel, setShowAdminPanel] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   
+  // Track when we're returning from a rote detail view
+  const [returningFromDetail, setReturningFromDetail] = useState(false)
+  
   // Store browse panel state when viewing a rote
   const browsePanelStateRef = useRef<{
     scrollPosition: number
@@ -60,6 +63,7 @@ export default function Page() {
 
   const handleBackFromDetail = useCallback(() => {
     setSelectedRote(null)
+    setReturningFromDetail(true)
     
     // Restore scroll position after state updates
     if (browsePanelStateRef.current) {
@@ -193,8 +197,9 @@ export default function Page() {
                   <BrowsePanel 
                     rotes={rotes} 
                     onSelectRote={handleSelectRote}
-                    shouldRestoreState={browsePanelStateRef.current !== null}
+                    shouldRestoreState={returningFromDetail}
                     onStateRestored={() => {
+                      setReturningFromDetail(false)
                       browsePanelStateRef.current = null
                     }}
                   />
