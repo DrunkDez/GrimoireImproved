@@ -8,6 +8,7 @@ import { SphereFilter } from "./sphere-filter"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
+import { LayoutList, LayoutGrid } from "lucide-react"
 
 interface BrowsePanelProps {
   rotes: Rote[]
@@ -22,6 +23,7 @@ export function BrowsePanel({ rotes, onSelectRote, shouldRestoreState, onStateRe
   const [searchTerm, setSearchTerm] = useState("")
   const [mixAndMatch, setMixAndMatch] = useState(false)
   const [displayLimit, setDisplayLimit] = useState(20)
+  const [viewMode, setViewMode] = useState<"card" | "compact">("card")
   
   // Save state to sessionStorage before navigating away
   useEffect(() => {
@@ -31,13 +33,14 @@ export function BrowsePanel({ rotes, onSelectRote, shouldRestoreState, onStateRe
         traditionFilter,
         searchTerm,
         mixAndMatch,
-        displayLimit
+        displayLimit,
+        viewMode
       }
       sessionStorage.setItem('browsePanelState', JSON.stringify(state))
     }
     
     saveState()
-  }, [sphereFilters, traditionFilter, searchTerm, mixAndMatch, displayLimit])
+  }, [sphereFilters, traditionFilter, searchTerm, mixAndMatch, displayLimit, viewMode])
   
   // Restore state when coming back from rote detail
   useEffect(() => {
@@ -51,6 +54,7 @@ export function BrowsePanel({ rotes, onSelectRote, shouldRestoreState, onStateRe
           setSearchTerm(state.searchTerm || "")
           setMixAndMatch(state.mixAndMatch || false)
           setDisplayLimit(state.displayLimit || 20)
+          setViewMode(state.viewMode || "card")
         } catch (e) {
           console.error('Failed to restore state:', e)
         }
@@ -342,19 +346,52 @@ export function BrowsePanel({ rotes, onSelectRote, shouldRestoreState, onStateRe
           The Wheel's Archives
           <span className="ml-2 text-accent text-lg" aria-hidden="true">◈</span>
         </h2>
-        <span className="font-mono text-sm text-muted-foreground italic">
-          Showing {displayedRotes.length} of {filteredRotes.length} rotes
-          {filteredRotes.length !== rotes.length && ` (filtered from ${rotes.length} total)`}
-          {activeFilterCount > 0 && ` • ${activeFilterCount} filter${activeFilterCount > 1 ? 's' : ''} active`}
-        </span>
+        
+        <div className="flex items-center gap-4">
+          {/* View mode toggle */}
+          <div className="flex gap-1 bg-muted rounded-sm p-1">
+            <Button
+              variant={viewMode === "card" ? "default" : "ghost"}
+              size="sm"
+              onClick={() => setViewMode("card")}
+              className="gap-2 h-8"
+            >
+              <LayoutGrid className="w-4 h-4" />
+              <span className="hidden sm:inline">Cards</span>
+            </Button>
+            <Button
+              variant={viewMode === "compact" ? "default" : "ghost"}
+              size="sm"
+              onClick={() => setViewMode("compact")}
+              className="gap-2 h-8"
+            >
+              <LayoutList className="w-4 h-4" />
+              <span className="hidden sm:inline">Compact</span>
+            </Button>
+          </div>
+          
+          <span className="font-mono text-sm text-muted-foreground italic">
+            Showing {displayedRotes.length} of {filteredRotes.length} rotes
+            {filteredRotes.length !== rotes.length && ` (filtered from ${rotes.length} total)`}
+            {activeFilterCount > 0 && ` • ${activeFilterCount} filter${activeFilterCount > 1 ? 's' : ''} active`}
+          </span>
+        </div>
       </div>
 
       {/* Rote grid */}
       {displayedRotes.length > 0 ? (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          <div className={viewMode === "compact" 
+            ? "flex flex-col gap-2" 
+            : "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"
+          }>
             {displayedRotes.map((rote) => (
-              <RoteCard key={rote.id} rote={rote} onClick={onSelectRote} />
+              <RoteCard 
+                key={rote.id} 
+                rote={rote} 
+                onClick={onSelectRote}
+                compact={viewMode === "compact"}
+              />
             ))}
           </div>
 
