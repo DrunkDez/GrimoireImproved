@@ -7,6 +7,7 @@ import { SphereDots } from "./sphere-dots"
 interface RoteCardProps {
   rote: Rote
   onClick: (rote: Rote) => void
+  compact?: boolean
 }
 
 function formatSpheres(spheres: any): { [key: string]: number } {
@@ -40,11 +41,55 @@ function getAllCombinations(spheres: any): Array<{ [key: string]: number }> {
   return [];
 }
 
-export function RoteCard({ rote, onClick }: RoteCardProps) {
+export function RoteCard({ rote, onClick, compact = false }: RoteCardProps) {
   const sphereData = formatSpheres(rote.spheres);
   const allCombinations = getAllCombinations(rote.spheres);
   const hasMultipleCombinations = allCombinations.length > 1;
 
+  // Compact view - just name and spheres
+  if (compact) {
+    return (
+      <button
+        type="button"
+        onClick={() => onClick(rote)}
+        className="group text-left w-full bg-background border-2 border-primary rounded-sm p-4
+          shadow-[3px_3px_8px_rgba(0,0,0,0.15)]
+          transition-all duration-300 cursor-pointer
+          hover:border-accent hover:-translate-y-1
+          hover:shadow-[3px_6px_12px_rgba(0,0,0,0.2),0_0_15px_rgba(201,169,97,0.15)]
+          focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-2"
+      >
+        <div className="flex items-start justify-between gap-3">
+          {/* Name */}
+          <h3 className="font-serif text-base font-bold text-primary uppercase tracking-wide leading-tight flex-1">
+            {rote.name}
+          </h3>
+          
+          {/* Spheres - compact inline */}
+          <div className="flex flex-wrap gap-1.5 items-center justify-end flex-shrink-0">
+            {hasMultipleCombinations && (
+              <span className="text-xs text-accent">✨</span>
+            )}
+            {Object.entries(sphereData).map(([sphere, level]) => (
+              <div
+                key={sphere}
+                className={`flex items-center gap-1 px-1.5 py-0.5 border rounded-sm text-xs font-semibold uppercase font-serif
+                  ${isTechnocracySphere(sphere)
+                    ? "bg-foreground/5 border-foreground/40 text-foreground"
+                    : "bg-primary/10 border-primary text-primary"
+                  }`}
+              >
+                <span>{sphere}</span>
+                <span className="text-[10px]">{level}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </button>
+    )
+  }
+
+  // Full card view (existing code)
   return (
     <button
       type="button"

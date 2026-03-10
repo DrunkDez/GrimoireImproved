@@ -7,6 +7,7 @@ import type { Rote } from "@/lib/mage-data"
 import { SPHERES, TECHNOCRACY_SPHERES } from "@/lib/mage-data"
 import { SphereDotsInteractive, SphereDots } from "./sphere-dots"
 import { TraditionCombobox } from "./tradition-combobox"
+import { RichTextEditor } from "@/components/ui/rich-text-editor"
 
 const ROTE_LEVELS = ["Initiate", "Apprentice", "Disciple", "Adept", "Master"]
 
@@ -150,23 +151,14 @@ export function AddRotePanel({ onAdd }: AddRotePanelProps) {
 
           {/* Description */}
           <div className="flex flex-col gap-2">
-            <label htmlFor="rote-desc" className="font-serif text-sm font-semibold text-primary uppercase tracking-widest flex items-center gap-2">
-              <span className="text-ring" aria-hidden="true">{'\u2726'}</span>
-              Description
-            </label>
-            <textarea
+            <RichTextEditor
               id="rote-desc"
-              required
-              rows={5}
-              placeholder="Describe the focus, effect, and practice of this Rote..."
+              label="Description"
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className="w-full px-4 py-3 bg-background/60 border-2 border-primary rounded-sm
-                text-foreground font-mono text-base placeholder:text-foreground/40 placeholder:italic
-                transition-all duration-300 shadow-[inset_2px_2px_5px_rgba(0,0,0,0.1)]
-                focus:outline-none focus:border-ring focus:bg-background/80
-                focus:shadow-[inset_2px_2px_5px_rgba(0,0,0,0.1),0_0_10px_rgba(107,45,107,0.3)]
-                resize-y min-h-[140px] leading-relaxed"
+              onChange={setDescription}
+              rows={8}
+              placeholder="Describe the focus, effect, and practice of this Rote..."
+              required
             />
           </div>
 
