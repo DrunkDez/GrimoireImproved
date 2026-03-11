@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import type { Rote } from "@/lib/mage-data"
 import { getTraditionSymbol, isTechnocracySphere } from "@/lib/mage-data"
 import { SphereDots } from "./sphere-dots"
@@ -16,6 +17,7 @@ interface RoteCardProps {
   rote: RoteWithUser
   onClick: (rote: Rote) => void
   compact?: boolean
+  matchingSpheres?: Record<string, number> // The sphere combination that matched the search
 }
 
 function formatSpheres(spheres: any): { [key: string]: number } {
@@ -49,10 +51,23 @@ function getAllCombinations(spheres: any): Array<{ [key: string]: number }> {
   return [];
 }
 
-export function RoteCard({ rote, onClick, compact = false }: RoteCardProps) {
-  const sphereData = formatSpheres(rote.spheres);
-  const allCombinations = getAllCombinations(rote.spheres);
-  const hasMultipleCombinations = allCombinations.length > 1;
+export function RoteCard({ rote, onClick, compact = false, matchingSpheres }: RoteCardProps) {
+  const [showAllCombos, setShowAllCombos] = useState(false)
+  
+  const allCombinations = getAllCombinations(rote.spheres)
+  const hasMultipleCombinations = allCombinations.length > 1
+  
+  // If we have matching spheres from a search, show that combo first
+  const primaryCombo = matchingSpheres || formatSpheres(rote.spheres)
+  
+  // Filter to show only matching combo or all combos based on toggle
+  const displayCombinations = hasMultipleCombinations && matchingSpheres && !showAllCombos
+    ? [matchingSpheres]
+    : allCombinations
+  
+  const hiddenCombosCount = hasMultipleCombinations && matchingSpheres && !showAllCombos
+    ? allCombinations.length - 1
+    : 0
 
   // Compact view - just name and spheres
   if (compact) {
@@ -78,7 +93,7 @@ export function RoteCard({ rote, onClick, compact = false }: RoteCardProps) {
             {hasMultipleCombinations && (
               <span className="text-xs text-accent">✨</span>
             )}
-            {Object.entries(sphereData).map(([sphere, level]) => (
+            {Object.entries(primaryCombo).map(([sphere, level]) => (
               <div
                 key={sphere}
                 className={`flex items-center gap-1 px-1.5 py-0.5 border rounded-sm text-xs font-semibold uppercase font-serif
@@ -148,32 +163,56 @@ export function RoteCard({ rote, onClick, compact = false }: RoteCardProps) {
       {/* Sphere combinations */}
       {hasMultipleCombinations ? (
         <div className="space-y-2 mb-4">
-          <div className="text-xs text-accent font-semibold mb-2 flex items-center gap-1">
-            <span>✨</span>
-            Multiple combinations:
-          </div>
-          {allCombinations.map((combo, index) => (
-            <div key={index} className="flex flex-wrap gap-1.5 pl-3">
-              <span className="text-xs text-muted-foreground font-mono">{index + 1}.</span>
-              {Object.entries(combo).map(([sphere, level]) => (
-                <div
-                  key={sphere}
-                  className={`flex items-center gap-1.5 px-2 py-1 border rounded-sm text-xs font-semibold uppercase tracking-wide font-serif
-                    ${isTechnocracySphere(sphere)
-                      ? "bg-foreground/5 border-foreground/40 text-foreground"
-                      : "bg-primary/10 border-primary text-primary"
-                    }`}
-                >
-                  <span>{sphere}</span>
-                  <SphereDots level={level} size="sm" />
+          {/* Show matching combo first (or all if no match/toggle is on) */}
+          {displayCombinations.map((combo, index) => {
+            const isFirstCombo = index === 0 && matchingSpheres
+            return (
+              <div key={index} className={index === 0 ? "" : "pl-3"}>
+                {index > 0 && (
+                  <span className="text-xs text-muted-foreground font-mono">{index + 1}.</span>
+                )}
+                <div className="flex flex-wrap gap-1.5">
+                  {Object.entries(combo).map(([sphere, level]) => (
+                    <div
+                      key={sphere}
+                      className={`flex items-center gap-1.5 px-2 py-1 border rounded-sm text-xs font-semibold uppercase tracking-wide font-serif
+                        ${isTechnocracySphere(sphere)
+                          ? "bg-foreground/5 border-foreground/40 text-foreground"
+                          : isFirstCombo
+                          ? "bg-accent/10 border-accent text-accent"  // Highlight matching combo
+                          : "bg-primary/10 border-primary text-primary"
+                        }`}
+                    >
+                      <span>{sphere}</span>
+                      <SphereDots level={level} size="sm" />
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          ))}
+              </div>
+            )
+          })}
+          
+          {/* Toggle button for other combos */}
+          {hiddenCombosCount > 0 && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation() // Prevent card click
+                setShowAllCombos(!showAllCombos)
+              }}
+              className="text-xs text-accent hover:text-accent/80 font-semibold flex items-center gap-1 mt-2 transition-colors"
+            >
+              <span>{showAllCombos ? '▼' : '▶'}</span>
+              {showAllCombos 
+                ? 'Hide other combinations' 
+                : `Show ${hiddenCombosCount} other combination${hiddenCombosCount > 1 ? 's' : ''}`
+              }
+            </button>
+          )}
         </div>
       ) : (
         <div className="flex flex-wrap gap-2 mb-4">
-          {Object.entries(sphereData).map(([sphere, level]) => (
+          {Object.entries(primaryCombo).map(([sphere, level]) => (
             <div
               key={sphere}
               className={`flex items-center gap-2 px-2.5 py-1.5 border rounded-sm text-xs font-semibold uppercase tracking-wide font-serif
