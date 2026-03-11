@@ -17,6 +17,11 @@ interface BrowsePanelProps {
   onStateRestored?: () => void
 }
 
+interface RoteWithMatchingCombo {
+  rote: Rote
+  matchingCombo?: Record<string, number>
+}
+
 export function BrowsePanel({ rotes, onSelectRote, shouldRestoreState, onStateRestored }: BrowsePanelProps) {
   const [sphereFilters, setSphereFilters] = useState<Record<string, number>>({})
   const [traditionFilter, setTraditionFilter] = useState("")
@@ -71,7 +76,9 @@ export function BrowsePanel({ rotes, onSelectRote, shouldRestoreState, onStateRe
   }, [sphereFilters, traditionFilter, searchTerm, mixAndMatch, displayLimit, viewMode, hasRestoredState, shouldRestoreState])
 
   const filteredRotes = useMemo(() => {
-    return rotes.filter((rote) => {
+    const results: RoteWithMatchingCombo[] = []
+    
+    rotes.forEach((rote) => {
       // Text search
       if (searchTerm) {
         const q = searchTerm.toLowerCase()
@@ -79,11 +86,11 @@ export function BrowsePanel({ rotes, onSelectRote, shouldRestoreState, onStateRe
           rote.name.toLowerCase().includes(q) ||
           rote.tradition.toLowerCase().includes(q) ||
           rote.description.toLowerCase().includes(q)
-        if (!textMatch) return false
+        if (!textMatch) return
       }
 
       // Tradition filter
-      if (traditionFilter && rote.tradition !== traditionFilter) return false
+      if (traditionFilter && rote.tradition !== traditionFilter) return
 
       // Sphere filters - EXACT MATCHING
       const activeSphereFilters = Object.entries(sphereFilters).filter(([_, level]) => level > 0)
@@ -92,16 +99,13 @@ export function BrowsePanel({ rotes, onSelectRote, shouldRestoreState, onStateRe
         // Normalize rote.spheres to always be an array of combinations
         const roteCombinations = Array.isArray(rote.spheres) ? rote.spheres : [rote.spheres]
         
+        let matchingCombo: Record<string, number> | undefined = undefined
+        
         if (mixAndMatch) {
-          // What Can I Do?: Must have at least ONE selected sphere
-          // ALL spheres in combo must be at or BELOW the levels you selected
-          // AND must NOT have any unselected spheres
-          
+          // What Can I Do?: Find the combo that matches
           const selectedSphereNames = activeSphereFilters.map(([sphere, _]) => {
             return getLinkedSpheres(sphere)
           }).flat().map(s => s.toLowerCase())
-
-          let hasMatchingCombo = false
 
           for (const combo of roteCombinations) {
             // Check if this combo has at least one selected sphere
@@ -124,35 +128,28 @@ export function BrowsePanel({ rotes, onSelectRote, shouldRestoreState, onStateRe
 
             if (!onlySelectedSpheres) continue
 
-            // NEW CHECK: All spheres in combo must be at or below your levels
+            // All spheres in combo must be at or below your levels
             const allSpheresWithinLimits = Object.entries(combo).every(([roteSphere, roteLevel]) => {
               if (!roteLevel || roteLevel === 0) return true
               
-              // Find the max level we set for this sphere (or its linked spheres)
               const maxAllowedLevel = activeSphereFilters.find(([sphere, _]) => {
                 const linkedSpheres = getLinkedSpheres(sphere)
                 return linkedSpheres.some(s => s.toLowerCase() === roteSphere.toLowerCase())
               })?.[1]
 
-              // If we didn't select this sphere, it shouldn't be in the combo (already checked above)
-              // If we did select it, make sure rote's level doesn't exceed ours
               return maxAllowedLevel !== undefined && roteLevel <= maxAllowedLevel
             })
 
             if (allSpheresWithinLimits) {
-              hasMatchingCombo = true
+              matchingCombo = combo
               break
             }
           }
 
-          if (!hasMatchingCombo) return false
+          if (!matchingCombo) return
           
         } else {
-          // Standard mode: Must match ALL selected spheres EXACTLY
-          // AND must have ONLY those spheres (no extras, no higher levels)
-          
-          let hasMatchingCombo = false
-
+          // Standard mode: Find exact match
           for (const combo of roteCombinations) {
             // Check that ALL selected spheres are present at EXACT level
             const allPresentExactly = activeSphereFilters.every(([sphere, exactLevel]) => {
@@ -167,7 +164,6 @@ export function BrowsePanel({ rotes, onSelectRote, shouldRestoreState, onStateRe
               const level = combo[roteSphere]
               if (!level || level === 0) return true
               
-              // This sphere must be one we selected
               return activeSphereFilters.some(([sphere, _]) => {
                 const linkedSpheres = getLinkedSpheres(sphere)
                 return linkedSpheres.some(s => 
@@ -177,17 +173,22 @@ export function BrowsePanel({ rotes, onSelectRote, shouldRestoreState, onStateRe
             })
 
             if (onlySelectedSpheres) {
-              hasMatchingCombo = true
+              matchingCombo = combo
               break
             }
           }
 
-          if (!hasMatchingCombo) return false
+          if (!matchingCombo) return
         }
+        
+        results.push({ rote, matchingCombo })
+      } else {
+        // No sphere filters - include all
+        results.push({ rote })
       }
-
-      return true
     })
+    
+    return results
   }, [rotes, sphereFilters, traditionFilter, searchTerm, mixAndMatch])
 
   const displayedRotes = useMemo(() => {
@@ -392,12 +393,13 @@ export function BrowsePanel({ rotes, onSelectRote, shouldRestoreState, onStateRe
             ? "flex flex-col gap-2" 
             : "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"
           }>
-            {displayedRotes.map((rote) => (
+            {displayedRotes.map(({ rote, matchingCombo }) => (
               <RoteCard 
                 key={rote.id} 
                 rote={rote} 
                 onClick={onSelectRote}
                 compact={viewMode === "compact"}
+                matchingSpheres={matchingCombo}
               />
             ))}
           </div>
