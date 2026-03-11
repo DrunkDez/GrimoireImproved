@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast"
 import { AdminRotesPanel } from "@/components/admin/admin-rotes-panel"
 import { AdminMeritsPanel } from "@/components/admin/admin-merits-panel"
 import { AdminResourcesPanel } from "@/components/admin/admin-resources-panel"
+import { AdminUsersPanel } from "@/components/admin/admin-users-panel"
 
 interface AdminPanelProps {
   rotes: Rote[]
@@ -139,7 +140,7 @@ export function AdminPanel({ rotes, onRotesChange, onClose }: AdminPanelProps) {
       </div>
 
       <Tabs defaultValue="content" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-7 max-w-3xl">
+        <TabsList className="grid w-full grid-cols-8 max-w-4xl">
           <TabsTrigger value="content" className="gap-2">
             <FileText className="w-4 h-4" />
             Content
@@ -155,6 +156,10 @@ export function AdminPanel({ rotes, onRotesChange, onClose }: AdminPanelProps) {
           <TabsTrigger value="resources" className="gap-2">
             <Library className="w-4 h-4" />
             Resources
+          </TabsTrigger>
+          <TabsTrigger value="users" className="gap-2">
+            <Users className="w-4 h-4" />
+            Users
           </TabsTrigger>
           <TabsTrigger value="overview" className="gap-2">
             <BookOpen className="w-4 h-4" />
@@ -184,6 +189,10 @@ export function AdminPanel({ rotes, onRotesChange, onClose }: AdminPanelProps) {
 
         <TabsContent value="resources">
           <AdminResourcesPanel />
+        </TabsContent>
+
+        <TabsContent value="users">
+          <AdminUsersPanel />
         </TabsContent>
 
         <TabsContent value="overview">

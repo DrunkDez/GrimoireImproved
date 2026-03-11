@@ -4,8 +4,16 @@ import type { Rote } from "@/lib/mage-data"
 import { getTraditionSymbol, isTechnocracySphere } from "@/lib/mage-data"
 import { SphereDots } from "./sphere-dots"
 
+interface RoteWithUser extends Rote {
+  user?: {
+    id: string
+    name: string | null
+    email: string
+  } | null
+}
+
 interface RoteCardProps {
-  rote: Rote
+  rote: RoteWithUser
   onClick: (rote: Rote) => void
   compact?: boolean
 }
@@ -85,6 +93,13 @@ export function RoteCard({ rote, onClick, compact = false }: RoteCardProps) {
             ))}
           </div>
         </div>
+        
+        {/* Creator badge */}
+        {rote.user && (
+          <div className="text-xs text-muted-foreground font-mono mt-1">
+            by {rote.user.name || rote.user.email}
+          </div>
+        )}
       </button>
     )
   }
@@ -175,9 +190,16 @@ export function RoteCard({ rote, onClick, compact = false }: RoteCardProps) {
       )}
 
       {/* Footer */}
-      <div className="flex justify-between items-center pt-3 border-t-2 border-primary font-serif text-xs text-muted-foreground font-semibold uppercase tracking-widest">
-        <span>{rote.level}</span>
-        {rote.pageRef && <span className="font-mono italic normal-case text-xs">{rote.pageRef}</span>}
+      <div className="flex flex-col gap-2 pt-3 border-t-2 border-primary">
+        <div className="flex justify-between items-center font-serif text-xs text-muted-foreground font-semibold uppercase tracking-widest">
+          <span>{rote.level}</span>
+          {rote.pageRef && <span className="font-mono italic normal-case text-xs">{rote.pageRef}</span>}
+        </div>
+        {rote.user && (
+          <div className="text-xs text-muted-foreground font-mono italic">
+            Created by {rote.user.name || rote.user.email}
+          </div>
+        )}
       </div>
     </button>
   )
