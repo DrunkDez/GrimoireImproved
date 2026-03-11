@@ -3,7 +3,19 @@
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Users, Mail, Calendar, Book, User, Shield } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Users, Mail, Calendar, Book, User, Shield, Trash2 } from "lucide-react"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import { useToast } from "@/hooks/use-toast"
 
 interface UserData {
   id: string
@@ -20,6 +32,8 @@ interface UserData {
 export function AdminUsersPanel() {
   const [users, setUsers] = useState<UserData[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [deleteUserId, setDeleteUserId] = useState<string | null>(null)
+  const { toast } = useToast()
 
   useEffect(() => {
     fetchUsers()
@@ -36,6 +50,60 @@ export function AdminUsersPanel() {
       console.error('Error fetching users:', error)
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const deleteUser = async () => {
+    if (!deleteUserId) return
+
+    try {
+      const response = await fetch(`/api/admin/users/${deleteUserId}`, {
+        method: 'DELETE',
+      })
+
+      if (response.ok) {
+        toast({
+          title: "User Deleted",
+          description: "The user and all their data have been deleted",
+        })
+        fetchUsers()
+      } else {
+        throw new Error('Failed to delete')
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete user",
+        variant: "destructive",
+      })
+    } finally {
+      setDeleteUserId(null)
+    }
+  }
+
+  const toggleAdmin = async (userId: string, currentStatus: boolean) => {
+    try {
+      const response = await fetch(`/api/admin/users/${userId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isAdmin: !currentStatus }),
+      })
+
+      if (response.ok) {
+        toast({
+          title: "Admin Status Updated",
+          description: `User is now ${!currentStatus ? 'an admin' : 'a regular user'}`,
+        })
+        fetchUsers()
+      } else {
+        throw new Error('Failed to update')
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update admin status",
+        variant: "destructive",
+      })
     }
   }
 
@@ -97,6 +165,26 @@ export function AdminUsersPanel() {
                       </div>
                     </div>
                   </div>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => toggleAdmin(user.id, user.isAdmin)}
+                      className="gap-2"
+                    >
+                      <Shield className="w-4 h-4" />
+                      {user.isAdmin ? 'Remove Admin' : 'Make Admin'}
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => setDeleteUserId(user.id)}
+                      className="gap-2"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      Delete
+                    </Button>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent>
@@ -121,6 +209,24 @@ export function AdminUsersPanel() {
           ))}
         </div>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!deleteUserId} onOpenChange={() => setDeleteUserId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete User?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete this user and all their rotes and characters. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={deleteUser} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Delete User
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
