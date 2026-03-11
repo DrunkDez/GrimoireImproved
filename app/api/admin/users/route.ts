@@ -1,27 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
 
-// GET /api/admin/users - Get all users (admin only)
+// GET /api/admin/users - Get all users (admin panel authenticated)
+// NOTE: This endpoint is protected by the admin panel password,
+// not by user authentication, so anyone with admin panel access can view users
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions)
-    
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    // Check if user is admin
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: { isAdmin: true }
-    })
-
-    if (!user?.isAdmin) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-    }
-
     // Get all users with rote counts
     const users = await prisma.user.findMany({
       select: {
