@@ -41,8 +41,11 @@ export function GrimoireHeader() {
             <h1 className="font-serif text-4xl md:text-6xl font-black tracking-wider uppercase text-primary leading-tight">
               The Paradox
             </h1>
-            <div className="text-5xl md:text-7xl text-accent animate-spin-slow" aria-hidden="true">
-              ⚙
+            {/* Fixed: Spin in place without moving */}
+            <div className="relative flex items-center justify-center w-[60px] h-[60px] md:w-[84px] md:h-[84px]" aria-hidden="true">
+              <div className="absolute inset-0 flex items-center justify-center text-5xl md:text-7xl text-accent animate-spin-slow">
+                ⚙
+              </div>
             </div>
             <h1 className="font-serif text-4xl md:text-6xl font-black tracking-wider uppercase text-primary leading-tight">
               Wheel
