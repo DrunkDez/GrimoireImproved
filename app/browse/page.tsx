@@ -1,37 +1,24 @@
 "use client"
 
-import { useState, useCallback, useEffect, useRef } from "react"
+import { useState, useCallback, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import type { Rote } from "@/lib/mage-data"
-import { SAMPLE_ROTES, TRADITIONS } from "@/lib/mage-data"
 import { GrimoireHeader } from "@/components/grimoire-header"
-import { GrimoireNav, type TabId } from "@/components/grimoire-nav"
 import { GrimoireFooter } from "@/components/grimoire-footer"
-import { HomePanel } from "@/components/home-panel"
 import { BrowsePanel } from "@/components/browse-panel"
-import { AddRotePanel } from "@/components/add-rote-panel"
 import { RoteDetail } from "@/components/rote-detail"
-import { AdminPanel } from "@/components/admin-panel"
 import { Button } from "@/components/ui/button"
-import { ShieldAlert } from "lucide-react"
+import { Home, ShieldAlert } from "lucide-react"
 import { Toaster } from "@/components/ui/toaster"
+import Link from "next/link"
 
-export default function Page() {
+export default function BrowsePage() {
   const router = useRouter()
-  const [activeTab, setActiveTab] = useState<TabId>("home")
   const [rotes, setRotes] = useState<Rote[]>([])
   const [selectedRote, setSelectedRote] = useState<Rote | null>(null)
   const [showAdminPanel, setShowAdminPanel] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
-  
-  // Track when we're returning from a rote detail view
   const [returningFromDetail, setReturningFromDetail] = useState(false)
-  
-  // Store browse panel state when viewing a rote
-  const browsePanelStateRef = useRef<{
-    scrollPosition: number
-    timestamp: number
-  } | null>(null)
 
   // Fetch rotes from API
   const fetchRotes = useCallback(async () => {
@@ -53,11 +40,8 @@ export default function Page() {
   }, [fetchRotes])
 
   const handleSelectRote = useCallback((rote: Rote) => {
-    // Save current scroll position before viewing rote
-    browsePanelStateRef.current = {
-      scrollPosition: window.scrollY,
-      timestamp: Date.now()
-    }
+    // Save scroll position
+    sessionStorage.setItem('browseScrollPosition', window.scrollY.toString())
     setSelectedRote(rote)
   }, [])
 
@@ -65,81 +49,24 @@ export default function Page() {
     setSelectedRote(null)
     setReturningFromDetail(true)
     
-    // Restore scroll position after state updates
-    if (browsePanelStateRef.current) {
-      // Use setTimeout to ensure DOM has updated
-      setTimeout(() => {
+    // Restore scroll position
+    setTimeout(() => {
+      const savedPosition = sessionStorage.getItem('browseScrollPosition')
+      if (savedPosition) {
         window.scrollTo({
-          top: browsePanelStateRef.current?.scrollPosition || 0,
+          top: parseInt(savedPosition, 10),
           behavior: 'instant'
         })
-      }, 0)
-    }
-  }, [])
-
-  const handleAddRote = useCallback(async (rote: Rote) => {
-    try {
-      const response = await fetch('/api/rotes', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(rote),
-      })
-
-      if (response.ok) {
-        fetchRotes() // Refresh the list
       }
-    } catch (error) {
-      console.error('Error adding rote:', error)
-    }
-  }, [fetchRotes])
-
-  const handleNavigate = useCallback((tab: TabId) => {
-    setSelectedRote(null)
-    
-    // Navigate to separate pages
-    if (tab === "browse") {
-      router.push("/browse")
-      return
-    }
-    if (tab === "merits") {
-      router.push("/merits-flaws")
-      return
-    }
-    if (tab === "resources") {
-      router.push("/recommended")
-      return
-    }
-    
-    setActiveTab(tab)
-  }, [router])
-
-  const uniqueTraditions = new Set(rotes.map((r) => r.tradition)).size
-
-  // Show admin panel if activated
-  if (showAdminPanel) {
-    return (
-      <>
-        <div className="min-h-screen relative z-[1] py-6 px-3 md:py-8 md:px-4">
-          <div className="max-w-[1400px] mx-auto bg-background border-[3px] border-primary rounded-lg overflow-hidden relative shadow-[0_0_0_1px_hsl(42_42%_59%),0_0_0_8px_hsl(36_42%_88%),0_0_0_11px_hsl(300_45%_20%),inset_0_0_80px_rgba(139,71,38,0.08),0_14px_40px_rgba(26,21,16,0.25)]">
-            <AdminPanel
-              rotes={rotes}
-              onRotesChange={fetchRotes}
-              onClose={() => setShowAdminPanel(false)}
-            />
-          </div>
-        </div>
-        <Toaster />
-      </>
-    )
-  }
+    }, 0)
+  }, [])
 
   return (
     <>
       <div className="min-h-screen relative z-[1] py-6 px-3 md:py-8 md:px-4">
-        <div
-          className="max-w-[1400px] mx-auto bg-background border-[3px] border-primary rounded-lg overflow-hidden relative
-            shadow-[0_0_0_1px_hsl(42_42%_59%),0_0_0_8px_hsl(36_42%_88%),0_0_0_11px_hsl(300_45%_20%),inset_0_0_80px_rgba(139,71,38,0.08),0_14px_40px_rgba(26,21,16,0.25)]"
-        >
+        <div className="max-w-[1400px] mx-auto bg-background border-[3px] border-primary rounded-lg overflow-hidden relative
+          shadow-[0_0_0_1px_hsl(42_42%_59%),0_0_0_8px_hsl(36_42%_88%),0_0_0_11px_hsl(300_45%_20%),inset_0_0_80px_rgba(139,71,38,0.08),0_14px_40px_rgba(26,21,16,0.25)]">
+          
           {/* Corner decorations */}
           <div className="absolute -top-2 -left-2 text-4xl text-ring drop-shadow-[0_0_10px_rgba(107,45,107,0.8)] z-10 font-serif" aria-hidden="true">
             {'\u25C8'}
@@ -153,7 +80,7 @@ export default function Page() {
             variant="ghost"
             size="sm"
             className="absolute top-4 right-4 z-20 opacity-30 hover:opacity-100 transition-opacity"
-            onClick={() => setShowAdminPanel(true)}
+            onClick={() => router.push('/?admin=true')}
             title="Admin Panel"
           >
             <ShieldAlert className="w-4 h-4" />
@@ -170,9 +97,18 @@ export default function Page() {
           />
 
           <GrimoireHeader />
-          <GrimoireNav activeTab={activeTab} onTabChange={handleNavigate} />
 
-          {/* Main content area with subtle background pattern */}
+          {/* Back to Home button */}
+          <div className="px-6 py-4 border-b-2 border-primary/20">
+            <Link href="/">
+              <Button variant="outline" className="gap-2">
+                <Home className="w-4 h-4" />
+                Back to Home
+              </Button>
+            </Link>
+          </div>
+
+          {/* Main content */}
           <main
             className="min-h-[500px]"
             style={{
@@ -189,18 +125,12 @@ export default function Page() {
             ) : selectedRote ? (
               <RoteDetail rote={selectedRote} onBack={handleBackFromDetail} />
             ) : (
-              <>
-                {activeTab === "home" && (
-                  <HomePanel
-                    totalRotes={rotes.length}
-                    traditions={uniqueTraditions}
-                    onNavigate={handleNavigate}
-                  />
-                )}
-                {activeTab === "add" && (
-                  <AddRotePanel onAdd={handleAddRote} />
-                )}
-              </>
+              <BrowsePanel 
+                rotes={rotes} 
+                onSelectRote={handleSelectRote}
+                shouldRestoreState={returningFromDetail}
+                onStateRestored={() => setReturningFromDetail(false)}
+              />
             )}
           </main>
 
