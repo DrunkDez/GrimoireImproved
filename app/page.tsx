@@ -96,7 +96,11 @@ export default function Page() {
   const handleNavigate = useCallback((tab: TabId) => {
     setSelectedRote(null)
     
-    // Navigate to separate pages for merits and resources
+    // Navigate to separate pages
+    if (tab === "browse") {
+      router.push("/browse")
+      return
+    }
     if (tab === "merits") {
       router.push("/merits-flaws")
       return
@@ -191,17 +195,6 @@ export default function Page() {
                     totalRotes={rotes.length}
                     traditions={uniqueTraditions}
                     onNavigate={handleNavigate}
-                  />
-                )}
-                {activeTab === "browse" && (
-                  <BrowsePanel 
-                    rotes={rotes} 
-                    onSelectRote={handleSelectRote}
-                    shouldRestoreState={returningFromDetail}
-                    onStateRestored={() => {
-                      setReturningFromDetail(false)
-                      browsePanelStateRef.current = null
-                    }}
                   />
                 )}
                 {activeTab === "add" && (
