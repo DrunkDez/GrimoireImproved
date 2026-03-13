@@ -6,7 +6,7 @@ import { prisma } from '@/lib/db'
 // POST /api/characters/[id]/rotes - Assign a rote to a character
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -17,6 +17,8 @@ export async function POST(
         { status: 401 }
       )
     }
+
+    const params = await context.params
 
     // Verify character ownership
     const character = await prisma.character.findFirst({
@@ -90,7 +92,7 @@ export async function POST(
 // DELETE /api/characters/[id]/rotes - Remove a rote from a character
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -101,6 +103,8 @@ export async function DELETE(
         { status: 401 }
       )
     }
+
+    const params = await context.params
 
     // Verify character ownership
     const character = await prisma.character.findFirst({
