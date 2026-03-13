@@ -187,7 +187,7 @@ export function RoteDetail({ rote, onBack }: RoteDetailProps) {
         <div className="bg-muted border-2 border-primary/30 rounded-md p-4 text-center">
           <p className="text-sm text-muted-foreground">
             Create a character to add rotes to your grimoire.{" "}
-            <a href="/characters/create" className="text-primary underline hover:text-accent">
+            <a href="/characters/new" className="text-primary underline hover:text-accent">
               Create Character
             </a>
           </p>
