@@ -37,3 +37,45 @@ export async function GET() {
     )
   }
 }
+
+// POST /api/characters - Create a new character
+export async function POST(request: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions)
+    
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const body = await request.json()
+    const { name, faction, concept, arete, avatar, essence } = body
+
+    // Validate required fields
+    if (!name || !faction) {
+      return NextResponse.json(
+        { error: 'Name and faction are required' },
+        { status: 400 }
+      )
+    }
+
+    const character = await prisma.character.create({
+      data: {
+        name,
+        faction,
+        concept: concept || null,
+        arete: arete || null,
+        avatar: avatar || null,
+        essence: essence || null,
+        userId: session.user.id,
+      },
+    })
+
+    return NextResponse.json(character, { status: 201 })
+  } catch (error) {
+    console.error('Error creating character:', error)
+    return NextResponse.json(
+      { error: 'Failed to create character' },
+      { status: 500 }
+    )
+  }
+}
