@@ -16,6 +16,15 @@ export function ContentManager() {
   const [welcomeTitle, setWelcomeTitle] = useState("")
   const [welcomeText, setWelcomeText] = useState("")
   const [aboutPage, setAboutPage] = useState("")
+  
+  // NEW: About sections
+  const [aboutOwnerTitle, setAboutOwnerTitle] = useState("About the Owner")
+  const [aboutOwnerText, setAboutOwnerText] = useState("")
+  const [aboutOwnerImage, setAboutOwnerImage] = useState("")
+  const [aboutSiteTitle, setAboutSiteTitle] = useState("About the Site")
+  const [aboutSiteText, setAboutSiteText] = useState("")
+  const [aboutSectionOrder, setAboutSectionOrder] = useState("owner,site")
+  
   const [howToUse, setHowToUse] = useState("")
   const [creditsPage, setCreditsPage] = useState("")
   const [isSaving, setIsSaving] = useState(false)
@@ -34,6 +43,15 @@ export function ContentManager() {
         setWelcomeTitle(settings.welcomeTitle || "Welcome, Newly Awakened")
         setWelcomeText(settings.welcomeText || "")
         setAboutPage(settings.aboutPage || "")
+        
+        // NEW: Load About sections
+        setAboutOwnerTitle(settings.aboutOwnerTitle || "About the Owner")
+        setAboutOwnerText(settings.aboutOwnerText || "")
+        setAboutOwnerImage(settings.aboutOwnerImage || "")
+        setAboutSiteTitle(settings.aboutSiteTitle || "About the Site")
+        setAboutSiteText(settings.aboutSiteText || "")
+        setAboutSectionOrder(settings.aboutSectionOrder || "owner,site")
+        
         setHowToUse(settings.howToUse || "")
         setCreditsPage(settings.creditsPage || "")
       }
@@ -221,11 +239,11 @@ An unofficial fan site for Mage: The Ascension"
           </CardContent>
         </Card>
 
-        {/* About Page */}
-        <Card>
+        {/* About Page - TWO SECTIONS */}
+        <Card className="border-accent">
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
-              <span>About Page</span>
+              <span>About Page (Two Sections)</span>
               <a href="/about" target="_blank" rel="noopener noreferrer">
                 <Button variant="outline" size="sm">
                   <Eye className="w-4 h-4 mr-2" />
@@ -234,27 +252,158 @@ An unofficial fan site for Mage: The Ascension"
               </a>
             </CardTitle>
             <CardDescription>
-              The main About page content. Use double line breaks for paragraphs.
+              The About page is split into two sections: About the Owner and About the Site. You can reorder them.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <RichTextEditor
-              id="about-page"
-              label="Content"
-              value={aboutPage}
-              onChange={setAboutPage}
-              rows={12}
-              placeholder="The Paradox Wheel is a comprehensive digital grimoire for Mage: The Ascension...
+          <CardContent className="space-y-6">
+            
+            {/* Section Order */}
+            <div className="space-y-2">
+              <Label>Section Display Order</Label>
+              <div className="flex gap-2">
+                <Button
+                  variant={aboutSectionOrder === "owner,site" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setAboutSectionOrder("owner,site")}
+                >
+                  Owner First
+                </Button>
+                <Button
+                  variant={aboutSectionOrder === "site,owner" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setAboutSectionOrder("site,owner")}
+                >
+                  Site First
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Choose which section appears first on the About page.
+              </p>
+            </div>
 
-Created by passionate fans of the World of Darkness, this tool helps Storytellers and players..."
-            />
-            <Button
-              onClick={() => handleSave('aboutPage', aboutPage)}
-              disabled={isSaving}
-            >
-              <Save className="w-4 h-4 mr-2" />
-              Save About Page
-            </Button>
+            <div className="h-px bg-border" />
+
+            {/* About the Owner Section */}
+            <div className="space-y-4 border-2 border-primary/20 rounded-lg p-4">
+              <h3 className="font-semibold text-lg text-primary">Section 1: About the Owner</h3>
+              
+              <div className="space-y-2">
+                <Label htmlFor="about-owner-title">Section Title</Label>
+                <Input
+                  id="about-owner-title"
+                  value={aboutOwnerTitle}
+                  onChange={(e) => setAboutOwnerTitle(e.target.value)}
+                  placeholder="About the Owner"
+                  className="font-serif"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="about-owner-image">Owner Image URL</Label>
+                <Input
+                  id="about-owner-image"
+                  value={aboutOwnerImage}
+                  onChange={(e) => setAboutOwnerImage(e.target.value)}
+                  placeholder="https://example.com/profile.jpg"
+                  type="url"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Small image shown next to the owner text. Leave empty for no image.
+                </p>
+              </div>
+
+              <RichTextEditor
+                id="about-owner-text"
+                label="Owner Bio/Description"
+                value={aboutOwnerText}
+                onChange={setAboutOwnerText}
+                rows={8}
+                placeholder="Tell visitors about yourself - who you are, why you created this site, your connection to Mage: The Ascension..."
+              />
+            </div>
+
+            <div className="h-px bg-border" />
+
+            {/* About the Site Section */}
+            <div className="space-y-4 border-2 border-primary/20 rounded-lg p-4">
+              <h3 className="font-semibold text-lg text-primary">Section 2: About the Site</h3>
+              
+              <div className="space-y-2">
+                <Label htmlFor="about-site-title">Section Title</Label>
+                <Input
+                  id="about-site-title"
+                  value={aboutSiteTitle}
+                  onChange={(e) => setAboutSiteTitle(e.target.value)}
+                  placeholder="About the Site"
+                  className="font-serif"
+                />
+              </div>
+
+              <RichTextEditor
+                id="about-site-text"
+                label="Site Description"
+                value={aboutSiteText}
+                onChange={setAboutSiteText}
+                rows={8}
+                placeholder="Describe the site's purpose, features, what makes it unique, how it helps players and Storytellers..."
+              />
+            </div>
+
+            <div className="flex gap-3 flex-wrap">
+              <Button
+                onClick={() => handleSave('aboutOwnerTitle', aboutOwnerTitle)}
+                disabled={isSaving}
+                variant="outline"
+                size="sm"
+              >
+                <Save className="w-4 h-4 mr-2" />
+                Save Owner Title
+              </Button>
+              <Button
+                onClick={() => handleSave('aboutOwnerImage', aboutOwnerImage)}
+                disabled={isSaving}
+                variant="outline"
+                size="sm"
+              >
+                <Save className="w-4 h-4 mr-2" />
+                Save Owner Image
+              </Button>
+              <Button
+                onClick={() => handleSave('aboutOwnerText', aboutOwnerText)}
+                disabled={isSaving}
+                variant="outline"
+                size="sm"
+              >
+                <Save className="w-4 h-4 mr-2" />
+                Save Owner Text
+              </Button>
+              <Button
+                onClick={() => handleSave('aboutSiteTitle', aboutSiteTitle)}
+                disabled={isSaving}
+                variant="outline"
+                size="sm"
+              >
+                <Save className="w-4 h-4 mr-2" />
+                Save Site Title
+              </Button>
+              <Button
+                onClick={() => handleSave('aboutSiteText', aboutSiteText)}
+                disabled={isSaving}
+                variant="outline"
+                size="sm"
+              >
+                <Save className="w-4 h-4 mr-2" />
+                Save Site Text
+              </Button>
+              <Button
+                onClick={() => handleSave('aboutSectionOrder', aboutSectionOrder)}
+                disabled={isSaving}
+                size="sm"
+              >
+                <Save className="w-4 h-4 mr-2" />
+                Save Order
+              </Button>
+            </div>
           </CardContent>
         </Card>
 
