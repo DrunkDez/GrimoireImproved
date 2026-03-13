@@ -145,17 +145,26 @@ model Resource {
 }
 
 model SiteSettings {
-  id           String   @id @default(cuid())
-  key          String   @unique
-  value        String   @db.Text
-  footerText   String   @default("") @db.Text
-  welcomeTitle String   @default("Welcome, Newly Awakened") @db.Text
-  welcomeText  String   @default("") @db.Text
-  aboutPage    String   @default("") @db.Text
-  howToUse     String   @default("") @db.Text
-  creditsPage  String   @default("") @db.Text
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id                String   @id @default(cuid())
+  key               String   @unique
+  value             String   @db.Text
+  footerText        String   @default("") @db.Text
+  welcomeTitle      String   @default("Welcome, Newly Awakened") @db.Text
+  welcomeText       String   @default("") @db.Text
+  aboutPage         String   @default("") @db.Text
+  
+  // NEW: Split About into two sections
+  aboutOwnerTitle   String   @default("About the Owner") @db.Text
+  aboutOwnerText    String   @default("") @db.Text
+  aboutOwnerImage   String   @default("") @db.Text  // URL to owner image
+  aboutSiteTitle    String   @default("About the Site") @db.Text
+  aboutSiteText     String   @default("") @db.Text
+  aboutSectionOrder String   @default("owner,site") // "owner,site" or "site,owner"
+  
+  howToUse          String   @default("") @db.Text
+  creditsPage       String   @default("") @db.Text
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 }
 
 model CharacterCreationContent {
@@ -181,3 +190,4 @@ model GuideExpandedContent {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
+
