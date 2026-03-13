@@ -256,7 +256,7 @@ export default function DashboardPage() {
                 <h2 className="text-2xl font-cinzel font-bold text-primary">
                   Your Characters
                 </h2>
-                <Link href="/characters/create">
+                <Link href="/characters/new">
                   <Button className="gap-2">
                     <Plus className="w-4 h-4" />
                     Create New Character
@@ -276,7 +276,7 @@ export default function DashboardPage() {
                     <p className="text-muted-foreground mb-4">
                       Create your first mage character and begin your journey!
                     </p>
-                    <Link href="/characters/create">
+                    <Link href="/characters/new">
                       <Button>Create Your First Character</Button>
                     </Link>
                   </CardContent>

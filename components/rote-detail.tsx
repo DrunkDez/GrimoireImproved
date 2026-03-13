@@ -1,13 +1,31 @@
 "use client"
 
+import { useState, useEffect } from "react"
+import { useSession } from "next-auth/react"
 import type { Rote } from "@/lib/mage-data"
 import { getTraditionSymbol, isTechnocracySphere } from "@/lib/mage-data"
 import { SphereDots } from "./sphere-dots"
 import { MarkdownRenderer } from "@/components/ui/markdown-renderer"
+import { Button } from "@/components/ui/button"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { useToast } from "@/hooks/use-toast"
+import { UserPlus } from "lucide-react"
 
 interface RoteDetailProps {
   rote: Rote
   onBack: () => void
+}
+
+interface Character {
+  id: string
+  name: string
+  faction: string
 }
 
 function formatSpheres(spheres: any): { [key: string]: number } {
@@ -42,9 +60,81 @@ function getAllCombinations(spheres: any): Array<{ [key: string]: number }> {
 }
 
 export function RoteDetail({ rote, onBack }: RoteDetailProps) {
+  const { data: session } = useSession()
+  const { toast } = useToast()
+  const [characters, setCharacters] = useState<Character[]>([])
+  const [selectedCharacterId, setSelectedCharacterId] = useState<string>("")
+  const [isAddingToCharacter, setIsAddingToCharacter] = useState(false)
+  const [isLoadingCharacters, setIsLoadingCharacters] = useState(false)
+
   const sphereData = formatSpheres(rote.spheres);
   const allCombinations = getAllCombinations(rote.spheres);
   const hasMultipleCombinations = allCombinations.length > 1;
+
+  // Fetch user's characters when logged in
+  useEffect(() => {
+    if (session?.user?.id) {
+      fetchCharacters()
+    }
+  }, [session])
+
+  const fetchCharacters = async () => {
+    setIsLoadingCharacters(true)
+    try {
+      const response = await fetch('/api/characters')
+      if (response.ok) {
+        const data = await response.json()
+        setCharacters(data)
+      }
+    } catch (error) {
+      console.error('Error fetching characters:', error)
+    } finally {
+      setIsLoadingCharacters(false)
+    }
+  }
+
+  const handleAddToCharacter = async () => {
+    if (!selectedCharacterId) {
+      toast({
+        title: "No Character Selected",
+        description: "Please select a character first.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    setIsAddingToCharacter(true)
+    try {
+      const response = await fetch(`/api/characters/${selectedCharacterId}/rotes`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ roteId: rote.id }),
+      })
+
+      if (response.ok) {
+        toast({
+          title: "Rote Added!",
+          description: `${rote.name} has been added to your character's grimoire.`,
+        })
+        setSelectedCharacterId("") // Reset selection
+      } else {
+        const data = await response.json()
+        toast({
+          title: "Failed to Add Rote",
+          description: data.error || "This rote may already be in your character's grimoire.",
+          variant: "destructive",
+        })
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to add rote to character.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsAddingToCharacter(false)
+    }
+  }
 
   return (
     <div className="animate-fade-in-up flex flex-col gap-6 p-6 md:p-10">
@@ -62,6 +152,47 @@ export function RoteDetail({ rote, onBack }: RoteDetailProps) {
         <span aria-hidden="true">{'\u2190'}</span>
         Return to Library
       </button>
+
+      {/* Add to Character - Only show if logged in */}
+      {session?.user && characters.length > 0 && (
+        <div className="bg-accent/10 border-2 border-accent rounded-md p-4 flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+          <UserPlus className="w-5 h-5 text-accent flex-shrink-0" />
+          <div className="flex-1 flex flex-col sm:flex-row gap-3 items-start sm:items-center w-full">
+            <span className="font-serif font-semibold text-primary">Add to Character:</span>
+            <Select value={selectedCharacterId} onValueChange={setSelectedCharacterId}>
+              <SelectTrigger className="w-full sm:w-64">
+                <SelectValue placeholder="Select a character..." />
+              </SelectTrigger>
+              <SelectContent>
+                {characters.map((character) => (
+                  <SelectItem key={character.id} value={character.id}>
+                    {character.name} ({character.faction})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button
+              onClick={handleAddToCharacter}
+              disabled={!selectedCharacterId || isAddingToCharacter}
+              className="w-full sm:w-auto"
+            >
+              {isAddingToCharacter ? "Adding..." : "Add Rote"}
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Show message if logged in but no characters */}
+      {session?.user && characters.length === 0 && !isLoadingCharacters && (
+        <div className="bg-muted border-2 border-primary/30 rounded-md p-4 text-center">
+          <p className="text-sm text-muted-foreground">
+            Create a character to add rotes to your grimoire.{" "}
+            <a href="/characters/new" className="text-primary underline hover:text-accent">
+              Create Character
+            </a>
+          </p>
+        </div>
+      )}
 
       {/* Detail card */}
       <div
