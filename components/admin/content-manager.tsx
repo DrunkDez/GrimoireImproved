@@ -195,25 +195,22 @@ Create your character using our step-by-step Character Creation guide"
               </span>
             </CardTitle>
             <CardDescription>
-              Text displayed in the site footer. Each line break creates a new line.
+              Text displayed in the site footer. Use formatting buttons for bold, italic, etc.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="footer-text">Content</Label>
-              <Textarea
-                id="footer-text"
-                value={footerText}
-                onChange={(e) => setFooterText(e.target.value)}
-                rows={4}
-                placeholder="The Paradox Wheel © 2026
+            <RichTextEditor
+              id="footer-text"
+              label="Content"
+              value={footerText}
+              onChange={setFooterText}
+              rows={4}
+              placeholder="The Paradox Wheel © 2026
 An unofficial fan site for Mage: The Ascension"
-                className="font-mono text-sm"
-              />
-              <p className="text-xs text-muted-foreground">
-                Each new line will be displayed as a separate line in the footer.
-              </p>
-            </div>
+            />
+            <p className="text-xs text-muted-foreground">
+              Use **bold** for emphasis, *italic* for titles, or create lists with dashes.
+            </p>
             <Button
               onClick={() => handleSave('footerText', footerText)}
               disabled={isSaving}
