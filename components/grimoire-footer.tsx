@@ -1,14 +1,10 @@
 "use client"
 
 import { useSiteSettings } from "@/hooks/use-site-settings"
+import { MarkdownRenderer } from "@/components/ui/markdown-renderer"
 
 export function GrimoireFooter() {
   const { settings, isLoading } = useSiteSettings()
-
-  // Parse footer text into lines
-  const footerLines = isLoading
-    ? ["Turning the Wheel..."]
-    : settings.footerText.split('\n').filter(line => line.trim())
 
   return (
     <footer className="relative bg-card/80 backdrop-blur-md border-t-2 border-primary/20 py-8 px-6 text-center mt-auto">
@@ -22,18 +18,15 @@ export function GrimoireFooter() {
       />
 
       <div className="max-w-4xl mx-auto space-y-2">
-        {footerLines.map((line, index) => (
-          <p 
-            key={index}
-            className={`font-mono ${
-              index === 0 
-                ? 'text-lg font-semibold text-primary dark:text-accent' 
-                : 'text-sm text-muted-foreground'
-            }`}
-          >
-            {line}
+        {isLoading ? (
+          <p className="font-mono text-sm text-muted-foreground">
+            Turning the Wheel...
           </p>
-        ))}
+        ) : (
+          <div className="prose prose-sm dark:prose-invert mx-auto text-center">
+            <MarkdownRenderer content={settings.footerText} />
+          </div>
+        )}
       </div>
 
       {/* Decorative Wheel symbol */}
