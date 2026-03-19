@@ -389,18 +389,18 @@ function ExpandableStep({
 }) {
   return (
     <div 
-      className={`border-2 ${borderColor} rounded-md cursor-pointer transition-all hover:shadow-md`}
+      className={`border-2 ${borderColor} rounded-lg cursor-pointer transition-all hover:shadow-lg hover:border-primary/50 bg-card`}
       onClick={onToggle}
     >
       <div className="flex gap-4 p-4">
-        <div className={`flex-shrink-0 w-8 h-8 rounded-full ${bgColor} text-primary-foreground flex items-center justify-center font-bold`}>
+        <div className={`flex-shrink-0 w-10 h-10 rounded-full ${bgColor} text-primary-foreground flex items-center justify-center font-bold text-lg`}>
           {number}
         </div>
         <div className="flex-1">
           <div className="flex items-center justify-between">
             <div className="flex-1 pr-2">
-              <h3 className="font-semibold text-primary">{title}</h3>
-              <p className="text-sm text-muted-foreground">
+              <h3 className="font-semibold text-lg text-foreground">{title}</h3>
+              <p className="text-sm text-foreground/80 mt-1">
                 {subtitle}
               </p>
             </div>
@@ -417,8 +417,8 @@ function ExpandableStep({
       
       {isExpanded && expandedText && (
         <div className="px-4 pb-4 pl-16 animate-in slide-in-from-top-2 duration-200">
-          <div className="p-4 bg-muted/30 rounded-md border border-primary/20">
-            <p className="text-sm leading-relaxed whitespace-pre-wrap">
+          <div className="pt-3 border-t border-primary/20">
+            <p className="text-sm leading-relaxed whitespace-pre-wrap text-foreground/90">
               {expandedText}
             </p>
           </div>
@@ -428,3 +428,4 @@ function ExpandableStep({
   )
 
 }
+
