@@ -3,7 +3,7 @@ import { sendContactEmail } from '@/lib/email'
 
 // ⚙️ EDIT THIS EMAIL ADDRESS ⚙️
 // This is where contact form submissions will be sent
-const CONTACT_EMAIL = 'your-email@gmail.com'  // ← CHANGE THIS!
+const CONTACT_EMAIL = 'paradoxwheel@gmail.com'  // ← CHANGE THIS!
 
 // POST /api/contact - Send contact form email
 export async function POST(request: NextRequest) {
