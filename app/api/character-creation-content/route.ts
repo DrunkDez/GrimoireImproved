@@ -10,7 +10,8 @@ export async function GET() {
     
     if (!content) {
       return NextResponse.json({
-        overview: "",
+        concept: "",
+        overview: "", // Keep for backward compatibility
         attributes: "",
         abilities: "",
         spheres: "",
@@ -19,7 +20,8 @@ export async function GET() {
     }
 
     return NextResponse.json({
-      overview: content.overview || "",
+      concept: content.concept || content.overview || "",
+      overview: content.overview || content.concept || "", // Keep for backward compatibility
       attributes: content.attributes || "",
       abilities: content.abilities || "",
       spheres: content.spheres || "",
