@@ -2,36 +2,28 @@
 
 import { useState, useEffect } from "react"
 import { GrimoireHeader } from "@/components/grimoire-header"
+import { GrimoireFooter } from "@/components/grimoire-footer"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Button } from "@/components/ui/button"
 import { 
-  Sparkles, 
-  Dumbbell, 
-  BookOpen,
-  Star,
-  Target,
   ChevronDown,
   ChevronUp,
-  Info
+  BookOpen,
+  ArrowRight
 } from "lucide-react"
+import Link from "next/link"
 
 interface ExpandedContent {
   [key: string]: string
 }
 
-export default function CharacterCreationGuide() {
+export default function CharacterCreationQuickGuide() {
   const [expandedSteps, setExpandedSteps] = useState<string[]>([])
   const [expandedContent, setExpandedContent] = useState<ExpandedContent>({})
-  const [overviewContent, setOverviewContent] = useState("")
-  const [attributesContent, setAttributesContent] = useState("")
-  const [abilitiesContent, setAbilitiesContent] = useState("")
-  const [spheresContent, setSpheresContent] = useState("")
-  const [finishingContent, setFinishingContent] = useState("")
-  const [isLoadingContent, setIsLoadingContent] = useState(true)
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     fetchExpandedContent()
-    fetchCharacterCreationContent()
   }, [])
 
   const fetchExpandedContent = async () => {
@@ -43,24 +35,8 @@ export default function CharacterCreationGuide() {
       }
     } catch (error) {
       console.error('Error fetching expanded content:', error)
-    }
-  }
-
-  const fetchCharacterCreationContent = async () => {
-    try {
-      const response = await fetch('/api/character-creation-content')
-      if (response.ok) {
-        const data = await response.json()
-        setOverviewContent(data.overview || "")
-        setAttributesContent(data.attributes || "")
-        setAbilitiesContent(data.abilities || "")
-        setSpheresContent(data.spheres || "")
-        setFinishingContent(data.finishing || "")
-      }
-    } catch (error) {
-      console.error('Error fetching character creation content:', error)
     } finally {
-      setIsLoadingContent(false)
+      setIsLoading(false)
     }
   }
 
@@ -74,292 +50,160 @@ export default function CharacterCreationGuide() {
 
   return (
     <div className="min-h-screen relative z-[1]">
-      <div className="max-w-[1400px] mx-auto bg-background border-[3px] border-primary rounded-lg overflow-hidden relative my-6 mx-3 md:my-8 md:mx-4">
+      <div className="max-w-[1400px] mx-auto bg-background border-[3px] border-primary rounded-lg overflow-hidden relative my-6 mx-3 md:my-8 md:mx-4 shadow-[0_0_0_1px_hsl(42_42%_59%),0_0_0_8px_hsl(36_42%_88%),0_0_0_11px_hsl(300_45%_20%),inset_0_0_80px_rgba(139,71,38,0.08),0_14px_40px_rgba(26,21,16,0.25)]">
+        
+        {/* Top ornamental border */}
+        <div
+          className="h-1 w-full"
+          style={{
+            background: 'linear-gradient(90deg, transparent 0%, hsl(42 42% 59%) 10%, hsl(300 45% 30%) 30%, hsl(42 42% 59%) 50%, hsl(300 45% 30%) 70%, hsl(42 42% 59%) 90%, transparent 100%)',
+            boxShadow: '0 1px 3px rgba(107,45,107,0.5)',
+          }}
+          aria-hidden="true"
+        />
+        
         <GrimoireHeader />
 
         <div className="p-6 md:p-10 space-y-8">
           {/* Header */}
           <div className="text-center space-y-4">
             <h1 className="text-4xl md:text-5xl font-cinzel font-bold text-primary">
-              Character Creation Guide
+              Quick Character Creation Guide
             </h1>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Learn how to create your Mage: The Ascension character step by step
+            <p className="text-lg text-foreground/80 max-w-2xl mx-auto">
+              Follow these steps to create your Mage: The Ascension character
             </p>
+            
+            {/* Link to detailed guide */}
+            <div className="pt-4">
+              <Link href="/character-creation/guide">
+                <Button variant="outline" className="gap-2">
+                  <BookOpen className="w-4 h-4" />
+                  View Detailed Guide
+                  <ArrowRight className="w-4 h-4" />
+                </Button>
+              </Link>
+            </div>
           </div>
 
-          {/* Main Guide */}
-          <Tabs defaultValue="overview" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-5">
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="attributes">Attributes</TabsTrigger>
-              <TabsTrigger value="abilities">Abilities</TabsTrigger>
-              <TabsTrigger value="spheres">Spheres</TabsTrigger>
-              <TabsTrigger value="finishing">Finishing</TabsTrigger>
-            </TabsList>
+          {/* Quick Steps Card */}
+          <Card className="border-2 border-primary">
+            <CardHeader>
+              <CardTitle className="font-cinzel text-2xl">Character Creation Steps</CardTitle>
+              <CardDescription>Click each step to see more details</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid gap-4 md:grid-cols-2">
+                <ExpandableStep
+                  id="concept"
+                  number={1}
+                  title="Concept & Tradition"
+                  subtitle="Choose your character concept, Tradition, and basic identity"
+                  expandedText={expandedContent.concept}
+                  isExpanded={expandedSteps.includes('concept')}
+                  onToggle={() => toggleStep('concept')}
+                  borderColor="border-primary/30"
+                  bgColor="bg-primary"
+                />
 
-            {/* Overview Tab */}
-            <TabsContent value="overview" className="space-y-6">
-              {/* Editable Overview Content */}
-              {overviewContent && (
-                <Card className="border-2 border-accent">
-                  <CardHeader>
-                    <CardTitle className="font-cinzel text-2xl flex items-center gap-2">
-                      <Info className="w-6 h-6" />
-                      Getting Started
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="prose prose-sm max-w-none">
-                      {overviewContent.split('\n\n').filter(p => p.trim()).map((paragraph, index) => (
-                        <p key={index} className="mb-4 text-foreground leading-relaxed">
-                          {paragraph}
-                        </p>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
+                <ExpandableStep
+                  id="attributes"
+                  number={2}
+                  title="Attributes"
+                  subtitle="Prioritize Physical, Social, and Mental (7/5/3 dots + 1 free each)"
+                  expandedText={expandedContent.attributes}
+                  isExpanded={expandedSteps.includes('attributes')}
+                  onToggle={() => toggleStep('attributes')}
+                  borderColor="border-primary/30"
+                  bgColor="bg-primary"
+                />
 
-              <Card className="border-2 border-primary">
-                <CardHeader>
-                  <CardTitle className="font-cinzel text-2xl">Character Creation Steps</CardTitle>
-                  <CardDescription>Click each step to see more details</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid gap-4 md:grid-cols-2">
-                    {/* All your existing expandable steps */}
-                    <ExpandableStep
-                      id="concept"
-                      number={1}
-                      title="Concept & Tradition"
-                      subtitle="Choose your character concept, Tradition, and basic identity"
-                      expandedText={expandedContent.concept}
-                      isExpanded={expandedSteps.includes('concept')}
-                      onToggle={() => toggleStep('concept')}
-                      borderColor="border-primary/30"
-                      bgColor="bg-primary"
-                    />
+                <ExpandableStep
+                  id="abilities"
+                  number={3}
+                  title="Abilities"
+                  subtitle="Prioritize Talents, Skills, Knowledges (13/9/5 dots, max 3 each)"
+                  expandedText={expandedContent.abilities}
+                  isExpanded={expandedSteps.includes('abilities')}
+                  onToggle={() => toggleStep('abilities')}
+                  borderColor="border-accent/30"
+                  bgColor="bg-accent"
+                />
 
-                    <ExpandableStep
-                      id="attributes"
-                      number={2}
-                      title="Attributes"
-                      subtitle="Prioritize Physical, Social, and Mental (7/5/3 dots + 1 free each)"
-                      expandedText={expandedContent.attributes}
-                      isExpanded={expandedSteps.includes('attributes')}
-                      onToggle={() => toggleStep('attributes')}
-                      borderColor="border-primary/30"
-                      bgColor="bg-primary"
-                    />
+                <ExpandableStep
+                  id="spheres"
+                  number={4}
+                  title="Spheres"
+                  subtitle="Choose your magical Spheres (6 dots, affinity at 1, max 3 each)"
+                  expandedText={expandedContent.spheres}
+                  isExpanded={expandedSteps.includes('spheres')}
+                  onToggle={() => toggleStep('spheres')}
+                  borderColor="border-ring/30"
+                  bgColor="bg-ring"
+                />
 
-                    <ExpandableStep
-                      id="abilities"
-                      number={3}
-                      title="Abilities"
-                      subtitle="Prioritize Talents, Skills, Knowledges (13/9/5 dots, max 3 each)"
-                      expandedText={expandedContent.abilities}
-                      isExpanded={expandedSteps.includes('abilities')}
-                      onToggle={() => toggleStep('abilities')}
-                      borderColor="border-accent/30"
-                      bgColor="bg-accent"
-                    />
+                <ExpandableStep
+                  id="backgrounds"
+                  number={5}
+                  title="Backgrounds"
+                  subtitle="Select Backgrounds like Avatar, Resources, Allies (7 dots total)"
+                  expandedText={expandedContent.backgrounds}
+                  isExpanded={expandedSteps.includes('backgrounds')}
+                  onToggle={() => toggleStep('backgrounds')}
+                  borderColor="border-primary/30"
+                  bgColor="bg-primary"
+                />
 
-                    <ExpandableStep
-                      id="spheres"
-                      number={4}
-                      title="Spheres"
-                      subtitle="Choose your magical Spheres (6 dots, affinity at 1, max 3 each)"
-                      expandedText={expandedContent.spheres}
-                      isExpanded={expandedSteps.includes('spheres')}
-                      onToggle={() => toggleStep('spheres')}
-                      borderColor="border-ring/30"
-                      bgColor="bg-ring"
-                    />
+                <ExpandableStep
+                  id="freebies"
+                  number={6}
+                  title="Freebie Points"
+                  subtitle="Spend 15 freebie points to customize your character"
+                  expandedText={expandedContent.freebies}
+                  isExpanded={expandedSteps.includes('freebies')}
+                  onToggle={() => toggleStep('freebies')}
+                  borderColor="border-primary/30"
+                  bgColor="bg-primary"
+                />
+              </div>
 
-                    <ExpandableStep
-                      id="backgrounds"
-                      number={5}
-                      title="Backgrounds"
-                      subtitle="Select Backgrounds like Avatar, Resources, Allies (7 dots total)"
-                      expandedText={expandedContent.backgrounds}
-                      isExpanded={expandedSteps.includes('backgrounds')}
-                      onToggle={() => toggleStep('backgrounds')}
-                      borderColor="border-primary/30"
-                      bgColor="bg-primary"
-                    />
+              {/* Freebie costs reference */}
+              <div className="mt-8 p-6 bg-accent/10 border-2 border-accent/30 rounded-lg">
+                <h3 className="font-cinzel text-lg font-bold text-primary mb-4">
+                  Freebie Point Costs
+                </h3>
+                <div className="grid md:grid-cols-2 gap-4 text-sm">
+                  <ul className="space-y-2">
+                    <li>• <strong>Attributes:</strong> 5 Freebie points per dot</li>
+                    <li>• <strong>Abilities:</strong> 2 Freebie points per dot</li>
+                    <li>• <strong>Backgrounds:</strong> 1 Freebie point per dot</li>
+                    <li>• <strong>Spheres:</strong> 7 Freebie points per dot</li>
+                  </ul>
+                  <ul className="space-y-2">
+                    <li>• <strong>Arete:</strong> 4 Freebie points per dot</li>
+                    <li>• <strong>Willpower:</strong> 1 Freebie point per dot</li>
+                    <li>• <strong>Quintessence:</strong> 1 Freebie point for 4 points</li>
+                  </ul>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-                    <ExpandableStep
-                      id="freebies"
-                      number={6}
-                      title="Freebie Points"
-                      subtitle="Spend 15 freebie points to customize your character"
-                      expandedText={expandedContent.freebies}
-                      isExpanded={expandedSteps.includes('freebies')}
-                      onToggle={() => toggleStep('freebies')}
-                      borderColor="border-accent/30"
-                      bgColor="bg-accent"
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Quick Reference Card */}
-              <Card className="border-2 border-ring">
-                <CardHeader>
-                  <CardTitle className="font-cinzel text-2xl">Quick Reference</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <div className="space-y-2">
-                      <h3 className="font-semibold text-primary">Starting Points</h3>
-                      <ul className="space-y-1 text-sm">
-                        <li>• <strong>Attributes:</strong> 1 free in each (9 total), then 7/5/3</li>
-                        <li>• <strong>Abilities:</strong> 13/9/5 dots (max 3 per ability)</li>
-                        <li>• <strong>Spheres:</strong> 6 dots (affinity at 1, max 3)</li>
-                        <li>• <strong>Backgrounds:</strong> 7 dots</li>
-                        <li>• <strong>Arete:</strong> Starts at 1</li>
-                        <li>• <strong>Willpower:</strong> Starts at 5</li>
-                        <li>• <strong>Quintessence:</strong> Equal to Avatar rating</li>
-                      </ul>
-                    </div>
-
-                    <div className="space-y-2">
-                      <h3 className="font-semibold text-accent">Freebie Point Costs</h3>
-                      <ul className="space-y-1 text-sm">
-                        <li>• <strong>Attribute:</strong> 5 Freebie points per dot</li>
-                        <li>• <strong>Ability:</strong> 2 Freebie points per dot</li>
-                        <li>• <strong>Sphere:</strong> 7 Freebie points per dot</li>
-                        <li>• <strong>Background:</strong> 1 Freebie point per dot</li>
-                        <li>• <strong>Arete:</strong> 4 Freebie points per dot</li>
-                        <li>• <strong>Willpower:</strong> 1 Freebie point per dot</li>
-                        <li>• <strong>Quintessence:</strong> 1 Freebie point for 4 points</li>
-                      </ul>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            {/* Attributes Tab */}
-            <TabsContent value="attributes" className="space-y-6">
-              {/* Editable Attributes Content */}
-              {attributesContent && (
-                <Card className="border-2 border-accent">
-                  <CardHeader>
-                    <CardTitle className="font-cinzel text-2xl flex items-center gap-2">
-                      <BookOpen className="w-6 h-6" />
-                      Understanding Attributes
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="prose prose-sm max-w-none">
-                      {attributesContent.split('\n\n').filter(p => p.trim()).map((paragraph, index) => (
-                        <p key={index} className="mb-4 text-foreground leading-relaxed whitespace-pre-line">
-                          {paragraph}
-                        </p>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-
-              <Card className="border-2 border-primary">
-                <CardHeader>
-                  <CardTitle className="font-cinzel text-2xl flex items-center gap-2">
-                    <Dumbbell className="w-6 h-6" />
-                    Attributes
-                  </CardTitle>
-                  <CardDescription>
-                    Your character's innate capabilities - each starts at 1 dot
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="bg-primary/10 border border-primary/30 rounded-md p-4 mb-4">
-                    <p className="text-sm">
-                      <strong>How it works:</strong> Each of the 9 attributes starts at 1 dot. 
-                      Prioritize Physical, Social, and Mental - choosing which gets 7 dots (Primary), 
-                      5 dots (Secondary), and 3 dots (Tertiary).
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            {/* Abilities Tab */}
-            <TabsContent value="abilities" className="space-y-6">
-              {/* Editable Abilities Content */}
-              {abilitiesContent && (
-                <Card className="border-2 border-accent">
-                  <CardHeader>
-                    <CardTitle className="font-cinzel text-2xl flex items-center gap-2">
-                      <BookOpen className="w-6 h-6" />
-                      Understanding Abilities
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="prose prose-sm max-w-none">
-                      {abilitiesContent.split('\n\n').filter(p => p.trim()).map((paragraph, index) => (
-                        <p key={index} className="mb-4 text-foreground leading-relaxed whitespace-pre-line">
-                          {paragraph}
-                        </p>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-            </TabsContent>
-
-            {/* Spheres Tab */}
-            <TabsContent value="spheres" className="space-y-6">
-              {/* Editable Spheres Content */}
-              {spheresContent && (
-                <Card className="border-2 border-accent">
-                  <CardHeader>
-                    <CardTitle className="font-cinzel text-2xl flex items-center gap-2">
-                      <Sparkles className="w-6 h-6" />
-                      Understanding Spheres
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="prose prose-sm max-w-none">
-                      {spheresContent.split('\n\n').filter(p => p.trim()).map((paragraph, index) => (
-                        <p key={index} className="mb-4 text-foreground leading-relaxed whitespace-pre-line">
-                          {paragraph}
-                        </p>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-            </TabsContent>
-
-            {/* Finishing Tab */}
-            <TabsContent value="finishing" className="space-y-6">
-              {/* Editable Finishing Content */}
-              {finishingContent && (
-                <Card className="border-2 border-accent">
-                  <CardHeader>
-                    <CardTitle className="font-cinzel text-2xl flex items-center gap-2">
-                      <Target className="w-6 h-6" />
-                      Finishing Touches
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="prose prose-sm max-w-none">
-                      {finishingContent.split('\n\n').filter(p => p.trim()).map((paragraph, index) => (
-                        <p key={index} className="mb-4 text-foreground leading-relaxed whitespace-pre-line">
-                          {paragraph}
-                        </p>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-            </TabsContent>
-
-          </Tabs>
+          {/* CTA to detailed guide */}
+          <div className="text-center">
+            <p className="text-muted-foreground mb-4">
+              Want more detailed explanations for each category?
+            </p>
+            <Link href="/character-creation/guide">
+              <Button size="lg" className="gap-2">
+                <BookOpen className="w-5 h-5" />
+                View Detailed Character Creation Guide
+              </Button>
+            </Link>
+          </div>
         </div>
+
+        <GrimoireFooter />
       </div>
     </div>
   )
@@ -426,6 +270,4 @@ function ExpandableStep({
       )}
     </div>
   )
-
 }
-
