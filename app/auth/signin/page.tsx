@@ -18,6 +18,15 @@ export default function SignInPage() {
             </Link>
           </div>
           <LoginForm />
+          
+          {/* Forgot Password Link */}
+          <div className="text-center">
+            <Link href="/auth/forgot-password">
+              <Button variant="link" className="text-sm">
+                Forgot your password?
+              </Button>
+            </Link>
+          </div>
         </div>
       </div>
       <Toaster />

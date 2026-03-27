@@ -2,6 +2,7 @@
 
 import { useSiteSettings } from "@/hooks/use-site-settings"
 import { MarkdownRenderer } from "@/components/ui/markdown-renderer"
+import Link from "next/link"
 
 export function GrimoireFooter() {
   const { settings, isLoading } = useSiteSettings()
@@ -17,7 +18,7 @@ export function GrimoireFooter() {
         aria-hidden="true"
       />
 
-      <div className="max-w-4xl mx-auto space-y-2">
+      <div className="max-w-4xl mx-auto space-y-4">
         {isLoading ? (
           <p className="font-mono text-sm text-muted-foreground">
             Turning the Wheel...
@@ -27,6 +28,16 @@ export function GrimoireFooter() {
             <MarkdownRenderer content={settings.footerText} />
           </div>
         )}
+        
+        {/* Contact Link */}
+        <div className="pt-2">
+          <Link 
+            href="/contact" 
+            className="text-sm text-muted-foreground hover:text-primary transition-colors underline"
+          >
+            Contact Us
+          </Link>
+        </div>
       </div>
 
       {/* Decorative Wheel symbol */}
