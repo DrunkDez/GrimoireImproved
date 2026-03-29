@@ -2,85 +2,146 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Modern font stack with better fallbacks */
 body {
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  font-feature-settings: 'kern' 1, 'liga' 1, 'calt' 1;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
   }
+  
+  /* Smooth scroll behavior */
+  .smooth-scroll {
+    scroll-behavior: smooth;
+  }
+  
+  /* Modern backdrop blur */
+  .backdrop-blur-subtle {
+    backdrop-filter: blur(8px);
+  }
+  
+  /* Smooth transitions */
+  .transition-smooth {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
 }
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 3.9%;
+    /* Enhanced color palette with better contrast */
+    --background: 36 42% 95%;
+    --foreground: 30 20% 15%;
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 3.9%;
+    --card-foreground: 30 20% 15%;
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 3.9%;
-    --primary: 0 0% 9%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 96.1%;
-    --secondary-foreground: 0 0% 9%;
-    --muted: 0 0% 96.1%;
-    --muted-foreground: 0 0% 45.1%;
-    --accent: 0 0% 96.1%;
-    --accent-foreground: 0 0% 9%;
-    --destructive: 0 84.2% 60.2%;
+    --popover-foreground: 30 20% 15%;
+    
+    /* Rich primary colors */
+    --primary: 300 45% 25%;
+    --primary-foreground: 42 42% 95%;
+    
+    /* Warm secondary tones */
+    --secondary: 36 42% 88%;
+    --secondary-foreground: 30 20% 15%;
+    
+    /* Subtle muted colors */
+    --muted: 36 30% 90%;
+    --muted-foreground: 30 10% 45%;
+    
+    /* Accent color (golden) */
+    --accent: 42 42% 59%;
+    --accent-foreground: 30 20% 15%;
+    
+    /* Mystical ring color */
+    --ring: 42 42% 59%;
+    
+    /* Destructive states */
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
-    --ring: 0 0% 3.9%;
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
+    
+    /* Borders and inputs */
+    --border: 36 30% 85%;
+    --input: 36 30% 85%;
+    
+    /* Charts */
+    --chart-1: 42 60% 55%;
+    --chart-2: 300 45% 45%;
+    --chart-3: 36 50% 50%;
+    --chart-4: 280 40% 55%;
+    --chart-5: 20 55% 60%;
+    
+    /* Border radius */
     --radius: 0.5rem;
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    
+    /* Sidebar */
+    --sidebar-background: 36 42% 98%;
+    --sidebar-foreground: 30 20% 20%;
+    --sidebar-primary: 300 45% 25%;
+    --sidebar-primary-foreground: 42 42% 95%;
+    --sidebar-accent: 36 42% 93%;
+    --sidebar-accent-foreground: 30 20% 15%;
+    --sidebar-border: 36 30% 88%;
+    --sidebar-ring: 42 42% 59%;
   }
+  
   .dark {
-    --background: 0 0% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 0 0% 14.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 0 0% 14.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
+    /* Dark mode with warm tones */
+    --background: 30 20% 8%;
+    --foreground: 42 42% 95%;
+    --card: 30 20% 10%;
+    --card-foreground: 42 42% 95%;
+    --popover: 30 20% 8%;
+    --popover-foreground: 42 42% 95%;
+    
+    /* Primary in dark mode */
+    --primary: 42 42% 70%;
+    --primary-foreground: 30 20% 10%;
+    
+    /* Secondary tones */
+    --secondary: 30 15% 15%;
+    --secondary-foreground: 42 42% 95%;
+    
+    /* Muted dark */
+    --muted: 30 15% 18%;
+    --muted-foreground: 36 20% 65%;
+    
+    /* Accent */
+    --accent: 42 42% 59%;
+    --accent-foreground: 30 20% 10%;
+    
+    /* Ring */
+    --ring: 42 42% 70%;
+    
+    /* Destructive */
+    --destructive: 0 70% 50%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 0 0% 83.1%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    
+    /* Borders */
+    --border: 30 15% 20%;
+    --input: 30 15% 20%;
+    
+    /* Charts */
+    --chart-1: 42 65% 60%;
+    --chart-2: 300 50% 55%;
+    --chart-3: 36 55% 58%;
+    --chart-4: 280 45% 60%;
+    --chart-5: 20 60% 65%;
+    
+    /* Sidebar dark */
+    --sidebar-background: 30 20% 10%;
+    --sidebar-foreground: 42 42% 95%;
+    --sidebar-primary: 42 42% 70%;
+    --sidebar-primary-foreground: 30 20% 10%;
+    --sidebar-accent: 30 15% 15%;
+    --sidebar-accent-foreground: 42 42% 95%;
+    --sidebar-border: 30 15% 18%;
+    --sidebar-ring: 42 42% 70%;
   }
 }
 
@@ -88,7 +149,136 @@ body {
   * {
     @apply border-border;
   }
+  
   body {
     @apply bg-background text-foreground;
+    scroll-behavior: smooth;
+  }
+  
+  /* Better focus styles */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+  
+  /* Smooth selection */
+  ::selection {
+    background-color: hsl(var(--accent) / 0.3);
+    color: hsl(var(--foreground));
+  }
+  
+  /* Improved link styles */
+  a {
+    @apply transition-colors duration-200;
+  }
+  
+  /* Better button interactions */
+  button {
+    @apply transition-all duration-200;
+  }
+  
+  /* Smooth animations */
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes slide-in {
+    from {
+      opacity: 0;
+      transform: translateX(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  
+  @keyframes spin-slow {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  
+  .animate-fade-in {
+    animation: fade-in 0.4s ease-out;
+  }
+  
+  .animate-slide-in {
+    animation: slide-in 0.3s ease-out;
+  }
+  
+  .animate-spin-slow {
+    animation: spin-slow 8s linear infinite;
+  }
+  
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--muted));
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--accent) / 0.5);
+    border-radius: 5px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--accent));
+  }
+  
+  /* Typography improvements */
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+  }
+  
+  p {
+    line-height: 1.7;
+  }
+  
+  /* Better code blocks */
+  code {
+    @apply rounded bg-muted px-1.5 py-0.5 font-mono text-sm;
+  }
+  
+  pre code {
+    @apply block p-4 overflow-x-auto;
+  }
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Print styles */
+@media print {
+  body {
+    background: white;
+    color: black;
+  }
+  
+  .no-print {
+    display: none !important;
   }
 }
