@@ -1373,17 +1373,26 @@ function FreebiePointsPhase({ state, setState, onBack, onContinue }: {
 
   // Calculate points
   const calculatePoints = () => {
-    let spent = 0
-    Object.values(state.freebieDots.attributes).forEach(d => spent += d * 5)
-    Object.values(state.freebieDots.abilities).forEach(d => spent += d * 2)
-    Object.values(state.freebieDots.spheres).forEach(d => spent += d * 7)
-    Object.values(state.freebieDots.backgrounds).forEach(d => spent += d * 1)
-    spent += state.freebieDots.arete * 4
-    spent += state.freebieDots.willpower * 1
-    state.merits.forEach(m => spent += m.cost)
-    state.flaws.forEach(f => spent -= f.cost)
-    return 15 - spent
-  }
+  let spent = 0
+  
+  // Calculate spent points
+  Object.values(state.freebieDots.attributes).forEach(d => spent += d * 5)
+  Object.values(state.freebieDots.abilities).forEach(d => spent += d * 2)
+  Object.values(state.freebieDots.spheres).forEach(d => spent += d * 7)
+  Object.values(state.freebieDots.backgrounds).forEach(d => spent += d * 1)
+  spent += state.freebieDots.arete * 4
+  spent += state.freebieDots.willpower * 1
+  state.merits.forEach(m => spent += m.cost)
+  
+  // Calculate points gained from flaws
+  const flawPoints = state.flaws.reduce((sum, f) => sum + f.cost, 0)
+  
+  // Total available = base 15 + flaw points
+  const totalAvailable = 15 + flawPoints
+  
+  // Return remaining
+  return totalAvailable - spent
+}
 
   const remaining = calculatePoints()
 
@@ -1651,10 +1660,10 @@ function FreebiePointsPhase({ state, setState, onBack, onContinue }: {
               </CardHeader>
               <CardContent>
                 <FreebieDotRating label="Arete" baseDots={1} 
-                  freebieDots={state.freebieDots.arete}
-                  onAdd={() => addDot("arete", "arete", 4)}
-                  onRemove={() => removeDot("arete", "arete")} 
-                  maxDots={10} cost={4} />
+            freebieDots={state.freebieDots.arete}
+            onAdd={() => addDot("arete", "arete", 4)}
+            onRemove={() => removeDot("arete", "arete")} 
+            maxDots={3} cost={4} /> 
               </CardContent>
             </Card>
             <Card className="border-2 border-primary">
