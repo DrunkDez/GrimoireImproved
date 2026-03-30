@@ -971,57 +971,9 @@ export default function FullMageSheetCreation() {
               />
             )}
 
-            {/* PHASE: COMPLETE */}
+            {/* PHASE: COMPLETE - REPLACED WITH NEW CompletePhase COMPONENT */}
             {state.phase === "complete" && (
-              <div className="space-y-6 py-8">
-                <div className="text-center space-y-4">
-                  <div className="w-20 h-20 mx-auto rounded-full flex items-center justify-center" style={{
-                    background: 'linear-gradient(135deg, #d4af37, #8b6914)'
-                  }}>
-                    <Check className="w-10 h-10" style={{ color: '#2d1b4e' }} />
-                  </div>
-                  <h2 className="text-3xl font-bold" style={{ fontFamily: 'Georgia, serif', color: '#4a2c2a' }}>
-                    Character Creation Complete!
-                  </h2>
-                  <p style={{ color: '#6b4423' }}>
-                    {state.name || "Your character"} is ready for the next phase.
-                  </p>
-                </div>
-
-                {/* Summary */}
-                <div className="grid grid-cols-2 gap-6 max-w-3xl mx-auto">
-                  <div className="p-4 border-2 rounded" style={{ borderColor: '#8b4513', background: 'rgba(139, 69, 19, 0.03)' }}>
-                    <h3 className="font-semibold mb-3 text-center" style={{ color: '#4a2c2a' }}>✅ Completed</h3>
-                    <ul className="text-sm space-y-2" style={{ color: '#6b4423' }}>
-                      <li>✓ Basic Information</li>
-                      <li>✓ Attributes (15 dots)</li>
-                      <li>✓ Abilities (27 dots)</li>
-                      <li>✓ Spheres (6 dots)</li>
-                      <li>✓ Backgrounds (7 dots)</li>
-                      <li>✓ Arete: 1 (locked)</li>
-                      <li>✓ Willpower: 5 (locked)</li>
-                    </ul>
-                  </div>
-
-                  <div className="p-4 border-2 rounded" style={{ borderColor: '#8b4513', background: 'rgba(212, 175, 55, 0.05)' }}>
-                    <h3 className="font-semibold mb-3 text-center" style={{ color: '#d4af37' }}>⏳ Coming Next</h3>
-                    <ul className="text-sm space-y-2" style={{ color: '#6b4423' }}>
-                      <li>→ Merits & Flaws</li>
-                      <li>→ Freebie Points (15)</li>
-                      <li>→ Raise Arete</li>
-                      <li>→ Raise Willpower</li>
-                      <li>→ Add more dots</li>
-                      <li>→ Final touches</li>
-                    </ul>
-                  </div>
-                </div>
-
-                <div className="text-center pt-4">
-                  <p className="text-sm italic mb-4" style={{ color: '#8b6914' }}>
-                    Your character sheet is saved and ready for Merits, Flaws, and Freebie Points!
-                  </p>
-                </div>
-              </div>
+              <CompletePhase state={state} />
             )}
           </div>
         </div>
@@ -1444,10 +1396,17 @@ function FreebiePointsPhase({ state, setState, onBack, onContinue }: {
     setState(newState)
   }
 
-  // FIX: Use absolute cost for merits
+  // FIX: Use absolute cost for merits and prevent duplicates
   const addMerit = (merit: any) => {
-    const meritCost = Math.abs(merit.cost)  // Fix: Use absolute value
+    const meritCost = Math.abs(merit.cost)
     if (remaining < meritCost) return
+    
+    // FIX: Check if merit already selected
+    if (state.merits.some(m => m.id === merit.id)) {
+      alert("You've already selected this merit!")
+      return
+    }
+    
     setState({
       ...state,
       merits: [...state.merits, { id: merit.id, name: merit.name, cost: meritCost }]
@@ -1460,14 +1419,22 @@ function FreebiePointsPhase({ state, setState, onBack, onContinue }: {
     setState({ ...state, merits: newMerits })
   }
 
-  // FIX: Use absolute cost for flaws and enforce max 7 points
+  // FIX: Use absolute cost for flaws, enforce max 7 points, and prevent duplicates
   const addFlaw = (flaw: any) => {
     const flawPoints = state.flaws.reduce((sum, f) => sum + Math.abs(f.cost), 0)
     const flawCost = Math.abs(flaw.cost)
+    
     if (flawPoints + flawCost > 7) {
       alert("Maximum 7 points from flaws!")
       return
     }
+    
+    // FIX: Check if flaw already selected
+    if (state.flaws.some(f => f.id === flaw.id)) {
+      alert("You've already selected this flaw!")
+      return
+    }
+    
     setState({
       ...state,
       flaws: [...state.flaws, { id: flaw.id, name: flaw.name, cost: flawCost }]
@@ -1806,7 +1773,7 @@ function FreebiePointsPhase({ state, setState, onBack, onContinue }: {
                         <Badge>{Math.abs(merit.cost)} pts</Badge>
                         <button 
                           onClick={() => addMerit(merit)}
-                          disabled={remaining < Math.abs(merit.cost)}
+                          disabled={remaining < Math.abs(merit.cost) || state.merits.some(m => m.id === merit.id)}
                           className="text-xs px-3 py-1 rounded disabled:opacity-30"
                           style={{ background: '#d4af37', color: '#2d1b4e' }}
                         >Add</button>
@@ -1839,21 +1806,27 @@ function FreebiePointsPhase({ state, setState, onBack, onContinue }: {
                 </div>
               )}
               <div className="space-y-2 max-h-96 overflow-y-auto">
-                {flaws.map(flaw => (
-                  <div key={flaw.id} className="p-3 border rounded">
-                    <div className="flex justify-between items-start mb-2">
-                      <span className="font-semibold text-sm">{flaw.name}</span>
-                      <div className="flex items-center gap-2">
-                        <Badge className="bg-green-600">+{Math.abs(flaw.cost)} pts</Badge>
-                        <button 
-                          onClick={() => addFlaw(flaw)}
-                          className="text-xs px-3 py-1 rounded bg-green-600 text-white"
-                        >Add</button>
+                {flaws.map(flaw => {
+                  const flawCost = Math.abs(flaw.cost)
+                  const currentFlawPoints = state.flaws.reduce((sum, f) => sum + f.cost, 0)
+                  const isSelected = state.flaws.some(f => f.id === flaw.id)
+                  return (
+                    <div key={flaw.id} className="p-3 border rounded">
+                      <div className="flex justify-between items-start mb-2">
+                        <span className="font-semibold text-sm">{flaw.name}</span>
+                        <div className="flex items-center gap-2">
+                          <Badge className="bg-green-600">+{flawCost} pts</Badge>
+                          <button 
+                            onClick={() => addFlaw(flaw)}
+                            disabled={isSelected || currentFlawPoints + flawCost > 7}
+                            className="text-xs px-3 py-1 rounded bg-green-600 text-white disabled:opacity-30"
+                          >Add</button>
+                        </div>
                       </div>
+                      <p className="text-xs" style={{ color: '#6b4423' }}>{flaw.description}</p>
                     </div>
-                    <p className="text-xs" style={{ color: '#6b4423' }}>{flaw.description}</p>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             </CardContent>
           </Card>
@@ -1873,6 +1846,251 @@ function FreebiePointsPhase({ state, setState, onBack, onContinue }: {
               : `Spend ${remaining} more points`
           }
         </SheetButton>
+      </div>
+    </div>
+  )
+}
+
+// NEW: CompletePhase COMPONENT with PDF Generation
+function CompletePhase({ state }: { state: CharacterState }) {
+  const [isGenerating, setIsGenerating] = useState(false)
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  const generatePDF = async () => {
+    setIsGenerating(true)
+    setError(null)
+
+    try {
+      // Fetch the PDF template
+      const existingPdfBytes = await fetch('/M20_Mage35thAnniversary_1-Page_Interactive.pdf').then(res =>
+        res.arrayBuffer()
+      )
+
+      const { PDFDocument } = await import('pdf-lib')
+      const pdfDoc = await PDFDocument.load(existingPdfBytes)
+      const form = pdfDoc.getForm()
+
+      // Helper to safely set field
+      const setField = (fieldName: string, value: string | number) => {
+        try {
+          const field = form.getTextField(fieldName)
+          field.setText(String(value))
+        } catch (e) {
+          console.warn(`Field ${fieldName} not found`)
+        }
+      }
+
+      // Helper to fill dots (checkboxes)
+      const fillDots = (baseName: string, count: number, maxDots: number = 5) => {
+        for (let i = 1; i <= maxDots; i++) {
+          try {
+            const field = form.getCheckBox(`${baseName}${i}`)
+            if (i <= count) {
+              field.check()
+            } else {
+              field.uncheck()
+            }
+          } catch (e) {
+            console.warn(`Checkbox ${baseName}${i} not found`)
+          }
+        }
+      }
+
+      // Helper to get total dots including freebies
+      const getTotalDots = (baseDots: number, category: string, name: string) => {
+        return baseDots + (state.freebieDots[category as keyof typeof state.freebieDots][name] || 0)
+      }
+
+      // Basic Info
+      setField('Name', state.name)
+      setField('Player', state.player)
+      setField('Chronicle', state.chronicle)
+      setField('Nature', state.nature)
+      setField('Demeanor', state.demeanor)
+      setField('Essence', state.essence)
+      setField('Affiliation', state.affiliation)
+      setField('Sect', state.sect)
+      setField('Concept', state.concept)
+
+      // Attributes
+      fillDots('Strength', getTotalDots(state.attributes.strength, 'attributes', 'strength'))
+      fillDots('Dexterity', getTotalDots(state.attributes.dexterity, 'attributes', 'dexterity'))
+      fillDots('Stamina', getTotalDots(state.attributes.stamina, 'attributes', 'stamina'))
+      fillDots('Charisma', getTotalDots(state.attributes.charisma, 'attributes', 'charisma'))
+      fillDots('Manipulation', getTotalDots(state.attributes.manipulation, 'attributes', 'manipulation'))
+      fillDots('Appearance', getTotalDots(state.attributes.appearance, 'attributes', 'appearance'))
+      fillDots('Perception', getTotalDots(state.attributes.perception, 'attributes', 'perception'))
+      fillDots('Intelligence', getTotalDots(state.attributes.intelligence, 'attributes', 'intelligence'))
+      fillDots('Wits', getTotalDots(state.attributes.wits, 'attributes', 'wits'))
+
+      // Abilities with Specialties
+      const abilityFields = {
+        Alertness: 'alertness', Art: 'art', Athletics: 'athletics', Awareness: 'awareness', Brawl: 'brawl',
+        Empathy: 'empathy', Expression: 'expression', Intimidation: 'intimidation', Leadership: 'leadership',
+        Streetwise: 'streetwise', Subterfuge: 'subterfuge',
+        Crafts: 'crafts', Drive: 'drive', Etiquette: 'etiquette', Firearms: 'firearms',
+        'Martial Arts': 'martialArts', Meditation: 'meditation', Melee: 'melee', Research: 'research',
+        Stealth: 'stealth', Survival: 'survival', Technology: 'technology',
+        Academics: 'academics', Computer: 'computer', Cosmology: 'cosmology', Enigmas: 'enigmas',
+        Esoterica: 'esoterica', Investigation: 'investigation', Law: 'law', Medicine: 'medicine',
+        Occult: 'occult', Politics: 'politics', Science: 'science'
+      }
+
+      Object.entries(abilityFields).forEach(([pdfName, stateName]) => {
+        const total = getTotalDots(state.abilities[stateName as keyof typeof state.abilities], 'abilities', stateName)
+        fillDots(pdfName, total)
+        
+        // Add specialty if exists
+        if (state.specialties[stateName]) {
+          setField(`${pdfName}_Specialty`, state.specialties[stateName])
+        }
+      })
+
+      // Spheres
+      const sphereNames = ['Correspondence', 'Entropy', 'Forces', 'Life', 'Matter', 'Mind', 'Prime', 'Spirit', 'Time']
+      sphereNames.forEach(sphere => {
+        const sphereKey = sphere.toLowerCase() as keyof typeof state.spheres
+        const total = state.spheres[sphereKey] + (state.freebieDots.spheres[sphereKey] || 0)
+        fillDots(sphere, total)
+      })
+
+      // Backgrounds
+      Object.entries(state.backgrounds).forEach(([name, dots]) => {
+        const total = dots + (state.freebieDots.backgrounds[name] || 0)
+        setField(`Background_${name}`, name)
+        fillDots(`Background_${name}`, total)
+      })
+
+      // Arete & Willpower
+      const totalArete = 1 + state.freebieDots.arete
+      const totalWillpower = 5 + state.freebieDots.willpower
+      fillDots('Arete', totalArete, 10)
+      fillDots('Willpower', totalWillpower, 10)
+
+      // Merits & Flaws
+      state.merits.forEach((merit, idx) => {
+        setField(`Merit${idx + 1}`, `${merit.name} (${merit.cost})`)
+      })
+      state.flaws.forEach((flaw, idx) => {
+        setField(`Flaw${idx + 1}`, `${flaw.name} (+${flaw.cost})`)
+      })
+
+      // Generate PDF
+      const pdfBytes = await pdfDoc.save()
+      const blob = new Blob([pdfBytes], { type: 'application/pdf' })
+      const url = URL.createObjectURL(blob)
+      setPdfUrl(url)
+
+    } catch (err) {
+      console.error('PDF Generation Error:', err)
+      setError('Failed to generate PDF. Please try again.')
+    } finally {
+      setIsGenerating(false)
+    }
+  }
+
+  useEffect(() => {
+    generatePDF()
+  }, [])
+
+  return (
+    <div className="space-y-6 py-8">
+      <div className="text-center space-y-4">
+        <div className="w-20 h-20 mx-auto rounded-full flex items-center justify-center" style={{
+          background: 'linear-gradient(135deg, #d4af37, #8b6914)'
+        }}>
+          <Check className="w-10 h-10" style={{ color: '#2d1b4e' }} />
+        </div>
+        <h2 className="text-3xl font-bold" style={{ fontFamily: 'Georgia, serif', color: '#4a2c2a' }}>
+          Character Creation Complete!
+        </h2>
+        <p style={{ color: '#6b4423' }}>
+          {state.name || "Your character"} is ready!
+        </p>
+      </div>
+
+      {/* PDF Download Section */}
+      <Card className="max-w-2xl mx-auto border-2 border-primary">
+        <CardHeader>
+          <CardTitle className="font-cinzel text-center">📄 Character Sheet</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {isGenerating && (
+            <div className="text-center py-8">
+              <div className="animate-spin w-12 h-12 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4" />
+              <p style={{ color: '#6b4423' }}>Generating your character sheet...</p>
+            </div>
+          )}
+
+          {error && (
+            <div className="p-4 bg-red-50 border-2 border-red-600 rounded text-center">
+              <p className="text-red-600 font-semibold">{error}</p>
+              <Button onClick={generatePDF} className="mt-2">Try Again</Button>
+            </div>
+          )}
+
+          {pdfUrl && !isGenerating && (
+            <div className="space-y-4">
+              <div className="aspect-[8.5/11] border-2 border-accent rounded overflow-hidden">
+                <iframe
+                  src={pdfUrl}
+                  className="w-full h-full"
+                  title="Character Sheet Preview"
+                />
+              </div>
+              
+              <div className="flex gap-3">
+                <a
+                  href={pdfUrl}
+                  download={`${state.name || 'Character'}_Sheet.pdf`}
+                  className="flex-1"
+                >
+                  <Button className="w-full" style={{
+                    background: 'linear-gradient(135deg, #d4af37, #8b6914)',
+                    color: '#2d1b4e'
+                  }}>
+                    📥 Download Character Sheet
+                  </Button>
+                </a>
+                
+                <Button 
+                  variant="outline" 
+                  onClick={() => window.print()}
+                  className="flex-1"
+                >
+                  🖨️ Print
+                </Button>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Summary */}
+      <div className="grid grid-cols-2 gap-6 max-w-3xl mx-auto">
+        <div className="p-4 border-2 rounded" style={{ borderColor: '#8b4513', background: 'rgba(139, 69, 19, 0.03)' }}>
+          <h3 className="font-semibold mb-3 text-center" style={{ color: '#4a2c2a' }}>✅ Character Summary</h3>
+          <ul className="text-sm space-y-2" style={{ color: '#6b4423' }}>
+            <li>✓ Attributes: 15 dots assigned</li>
+            <li>✓ Abilities: 27 dots assigned</li>
+            <li>✓ Spheres: {Object.values(state.spheres).reduce((a, b) => a + b, 0)} dots</li>
+            <li>✓ Backgrounds: {Object.values(state.backgrounds).reduce((a, b) => a + b, 0)} dots</li>
+            <li>✓ Arete: {1 + state.freebieDots.arete}</li>
+            <li>✓ Willpower: {5 + state.freebieDots.willpower}</li>
+          </ul>
+        </div>
+
+        <div className="p-4 border-2 rounded" style={{ borderColor: '#8b4513', background: 'rgba(212, 175, 55, 0.05)' }}>
+          <h3 className="font-semibold mb-3 text-center" style={{ color: '#d4af37' }}>🎲 Freebie Points</h3>
+          <ul className="text-sm space-y-2" style={{ color: '#6b4423' }}>
+            <li>Merits: {state.merits.length} selected</li>
+            <li>Flaws: {state.flaws.length} selected (+{state.flaws.reduce((s, f) => s + f.cost, 0)} pts)</li>
+            <li>Extra Attributes: {Object.values(state.freebieDots.attributes).reduce((a, b) => a + b, 0)}</li>
+            <li>Extra Abilities: {Object.values(state.freebieDots.abilities).reduce((a, b) => a + b, 0)}</li>
+            <li>Extra Spheres: {Object.values(state.freebieDots.spheres).reduce((a, b) => a + b, 0)}</li>
+          </ul>
+        </div>
       </div>
     </div>
   )
