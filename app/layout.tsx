@@ -4,7 +4,8 @@ import { Cinzel, Crimson_Text, IM_Fell_DW_Pica } from 'next/font/google'
 import { AuthProvider } from '@/components/auth/auth-provider'
 import { ThemeProvider } from '@/components/theme-provider'
 
-import './globals.css'
+import '../styles/globals.css'  // Import base styles FIRST
+import './globals.css'           // Then import app-specific styles
 
 const cinzel = Cinzel({
   subsets: ['latin'],
