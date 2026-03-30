@@ -1371,30 +1371,52 @@ function FreebiePointsPhase({ state, setState, onBack, onContinue }: {
       .finally(() => setIsLoading(false))
   }, [])
 
-  // Calculate points
+  // Calculate points - FIXED: Use absolute values for merits and flaws
   const calculatePoints = () => {
-  let spent = 0
-  
-  // Calculate spent points
-  Object.values(state.freebieDots.attributes).forEach(d => spent += d * 5)
-  Object.values(state.freebieDots.abilities).forEach(d => spent += d * 2)
-  Object.values(state.freebieDots.spheres).forEach(d => spent += d * 7)
-  Object.values(state.freebieDots.backgrounds).forEach(d => spent += d * 1)
-  spent += state.freebieDots.arete * 4
-  spent += state.freebieDots.willpower * 1
-  state.merits.forEach(m => spent += m.cost)
-  
-  // Calculate points gained from flaws
-  const flawPoints = state.flaws.reduce((sum, f) => sum + f.cost, 0)
-  
-  // Total available = base 15 + flaw points
-  const totalAvailable = 15 + flawPoints
-  
-  // Return remaining
-  return totalAvailable - spent
-}
+    let spent = 0
+    
+    // Calculate spent points
+    Object.values(state.freebieDots.attributes).forEach(d => spent += d * 5)
+    Object.values(state.freebieDots.abilities).forEach(d => spent += d * 2)
+    Object.values(state.freebieDots.spheres).forEach(d => spent += d * 7)
+    Object.values(state.freebieDots.backgrounds).forEach(d => spent += d * 1)
+    spent += state.freebieDots.arete * 4
+    spent += state.freebieDots.willpower * 1
+    
+    // FIX: Use absolute value for merit costs (database might have negative values)
+    state.merits.forEach(m => spent += Math.abs(m.cost))
+    
+    // Calculate points gained from flaws (ADD them, don't subtract)
+    const flawPoints = state.flaws.reduce((sum, f) => sum + Math.abs(f.cost), 0)
+    
+    // Total available = base 15 + flaw points
+    const totalAvailable = 15 + flawPoints
+    
+    // Return remaining
+    return totalAvailable - spent
+  }
 
   const remaining = calculatePoints()
+
+  // Helper functions for Arete validation
+  const getHighestSphere = (): number => {
+    const sphereValues = Object.keys(state.spheres).map(sphere => {
+      const baseDots = state.spheres[sphere as keyof typeof state.spheres]
+      const freebieDots = state.freebieDots.spheres[sphere] || 0
+      return baseDots + freebieDots
+    })
+    return Math.max(...sphereValues)
+  }
+
+  const getMinimumArete = (): number => {
+    const highestSphere = getHighestSphere()
+    // Arete must be >= highest sphere
+    return highestSphere
+  }
+
+  const getTotalArete = (): number => {
+    return 1 + state.freebieDots.arete
+  }
 
   const addDot = (category: string, name: string, cost: number) => {
     if (remaining < cost) return
@@ -1422,11 +1444,13 @@ function FreebiePointsPhase({ state, setState, onBack, onContinue }: {
     setState(newState)
   }
 
+  // FIX: Use absolute cost for merits
   const addMerit = (merit: any) => {
-    if (remaining < merit.cost) return
+    const meritCost = Math.abs(merit.cost)  // Fix: Use absolute value
+    if (remaining < meritCost) return
     setState({
       ...state,
-      merits: [...state.merits, { id: merit.id, name: merit.name, cost: merit.cost }]
+      merits: [...state.merits, { id: merit.id, name: merit.name, cost: meritCost }]
     })
   }
 
@@ -1436,15 +1460,17 @@ function FreebiePointsPhase({ state, setState, onBack, onContinue }: {
     setState({ ...state, merits: newMerits })
   }
 
+  // FIX: Use absolute cost for flaws and enforce max 7 points
   const addFlaw = (flaw: any) => {
-    const flawPoints = state.flaws.reduce((sum, f) => sum + f.cost, 0)
-    if (flawPoints + Math.abs(flaw.cost) > 7) {
+    const flawPoints = state.flaws.reduce((sum, f) => sum + Math.abs(f.cost), 0)
+    const flawCost = Math.abs(flaw.cost)
+    if (flawPoints + flawCost > 7) {
       alert("Maximum 7 points from flaws!")
       return
     }
     setState({
       ...state,
-      flaws: [...state.flaws, { id: flaw.id, name: flaw.name, cost: Math.abs(flaw.cost) }]
+      flaws: [...state.flaws, { id: flaw.id, name: flaw.name, cost: flawCost }]
     })
   }
 
@@ -1466,6 +1492,9 @@ function FreebiePointsPhase({ state, setState, onBack, onContinue }: {
       specialties: { ...state.specialties, [abilityName]: specialty }
     })
   }
+
+  const isAreteValid = getTotalArete() >= getMinimumArete()
+  const canComplete = remaining === 0 && isAreteValid
 
   return (
     <div className="space-y-6">
@@ -1651,19 +1680,67 @@ function FreebiePointsPhase({ state, setState, onBack, onContinue }: {
           </Card>
         </TabsContent>
 
-        {/* Other Tab */}
+        {/* Other Tab - FIXED: Arete with validation and max 3 dots */}
         <TabsContent value="other">
           <div className="space-y-4">
             <Card className="border-2 border-accent">
               <CardHeader>
                 <CardTitle className="font-cinzel">Arete (4 points per dot)</CardTitle>
+                {getMinimumArete() > 1 && (
+                  <p className="text-xs text-amber-600 mt-1">
+                    ⚠️ Your highest sphere is {getMinimumArete()}. Arete must be at least {getMinimumArete()}.
+                  </p>
+                )}
               </CardHeader>
               <CardContent>
-                <FreebieDotRating label="Arete" baseDots={1} 
-            freebieDots={state.freebieDots.arete}
-            onAdd={() => addDot("arete", "arete", 4)}
-            onRemove={() => removeDot("arete", "arete")} 
-            maxDots={3} cost={4} /> 
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-semibold">Arete</span>
+                  <div className="flex items-center gap-2">
+                    {/* Dots */}
+                    <div className="flex gap-1">
+                      {[1, 2, 3].map(i => {
+                        const isBaseDot = i <= 1
+                        const isFreebieDot = i > 1 && i <= getTotalArete()
+                        return (
+                          <div
+                            key={i}
+                            className="w-5 h-5 rounded-full border-2"
+                            style={{
+                              borderColor: '#d4af37',
+                              backgroundColor: isBaseDot ? '#d4af37' : (isFreebieDot ? '#d4af37' : 'transparent')
+                            }}
+                          />
+                        )
+                      })}
+                    </div>
+                    
+                    {/* Buttons */}
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => removeDot("arete", "arete")}
+                        disabled={state.freebieDots.arete <= 0 || getTotalArete() <= getMinimumArete()}
+                        className="w-6 h-6 rounded flex items-center justify-center disabled:opacity-30"
+                        style={{ background: '#8b4513', color: '#fff' }}
+                      >
+                        <Minus className="w-3 h-3" />
+                      </button>
+                      <span className="text-xs w-8 text-center">4pt</span>
+                      <button
+                        onClick={() => addDot("arete", "arete", 4)}
+                        disabled={remaining < 4 || getTotalArete() >= 3}
+                        className="w-6 h-6 rounded flex items-center justify-center disabled:opacity-30"
+                        style={{ background: '#d4af37', color: '#2d1b4e' }}
+                      >
+                        <Plus className="w-3 h-3" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                {getTotalArete() < getMinimumArete() && (
+                  <p className="text-xs text-red-600 mt-2">
+                    ❌ You must raise Arete to {getMinimumArete()} to match your highest sphere!
+                  </p>
+                )}
               </CardContent>
             </Card>
             <Card className="border-2 border-primary">
@@ -1726,10 +1803,10 @@ function FreebiePointsPhase({ state, setState, onBack, onContinue }: {
                     <div className="flex justify-between items-start mb-2">
                       <span className="font-semibold text-sm">{merit.name}</span>
                       <div className="flex items-center gap-2">
-                        <Badge>{merit.cost} pts</Badge>
+                        <Badge>{Math.abs(merit.cost)} pts</Badge>
                         <button 
                           onClick={() => addMerit(merit)}
-                          disabled={remaining < merit.cost}
+                          disabled={remaining < Math.abs(merit.cost)}
                           className="text-xs px-3 py-1 rounded disabled:opacity-30"
                           style={{ background: '#d4af37', color: '#2d1b4e' }}
                         >Add</button>
@@ -1783,13 +1860,18 @@ function FreebiePointsPhase({ state, setState, onBack, onContinue }: {
         </TabsContent>
       </Tabs>
 
-      {/* Navigation */}
+      {/* Navigation - FIXED: Complete button with Arete validation */}
       <div className="flex gap-3">
         <SheetButton onClick={onBack} variant="secondary">
           ← Back to Backgrounds
         </SheetButton>
-        <SheetButton onClick={onContinue} disabled={remaining !== 0}>
-          {remaining === 0 ? "Complete Character →" : `Spend ${remaining} more points`}
+        <SheetButton onClick={onContinue} disabled={!canComplete}>
+          {!isAreteValid 
+            ? `Arete must be ${getMinimumArete()} (highest sphere)` 
+            : remaining === 0 
+              ? "Complete Character →" 
+              : `Spend ${remaining} more points`
+          }
         </SheetButton>
       </div>
     </div>
