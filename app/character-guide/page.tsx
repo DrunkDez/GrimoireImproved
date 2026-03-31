@@ -607,25 +607,107 @@ export default function FullMageSheetCreation() {
           </div>
 
           <div className="p-8">
-            {/* PHASE: BASICS */}
+            {/* PHASE: BASICS - REPLACED WITH DROPDOWNS */}
             {state.phase === "basics" && (
               <div className="space-y-6">
+                <SectionHeader title="Basic Information" subtitle="Define your character's identity" />
+                
                 <div className="grid grid-cols-3 gap-4">
-                  <SheetInput label="Name:" value={state.name} onChange={(v) => setState({ ...state, name: v })} />
-                  <SheetInput label="Player:" value={state.player} onChange={(v) => setState({ ...state, player: v })} />
-                  <SheetInput label="Chronicle:" value={state.chronicle} onChange={(v) => setState({ ...state, chronicle: v })} />
+                  <SheetInput 
+                    label="Name:" 
+                    value={state.name} 
+                    onChange={(v) => setState({ ...state, name: v })} 
+                    placeholder="Character name"
+                  />
+                  <SheetInput 
+                    label="Player:" 
+                    value={state.player} 
+                    onChange={(v) => setState({ ...state, player: v })} 
+                    placeholder="Your name"
+                  />
+                  <SheetInput 
+                    label="Chronicle:" 
+                    value={state.chronicle} 
+                    onChange={(v) => setState({ ...state, chronicle: v })} 
+                    placeholder="Campaign name"
+                  />
                 </div>
 
                 <div className="grid grid-cols-3 gap-4">
-                  <SheetInput label="Nature:" value={state.nature} onChange={(v) => setState({ ...state, nature: v })} />
-                  <SheetInput label="Demeanor:" value={state.demeanor} onChange={(v) => setState({ ...state, demeanor: v })} />
-                  <SheetInput label="Essence:" value={state.essence} onChange={(v) => setState({ ...state, essence: v })} placeholder="Dynamic/Pattern/Primordial/Questing" />
+                  <SheetSelect
+                    label="Nature:"
+                    value={state.nature}
+                    onChange={(v) => setState({ ...state, nature: v })}
+                    placeholder="Select nature..."
+                    options={[
+                      "Architect", "Autocrat", "Bon Vivant", "Bravo", "Caregiver",
+                      "Celebrant", "Competitor", "Conformist", "Conniver", "Critic",
+                      "Curmudgeon", "Deviant", "Director", "Fanatic", "Gallant",
+                      "Judge", "Loner", "Martyr", "Masochist", "Monster",
+                      "Pedagogue", "Penitent", "Perfectionist", "Rebel", "Rogue",
+                      "Sage", "Scientist", "Sociopath", "Survivor", "Thrill-Seeker",
+                      "Traditionalist", "Trickster", "Visionary"
+                    ]}
+                  />
+                  <SheetSelect
+                    label="Demeanor:"
+                    value={state.demeanor}
+                    onChange={(v) => setState({ ...state, demeanor: v })}
+                    placeholder="Select demeanor..."
+                    options={[
+                      "Architect", "Autocrat", "Bon Vivant", "Bravo", "Caregiver",
+                      "Celebrant", "Competitor", "Conformist", "Conniver", "Critic",
+                      "Curmudgeon", "Deviant", "Director", "Fanatic", "Gallant",
+                      "Judge", "Loner", "Martyr", "Masochist", "Monster",
+                      "Pedagogue", "Penitent", "Perfectionist", "Rebel", "Rogue",
+                      "Sage", "Scientist", "Sociopath", "Survivor", "Thrill-Seeker",
+                      "Traditionalist", "Trickster", "Visionary"
+                    ]}
+                  />
+                  <SheetSelect
+                    label="Essence:"
+                    value={state.essence}
+                    onChange={(v) => setState({ ...state, essence: v })}
+                    placeholder="Select essence..."
+                    options={["Dynamic", "Pattern", "Primordial", "Questing"]}
+                  />
                 </div>
 
                 <div className="grid grid-cols-3 gap-4">
-                  <SheetInput label="Affiliation:" value={state.affiliation} onChange={(v) => setState({ ...state, affiliation: v })} placeholder="Tradition" />
-                  <SheetInput label="Sect:" value={state.sect} onChange={(v) => setState({ ...state, sect: v })} />
-                  <SheetInput label="Concept:" value={state.concept} onChange={(v) => setState({ ...state, concept: v })} />
+                  <SheetSelect
+                    label="Affiliation:"
+                    value={state.affiliation}
+                    onChange={(v) => setState({ ...state, affiliation: v })}
+                    placeholder="Select tradition..."
+                    options={[
+                      "Akashic Brotherhood",
+                      "Celestial Chorus",
+                      "Cult of Ecstasy",
+                      "Dreamspeakers",
+                      "Euthanatos",
+                      "Order of Hermes",
+                      "Sons of Ether",
+                      "Verbena",
+                      "Virtual Adepts",
+                      "Hollow Ones",
+                      "Orphan",
+                      "Technocracy",
+                      "Marauder",
+                      "Nephandi"
+                    ]}
+                  />
+                  <SheetInput 
+                    label="Sect:" 
+                    value={state.sect} 
+                    onChange={(v) => setState({ ...state, sect: v })} 
+                    placeholder="Optional"
+                  />
+                  <SheetInput 
+                    label="Concept:" 
+                    value={state.concept} 
+                    onChange={(v) => setState({ ...state, concept: v })} 
+                    placeholder="Character concept"
+                  />
                 </div>
 
                 <SheetButton
@@ -971,7 +1053,7 @@ export default function FullMageSheetCreation() {
               />
             )}
 
-            {/* PHASE: COMPLETE - REPLACED WITH NEW CompletePhase COMPONENT */}
+            {/* PHASE: COMPLETE */}
             {state.phase === "complete" && (
               <CompletePhase state={state} />
             )}
@@ -1018,6 +1100,32 @@ function SheetInput({ label, value, onChange, placeholder }: {
         className="border-b-2 border-t-0 border-x-0 rounded-none bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
         style={{ borderColor: '#8b4513', color: '#4a2c2a' }}
       />
+    </div>
+  )
+}
+
+// NEW: SheetSelect component
+function SheetSelect({ label, value, onChange, options, placeholder }: {
+  label: string
+  value: string
+  onChange: (value: string) => void
+  options: string[]
+  placeholder?: string
+}) {
+  return (
+    <div>
+      <Label className="text-xs uppercase tracking-wide" style={{ color: '#4a2c2a' }}>{label}</Label>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full border-b-2 border-t-0 border-x-0 bg-transparent focus:outline-none focus:ring-0 p-2"
+        style={{ borderColor: '#8b4513', color: '#4a2c2a' }}
+      >
+        <option value="">{placeholder || 'Select...'}</option>
+        {options.map(opt => (
+          <option key={opt} value={opt}>{opt}</option>
+        ))}
+      </select>
     </div>
   )
 }
@@ -1851,7 +1959,7 @@ function FreebiePointsPhase({ state, setState, onBack, onContinue }: {
   )
 }
 
-// NEW: CompletePhase COMPONENT with PDF Generation
+// NEW: CompletePhase COMPONENT with PDF Generation (debug version)
 function CompletePhase({ state }: { state: CharacterState }) {
   const [isGenerating, setIsGenerating] = useState(false)
   const [pdfUrl, setPdfUrl] = useState<string | null>(null)
@@ -1870,112 +1978,177 @@ function CompletePhase({ state }: { state: CharacterState }) {
       const { PDFDocument } = await import('pdf-lib')
       const pdfDoc = await PDFDocument.load(existingPdfBytes)
       const form = pdfDoc.getForm()
+      const fields = form.getFields()
+
+      // DEBUG: Log all field names
+      console.log('=== PDF FORM FIELDS ===')
+      fields.forEach(field => {
+        console.log(`${field.getName()} (${field.constructor.name})`)
+      })
 
       // Helper to safely set field
       const setField = (fieldName: string, value: string | number) => {
         try {
           const field = form.getTextField(fieldName)
           field.setText(String(value))
+          console.log(`✓ Set ${fieldName} = ${value}`)
         } catch (e) {
-          console.warn(`Field ${fieldName} not found`)
+          console.warn(`✗ Field not found: ${fieldName}`)
         }
       }
 
-      // Helper to fill dots (checkboxes)
-      const fillDots = (baseName: string, count: number, maxDots: number = 5) => {
-        for (let i = 1; i <= maxDots; i++) {
-          try {
-            const field = form.getCheckBox(`${baseName}${i}`)
-            if (i <= count) {
-              field.check()
-            } else {
-              field.uncheck()
-            }
-          } catch (e) {
-            console.warn(`Checkbox ${baseName}${i} not found`)
+      // Helper to check checkbox
+      const checkBox = (fieldName: string, shouldCheck: boolean = true) => {
+        try {
+          const field = form.getCheckBox(fieldName)
+          if (shouldCheck) {
+            field.check()
+          } else {
+            field.uncheck()
           }
+          console.log(`✓ Checkbox ${fieldName} = ${shouldCheck}`)
+        } catch (e) {
+          console.warn(`✗ Checkbox not found: ${fieldName}`)
         }
       }
 
-      // Helper to get total dots including freebies
-      const getTotalDots = (baseDots: number, category: string, name: string) => {
-        return baseDots + (state.freebieDots[category as keyof typeof state.freebieDots][name] || 0)
-      }
-
-      // Basic Info
-      setField('Name', state.name)
-      setField('Player', state.player)
-      setField('Chronicle', state.chronicle)
+      // Try common field name patterns for basic info
+      console.log('=== FILLING BASIC INFO ===')
+      const nameFields = ['Name', 'name', 'CharacterName', 'character_name', 'Player Name']
+      nameFields.forEach(f => setField(f, state.name))
+      
+      const playerFields = ['Player', 'player', 'PlayerName', 'player_name']
+      playerFields.forEach(f => setField(f, state.player))
+      
+      const chronicleFields = ['Chronicle', 'chronicle', 'ChroniclenName', 'campaign']
+      chronicleFields.forEach(f => setField(f, state.chronicle))
+      
       setField('Nature', state.nature)
       setField('Demeanor', state.demeanor)
       setField('Essence', state.essence)
       setField('Affiliation', state.affiliation)
+      setField('Tradition', state.affiliation)
       setField('Sect', state.sect)
       setField('Concept', state.concept)
 
-      // Attributes
-      fillDots('Strength', getTotalDots(state.attributes.strength, 'attributes', 'strength'))
-      fillDots('Dexterity', getTotalDots(state.attributes.dexterity, 'attributes', 'dexterity'))
-      fillDots('Stamina', getTotalDots(state.attributes.stamina, 'attributes', 'stamina'))
-      fillDots('Charisma', getTotalDots(state.attributes.charisma, 'attributes', 'charisma'))
-      fillDots('Manipulation', getTotalDots(state.attributes.manipulation, 'attributes', 'manipulation'))
-      fillDots('Appearance', getTotalDots(state.attributes.appearance, 'attributes', 'appearance'))
-      fillDots('Perception', getTotalDots(state.attributes.perception, 'attributes', 'perception'))
-      fillDots('Intelligence', getTotalDots(state.attributes.intelligence, 'attributes', 'intelligence'))
-      fillDots('Wits', getTotalDots(state.attributes.wits, 'attributes', 'wits'))
-
-      // Abilities with Specialties
-      const abilityFields = {
-        Alertness: 'alertness', Art: 'art', Athletics: 'athletics', Awareness: 'awareness', Brawl: 'brawl',
-        Empathy: 'empathy', Expression: 'expression', Intimidation: 'intimidation', Leadership: 'leadership',
-        Streetwise: 'streetwise', Subterfuge: 'subterfuge',
-        Crafts: 'crafts', Drive: 'drive', Etiquette: 'etiquette', Firearms: 'firearms',
-        'Martial Arts': 'martialArts', Meditation: 'meditation', Melee: 'melee', Research: 'research',
-        Stealth: 'stealth', Survival: 'survival', Technology: 'technology',
-        Academics: 'academics', Computer: 'computer', Cosmology: 'cosmology', Enigmas: 'enigmas',
-        Esoterica: 'esoterica', Investigation: 'investigation', Law: 'law', Medicine: 'medicine',
-        Occult: 'occult', Politics: 'politics', Science: 'science'
+      console.log('=== FILLING ATTRIBUTES ===')
+      // Attributes - try multiple naming conventions
+      const attributeMap = {
+        'strength': ['Strength', 'str', 'STR'],
+        'dexterity': ['Dexterity', 'dex', 'DEX'],
+        'stamina': ['Stamina', 'sta', 'STA'],
+        'charisma': ['Charisma', 'cha', 'CHA'],
+        'manipulation': ['Manipulation', 'man', 'MAN'],
+        'appearance': ['Appearance', 'app', 'APP'],
+        'perception': ['Perception', 'per', 'PER'],
+        'intelligence': ['Intelligence', 'int', 'INT'],
+        'wits': ['Wits', 'wit', 'WIT']
       }
 
-      Object.entries(abilityFields).forEach(([pdfName, stateName]) => {
-        const total = getTotalDots(state.abilities[stateName as keyof typeof state.abilities], 'abilities', stateName)
-        fillDots(pdfName, total)
+      Object.entries(attributeMap).forEach(([key, names]) => {
+        const value = state.attributes[key as keyof typeof state.attributes] + 
+                     (state.freebieDots.attributes[key] || 0)
         
-        // Add specialty if exists
-        if (state.specialties[stateName]) {
-          setField(`${pdfName}_Specialty`, state.specialties[stateName])
+        // Try text field
+        names.forEach(name => setField(name, value))
+        
+        // Try checkboxes (dots)
+        for (let i = 1; i <= 5; i++) {
+          names.forEach(name => {
+            checkBox(`${name}${i}`, i <= value)
+            checkBox(`${name}_${i}`, i <= value)
+            checkBox(`${name}.${i}`, i <= value)
+          })
         }
       })
 
+      console.log('=== FILLING ABILITIES ===')
+      // Abilities - similar pattern
+      const abilityNames = {
+        'alertness': 'Alertness',
+        'athletics': 'Athletics',
+        'awareness': 'Awareness',
+        'brawl': 'Brawl',
+        'empathy': 'Empathy',
+        'expression': 'Expression',
+        'intimidation': 'Intimidation',
+        'leadership': 'Leadership',
+        'streetwise': 'Streetwise',
+        'subterfuge': 'Subterfuge',
+        'crafts': 'Crafts',
+        'drive': 'Drive',
+        'etiquette': 'Etiquette',
+        'firearms': 'Firearms',
+        'martialArts': 'Martial Arts',
+        'meditation': 'Meditation',
+        'melee': 'Melee',
+        'research': 'Research',
+        'stealth': 'Stealth',
+        'survival': 'Survival',
+        'technology': 'Technology',
+        'academics': 'Academics',
+        'computer': 'Computer',
+        'cosmology': 'Cosmology',
+        'enigmas': 'Enigmas',
+        'esoterica': 'Esoterica',
+        'investigation': 'Investigation',
+        'law': 'Law',
+        'medicine': 'Medicine',
+        'occult': 'Occult',
+        'politics': 'Politics',
+        'science': 'Science'
+      }
+
+      Object.entries(abilityNames).forEach(([key, name]) => {
+        const value = (state.abilities[key as keyof typeof state.abilities] || 0) +
+                     (state.freebieDots.abilities[key] || 0)
+        
+        setField(name, value)
+        setField(name.replace(' ', ''), value)
+        
+        // Try checkboxes
+        for (let i = 1; i <= 5; i++) {
+          checkBox(`${name}${i}`, i <= value)
+          checkBox(`${name}_${i}`, i <= value)
+          checkBox(`${name.replace(' ', '')}${i}`, i <= value)
+        }
+        
+        // Add specialty
+        if (state.specialties[key]) {
+          setField(`${name}_Specialty`, state.specialties[key])
+          setField(`${name}Specialty`, state.specialties[key])
+        }
+      })
+
+      console.log('=== FILLING SPHERES ===')
       // Spheres
       const sphereNames = ['Correspondence', 'Entropy', 'Forces', 'Life', 'Matter', 'Mind', 'Prime', 'Spirit', 'Time']
       sphereNames.forEach(sphere => {
-        const sphereKey = sphere.toLowerCase() as keyof typeof state.spheres
-        const total = state.spheres[sphereKey] + (state.freebieDots.spheres[sphereKey] || 0)
-        fillDots(sphere, total)
+        const key = sphere.toLowerCase() as keyof typeof state.spheres
+        const value = state.spheres[key] + (state.freebieDots.spheres[key] || 0)
+        
+        setField(sphere, value)
+        for (let i = 1; i <= 5; i++) {
+          checkBox(`${sphere}${i}`, i <= value)
+          checkBox(`${sphere}_${i}`, i <= value)
+        }
       })
 
-      // Backgrounds
-      Object.entries(state.backgrounds).forEach(([name, dots]) => {
-        const total = dots + (state.freebieDots.backgrounds[name] || 0)
-        setField(`Background_${name}`, name)
-        fillDots(`Background_${name}`, total)
-      })
+      console.log('=== FILLING ARETE & WILLPOWER ===')
+      const arete = 1 + state.freebieDots.arete
+      const willpower = 5 + state.freebieDots.willpower
+      
+      setField('Arete', arete)
+      setField('Willpower', willpower)
+      
+      for (let i = 1; i <= 10; i++) {
+        checkBox(`Arete${i}`, i <= arete)
+        checkBox(`Arete_${i}`, i <= arete)
+        checkBox(`Willpower${i}`, i <= willpower)
+        checkBox(`Willpower_${i}`, i <= willpower)
+      }
 
-      // Arete & Willpower
-      const totalArete = 1 + state.freebieDots.arete
-      const totalWillpower = 5 + state.freebieDots.willpower
-      fillDots('Arete', totalArete, 10)
-      fillDots('Willpower', totalWillpower, 10)
-
-      // Merits & Flaws
-      state.merits.forEach((merit, idx) => {
-        setField(`Merit${idx + 1}`, `${merit.name} (${merit.cost})`)
-      })
-      state.flaws.forEach((flaw, idx) => {
-        setField(`Flaw${idx + 1}`, `${flaw.name} (+${flaw.cost})`)
-      })
-
+      console.log('=== SAVING PDF ===')
       // Generate PDF
       const pdfBytes = await pdfDoc.save()
       const blob = new Blob([pdfBytes], { type: 'application/pdf' })
@@ -1984,7 +2157,7 @@ function CompletePhase({ state }: { state: CharacterState }) {
 
     } catch (err) {
       console.error('PDF Generation Error:', err)
-      setError('Failed to generate PDF. Please try again.')
+      setError('Failed to generate PDF. Check console for field names.')
     } finally {
       setIsGenerating(false)
     }
