@@ -1055,8 +1055,8 @@ export default function FullMageSheetCreation() {
 
             {/* PHASE: COMPLETE */}
             {state.phase === "complete" && (
-              < state={state} />
-            )}
+  <CompletePhase state={state} />
+)}
           </div>
         </div>
       </div>
