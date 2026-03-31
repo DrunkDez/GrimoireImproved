@@ -1959,7 +1959,7 @@ function FreebiePointsPhase({ state, setState, onBack, onContinue }: {
   )
 }
 
-// NEW: CompletePhase COMPONENT with PDF Generation (debug version)
+// NEW: CompletePhase COMPONENT with PDF Generation (simplified)
 function CompletePhase({ state }: { state: CharacterState }) {
   const [isGenerating, setIsGenerating] = useState(false)
   const [pdfUrl, setPdfUrl] = useState<string | null>(null)
@@ -1978,177 +1978,78 @@ function CompletePhase({ state }: { state: CharacterState }) {
       const { PDFDocument } = await import('pdf-lib')
       const pdfDoc = await PDFDocument.load(existingPdfBytes)
       const form = pdfDoc.getForm()
-      const fields = form.getFields()
 
-      // DEBUG: Log all field names
-      console.log('=== PDF FORM FIELDS ===')
-      fields.forEach(field => {
-        console.log(`${field.getName()} (${field.constructor.name})`)
-      })
-
-      // Helper to safely set field
+      // Helper to safely set a text field
       const setField = (fieldName: string, value: string | number) => {
         try {
           const field = form.getTextField(fieldName)
           field.setText(String(value))
-          console.log(`✓ Set ${fieldName} = ${value}`)
         } catch (e) {
-          console.warn(`✗ Field not found: ${fieldName}`)
+          console.warn(`Field ${fieldName} not found`)
         }
       }
 
-      // Helper to check checkbox
-      const checkBox = (fieldName: string, shouldCheck: boolean = true) => {
-        try {
-          const field = form.getCheckBox(fieldName)
-          if (shouldCheck) {
-            field.check()
-          } else {
-            field.uncheck()
-          }
-          console.log(`✓ Checkbox ${fieldName} = ${shouldCheck}`)
-        } catch (e) {
-          console.warn(`✗ Checkbox not found: ${fieldName}`)
-        }
+      // Basic Info
+      setField('name', state.name)
+      setField('player', state.player)
+      setField('chronicle', state.chronicle)
+      setField('nature', state.nature)
+      setField('demeanor', state.demeanor)
+      setField('essence', state.essence)
+      setField('affiliation', state.affiliation)
+      setField('sect', state.sect)
+      setField('concept', state.concept)
+
+      // Helper to get total dots including freebies
+      const getTotalDots = (baseDots: number, category: string, name: string) => {
+        return baseDots + (state.freebieDots[category as keyof typeof state.freebieDots][name] || 0)
       }
 
-      // Try common field name patterns for basic info
-      console.log('=== FILLING BASIC INFO ===')
-      const nameFields = ['Name', 'name', 'CharacterName', 'character_name', 'Player Name']
-      nameFields.forEach(f => setField(f, state.name))
-      
-      const playerFields = ['Player', 'player', 'PlayerName', 'player_name']
-      playerFields.forEach(f => setField(f, state.player))
-      
-      const chronicleFields = ['Chronicle', 'chronicle', 'ChroniclenName', 'campaign']
-      chronicleFields.forEach(f => setField(f, state.chronicle))
-      
-      setField('Nature', state.nature)
-      setField('Demeanor', state.demeanor)
-      setField('Essence', state.essence)
-      setField('Affiliation', state.affiliation)
-      setField('Tradition', state.affiliation)
-      setField('Sect', state.sect)
-      setField('Concept', state.concept)
-
-      console.log('=== FILLING ATTRIBUTES ===')
-      // Attributes - try multiple naming conventions
-      const attributeMap = {
-        'strength': ['Strength', 'str', 'STR'],
-        'dexterity': ['Dexterity', 'dex', 'DEX'],
-        'stamina': ['Stamina', 'sta', 'STA'],
-        'charisma': ['Charisma', 'cha', 'CHA'],
-        'manipulation': ['Manipulation', 'man', 'MAN'],
-        'appearance': ['Appearance', 'app', 'APP'],
-        'perception': ['Perception', 'per', 'PER'],
-        'intelligence': ['Intelligence', 'int', 'INT'],
-        'wits': ['Wits', 'wit', 'WIT']
-      }
-
-      Object.entries(attributeMap).forEach(([key, names]) => {
-        const value = state.attributes[key as keyof typeof state.attributes] + 
-                     (state.freebieDots.attributes[key] || 0)
-        
-        // Try text field
-        names.forEach(name => setField(name, value))
-        
-        // Try checkboxes (dots)
-        for (let i = 1; i <= 5; i++) {
-          names.forEach(name => {
-            checkBox(`${name}${i}`, i <= value)
-            checkBox(`${name}_${i}`, i <= value)
-            checkBox(`${name}.${i}`, i <= value)
-          })
-        }
+      // Attributes (ordered as per PDF)
+      const attributeOrder = ['strength', 'dexterity', 'stamina', 'charisma', 'manipulation', 'appearance', 'perception', 'intelligence', 'wits']
+      attributeOrder.forEach((attr, idx) => {
+        const total = getTotalDots(state.attributes[attr as keyof typeof state.attributes], 'attributes', attr)
+        setField(`attributes${idx + 1}`, total)
       })
 
-      console.log('=== FILLING ABILITIES ===')
-      // Abilities - similar pattern
-      const abilityNames = {
-        'alertness': 'Alertness',
-        'athletics': 'Athletics',
-        'awareness': 'Awareness',
-        'brawl': 'Brawl',
-        'empathy': 'Empathy',
-        'expression': 'Expression',
-        'intimidation': 'Intimidation',
-        'leadership': 'Leadership',
-        'streetwise': 'Streetwise',
-        'subterfuge': 'Subterfuge',
-        'crafts': 'Crafts',
-        'drive': 'Drive',
-        'etiquette': 'Etiquette',
-        'firearms': 'Firearms',
-        'martialArts': 'Martial Arts',
-        'meditation': 'Meditation',
-        'melee': 'Melee',
-        'research': 'Research',
-        'stealth': 'Stealth',
-        'survival': 'Survival',
-        'technology': 'Technology',
-        'academics': 'Academics',
-        'computer': 'Computer',
-        'cosmology': 'Cosmology',
-        'enigmas': 'Enigmas',
-        'esoterica': 'Esoterica',
-        'investigation': 'Investigation',
-        'law': 'Law',
-        'medicine': 'Medicine',
-        'occult': 'Occult',
-        'politics': 'Politics',
-        'science': 'Science'
-      }
-
-      Object.entries(abilityNames).forEach(([key, name]) => {
-        const value = (state.abilities[key as keyof typeof state.abilities] || 0) +
-                     (state.freebieDots.abilities[key] || 0)
-        
-        setField(name, value)
-        setField(name.replace(' ', ''), value)
-        
-        // Try checkboxes
-        for (let i = 1; i <= 5; i++) {
-          checkBox(`${name}${i}`, i <= value)
-          checkBox(`${name}_${i}`, i <= value)
-          checkBox(`${name.replace(' ', '')}${i}`, i <= value)
-        }
-        
-        // Add specialty
-        if (state.specialties[key]) {
-          setField(`${name}_Specialty`, state.specialties[key])
-          setField(`${name}Specialty`, state.specialties[key])
-        }
+      // Abilities (ordered as per the PDF's skills fields)
+      // The PDF expects exactly 33 skills in this order:
+      const abilityOrder = [
+        'alertness', 'art', 'athletics', 'awareness', 'brawl', 'empathy', 'expression', 'intimidation', 'leadership', 'streetwise', 'subterfuge',
+        'crafts', 'drive', 'etiquette', 'firearms', 'martialArts', 'meditation', 'melee', 'research', 'stealth', 'survival', 'technology',
+        'academics', 'computer', 'cosmology', 'enigmas', 'esoterica', 'investigation', 'law', 'medicine', 'occult', 'politics', 'science'
+      ]
+      abilityOrder.forEach((ability, idx) => {
+        const total = getTotalDots(state.abilities[ability as keyof typeof state.abilities], 'abilities', ability)
+        setField(`skills${idx + 1}`, total)
       })
 
-      console.log('=== FILLING SPHERES ===')
-      // Spheres
-      const sphereNames = ['Correspondence', 'Entropy', 'Forces', 'Life', 'Matter', 'Mind', 'Prime', 'Spirit', 'Time']
-      sphereNames.forEach(sphere => {
-        const key = sphere.toLowerCase() as keyof typeof state.spheres
-        const value = state.spheres[key] + (state.freebieDots.spheres[key] || 0)
-        
-        setField(sphere, value)
-        for (let i = 1; i <= 5; i++) {
-          checkBox(`${sphere}${i}`, i <= value)
-          checkBox(`${sphere}_${i}`, i <= value)
-        }
+      // Spheres (ordered as per PDF)
+      const sphereOrder = ['correspondence', 'entropy', 'forces', 'life', 'matter', 'mind', 'prime', 'spirit', 'time']
+      sphereOrder.forEach((sphere, idx) => {
+        const total = state.spheres[sphere as keyof typeof state.spheres] + (state.freebieDots.spheres[sphere] || 0)
+        setField(`spheres${idx + 1}`, total)
       })
 
-      console.log('=== FILLING ARETE & WILLPOWER ===')
-      const arete = 1 + state.freebieDots.arete
-      const willpower = 5 + state.freebieDots.willpower
-      
-      setField('Arete', arete)
-      setField('Willpower', willpower)
-      
-      for (let i = 1; i <= 10; i++) {
-        checkBox(`Arete${i}`, i <= arete)
-        checkBox(`Arete_${i}`, i <= arete)
-        checkBox(`Willpower${i}`, i <= willpower)
-        checkBox(`Willpower_${i}`, i <= willpower)
+      // Backgrounds – we have a dynamic list; fill the first 6 fields
+      const backgroundValues = Object.entries(state.backgrounds)
+        .map(([name, dots]) => dots + (state.freebieDots.backgrounds[name] || 0))
+      for (let i = 0; i < 6; i++) {
+        setField(`backgrounds${i + 1}`, backgroundValues[i] || '')
       }
 
-      console.log('=== SAVING PDF ===')
+      // Other traits: Arete, Willpower
+      const totalArete = 1 + state.freebieDots.arete
+      const totalWillpower = 5 + state.freebieDots.willpower
+      setField('othertraits1', totalArete)
+      setField('othertraits2', totalWillpower)
+
+      // Experience field – leave blank or 0
+      setField('experience', 0)
+
+      // Optionally, we could fill specialties if we know where they go, but the PDF doesn't seem to have per‑ability specialty fields.
+      // For now, we'll skip.
+
       // Generate PDF
       const pdfBytes = await pdfDoc.save()
       const blob = new Blob([pdfBytes], { type: 'application/pdf' })
@@ -2157,7 +2058,7 @@ function CompletePhase({ state }: { state: CharacterState }) {
 
     } catch (err) {
       console.error('PDF Generation Error:', err)
-      setError('Failed to generate PDF. Check console for field names.')
+      setError('Failed to generate PDF. Please try again.')
     } finally {
       setIsGenerating(false)
     }
@@ -2167,6 +2068,7 @@ function CompletePhase({ state }: { state: CharacterState }) {
     generatePDF()
   }, [])
 
+  // The rest of the component (the JSX) remains exactly the same as before
   return (
     <div className="space-y-6 py-8">
       <div className="text-center space-y-4">
