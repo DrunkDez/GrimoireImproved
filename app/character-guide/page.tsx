@@ -1055,7 +1055,7 @@ export default function FullMageSheetCreation() {
 
             {/* PHASE: COMPLETE */}
             {state.phase === "complete" && (
-              <CompletePhase state={state} />
+              < state={state} />
             )}
           </div>
         </div>
@@ -1959,7 +1959,7 @@ function FreebiePointsPhase({ state, setState, onBack, onContinue }: {
   )
 }
 
-// NEW: CompletePhase COMPONENT with PDF Generation (simplified)
+// NEW: CompletePhase COMPONENT with PDF Generation (fills both text fields and dot checkboxes)
 function CompletePhase({ state }: { state: CharacterState }) {
   const [isGenerating, setIsGenerating] = useState(false)
   const [pdfUrl, setPdfUrl] = useState<string | null>(null)
@@ -1970,7 +1970,6 @@ function CompletePhase({ state }: { state: CharacterState }) {
     setError(null)
 
     try {
-      // Fetch the PDF template
       const existingPdfBytes = await fetch('/M20_Mage35thAnniversary_1-Page_Interactive.pdf').then(res =>
         res.arrayBuffer()
       )
@@ -1985,11 +1984,22 @@ function CompletePhase({ state }: { state: CharacterState }) {
           const field = form.getTextField(fieldName)
           field.setText(String(value))
         } catch (e) {
-          console.warn(`Field ${fieldName} not found`)
+          // console.warn(`Field ${fieldName} not found`)
         }
       }
 
-      // Basic Info
+      // Helper to check/uncheck a checkbox
+      const setCheckbox = (fieldName: string, checked: boolean) => {
+        try {
+          const field = form.getCheckBox(fieldName)
+          if (checked) field.check()
+          else field.uncheck()
+        } catch (e) {
+          // console.warn(`Checkbox ${fieldName} not found`)
+        }
+      }
+
+      // 1. Basic info
       setField('name', state.name)
       setField('player', state.player)
       setField('chronicle', state.chronicle)
@@ -2005,15 +2015,22 @@ function CompletePhase({ state }: { state: CharacterState }) {
         return baseDots + (state.freebieDots[category as keyof typeof state.freebieDots][name] || 0)
       }
 
-      // Attributes (ordered as per PDF)
+      // 2. Attributes
       const attributeOrder = ['strength', 'dexterity', 'stamina', 'charisma', 'manipulation', 'appearance', 'perception', 'intelligence', 'wits']
       attributeOrder.forEach((attr, idx) => {
         const total = getTotalDots(state.attributes[attr as keyof typeof state.attributes], 'attributes', attr)
         setField(`attributes${idx + 1}`, total)
+        // Fill dot checkboxes (assume first 45 `dotX` fields correspond to attributes, 5 per attribute)
+        for (let i = 0; i < total; i++) {
+          setCheckbox(`dot${idx * 5 + i + 1}`, true)
+        }
+        // Uncheck the rest (if any) – not strictly necessary but cleaner
+        for (let i = total; i < 5; i++) {
+          setCheckbox(`dot${idx * 5 + i + 1}`, false)
+        }
       })
 
-      // Abilities (ordered as per the PDF's skills fields)
-      // The PDF expects exactly 33 skills in this order:
+      // 3. Abilities
       const abilityOrder = [
         'alertness', 'art', 'athletics', 'awareness', 'brawl', 'empathy', 'expression', 'intimidation', 'leadership', 'streetwise', 'subterfuge',
         'crafts', 'drive', 'etiquette', 'firearms', 'martialArts', 'meditation', 'melee', 'research', 'stealth', 'survival', 'technology',
@@ -2022,33 +2039,60 @@ function CompletePhase({ state }: { state: CharacterState }) {
       abilityOrder.forEach((ability, idx) => {
         const total = getTotalDots(state.abilities[ability as keyof typeof state.abilities], 'abilities', ability)
         setField(`skills${idx + 1}`, total)
+        // Fill dot checkboxes (assume first 165 `sdotX` fields correspond to skills, 5 per skill)
+        for (let i = 0; i < total; i++) {
+          setCheckbox(`sdot${idx * 5 + i + 1}`, true)
+        }
+        for (let i = total; i < 5; i++) {
+          setCheckbox(`sdot${idx * 5 + i + 1}`, false)
+        }
       })
 
-      // Spheres (ordered as per PDF)
+      // 4. Spheres
       const sphereOrder = ['correspondence', 'entropy', 'forces', 'life', 'matter', 'mind', 'prime', 'spirit', 'time']
       sphereOrder.forEach((sphere, idx) => {
         const total = state.spheres[sphere as keyof typeof state.spheres] + (state.freebieDots.spheres[sphere] || 0)
         setField(`spheres${idx + 1}`, total)
+        // Fill dot checkboxes (assume first 45 `xdotX` fields correspond to spheres, 5 per sphere)
+        for (let i = 0; i < total; i++) {
+          setCheckbox(`xdot${idx * 5 + i + 1}`, true)
+        }
+        for (let i = total; i < 5; i++) {
+          setCheckbox(`xdot${idx * 5 + i + 1}`, false)
+        }
       })
 
-      // Backgrounds – we have a dynamic list; fill the first 6 fields
+      // 5. Backgrounds – we have only text fields, no dots (or they are separate, we'll just set the text)
       const backgroundValues = Object.entries(state.backgrounds)
         .map(([name, dots]) => dots + (state.freebieDots.backgrounds[name] || 0))
       for (let i = 0; i < 6; i++) {
         setField(`backgrounds${i + 1}`, backgroundValues[i] || '')
       }
 
-      // Other traits: Arete, Willpower
+      // 6. Arete & Willpower
       const totalArete = 1 + state.freebieDots.arete
       const totalWillpower = 5 + state.freebieDots.willpower
       setField('othertraits1', totalArete)
       setField('othertraits2', totalWillpower)
 
-      // Experience field – leave blank or 0
-      setField('experience', 0)
+      // Fill Arete dot checkboxes (use `bpdot` fields – common in Mage sheets)
+      for (let i = 0; i < totalArete; i++) {
+        setCheckbox(`bpdot${i + 1}`, true)
+      }
+      for (let i = totalArete; i < 10; i++) {
+        setCheckbox(`bpdot${i + 1}`, false)
+      }
 
-      // Optionally, we could fill specialties if we know where they go, but the PDF doesn't seem to have per‑ability specialty fields.
-      // For now, we'll skip.
+      // Fill Willpower dot checkboxes
+      for (let i = 0; i < totalWillpower; i++) {
+        setCheckbox(`willdot${i + 1}`, true)
+      }
+      for (let i = totalWillpower; i < 10; i++) {
+        setCheckbox(`willdot${i + 1}`, false)
+      }
+
+      // 7. Experience – leave blank or 0
+      setField('experience', 0)
 
       // Generate PDF
       const pdfBytes = await pdfDoc.save()
@@ -2068,7 +2112,7 @@ function CompletePhase({ state }: { state: CharacterState }) {
     generatePDF()
   }, [])
 
-  // The rest of the component (the JSX) remains exactly the same as before
+  // The JSX part remains exactly as before
   return (
     <div className="space-y-6 py-8">
       <div className="text-center space-y-4">
