@@ -15,14 +15,28 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const characterId = params.id
-    console.log("📡 API GET - Requesting character ID:", characterId)
-    console.log("📡 API GET - User ID:", session.user.id)
+    // Get the ID from the URL path
+    const url = new URL(request.url)
+    const pathParts = url.pathname.split('/')
+    const idFromUrl = pathParts[pathParts.length - 1]
+    
+    // Use params.id or extract from URL
+    const characterId = params?.id || idFromUrl
+    
+    console.log("=== API GET CHARACTER ===")
+    console.log("params.id:", params?.id)
+    console.log("URL path:", url.pathname)
+    console.log("Extracted ID:", characterId)
+    console.log("User ID:", session.user.id)
 
-    const character = await prisma.character.findFirst({
+    if (!characterId) {
+      console.error("No character ID provided")
+      return NextResponse.json({ error: 'Character ID required' }, { status: 400 })
+    }
+
+    const character = await prisma.character.findUnique({
       where: {
-        id: characterId,
-        userId: session.user.id
+        id: characterId
       },
       include: {
         rotes: {
@@ -33,13 +47,17 @@ export async function GET(
       }
     })
 
-    if (!character) {
-      console.log("❌ Character not found:", characterId)
+    console.log("Found character:", character?.id, character?.name)
+    console.log("Character belongs to user:", character?.userId)
+    console.log("Session user:", session.user.id)
+
+    // Verify the character belongs to the user
+    if (!character || character.userId !== session.user.id) {
+      console.log("❌ Character not found or unauthorized")
       return NextResponse.json({ error: 'Character not found' }, { status: 404 })
     }
 
-    console.log("✅ API GET - Returning character:", character.id, character.name)
-    console.log("📊 Has attributes:", !!character.attributes)
+    console.log("✅ Returning character:", character.id, character.name)
     
     return NextResponse.json(character)
   } catch (error) {
@@ -63,22 +81,29 @@ export async function PUT(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const body = await request.json()
-    const characterId = params.id
+    // Get the ID from the URL path
+    const url = new URL(request.url)
+    const pathParts = url.pathname.split('/')
+    const idFromUrl = pathParts[pathParts.length - 1]
+    const characterId = params?.id || idFromUrl
 
-    console.log("📡 API PUT - Updating character ID:", characterId)
-    console.log("📡 API PUT - User ID:", session.user.id)
+    console.log("=== API PUT CHARACTER ===")
+    console.log("Updating character ID:", characterId)
+
+    if (!characterId) {
+      return NextResponse.json({ error: 'Character ID required' }, { status: 400 })
+    }
+
+    const body = await request.json()
 
     // Check if character exists and belongs to user
-    const existingCharacter = await prisma.character.findFirst({
+    const existingCharacter = await prisma.character.findUnique({
       where: {
-        id: characterId,
-        userId: session.user.id
+        id: characterId
       }
     })
 
-    if (!existingCharacter) {
-      console.log("❌ Character not found for update:", characterId)
+    if (!existingCharacter || existingCharacter.userId !== session.user.id) {
       return NextResponse.json({ error: 'Character not found' }, { status: 404 })
     }
 
@@ -133,7 +158,7 @@ export async function PUT(
       },
     })
 
-    console.log("✅ API PUT - Character updated:", updatedCharacter.id, updatedCharacter.name)
+    console.log("✅ Character updated:", updatedCharacter.id, updatedCharacter.name)
     
     return NextResponse.json(updatedCharacter)
   } catch (error) {
@@ -157,17 +182,20 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const characterId = params.id
+    // Get the ID from the URL path
+    const url = new URL(request.url)
+    const pathParts = url.pathname.split('/')
+    const idFromUrl = pathParts[pathParts.length - 1]
+    const characterId = params?.id || idFromUrl
 
     // Check if character exists and belongs to user
-    const existingCharacter = await prisma.character.findFirst({
+    const existingCharacter = await prisma.character.findUnique({
       where: {
-        id: characterId,
-        userId: session.user.id
+        id: characterId
       }
     })
 
-    if (!existingCharacter) {
+    if (!existingCharacter || existingCharacter.userId !== session.user.id) {
       return NextResponse.json({ error: 'Character not found' }, { status: 404 })
     }
 
