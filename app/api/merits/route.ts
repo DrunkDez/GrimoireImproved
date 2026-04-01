@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/db"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth"
 
 export async function GET() {
   try {
@@ -22,6 +24,29 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
+    // 🔒 SECURITY FIX: Require authentication
+    const session = await getServerSession(authOptions)
+    
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
+    // 🔒 SECURITY FIX: Only admins can create merits
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { isAdmin: true }
+    })
+
+    if (!user?.isAdmin) {
+      return NextResponse.json(
+        { error: 'Forbidden: Admin access required' },
+        { status: 403 }
+      )
+    }
+
     const body = await request.json()
     const { name, category, type, subtype, cost, description, pageRef } = body
 
