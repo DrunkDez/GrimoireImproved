@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useSession } from "next-auth/react"
-import { useRouter } from "next/navigation"
+import { useRouter, useParams } from "next/navigation"  // Add useParams
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -81,11 +81,13 @@ function DotSelector({ label, value, max = 5, onChange, disabled = false }: {
   )
 }
 
-export default function EditCharacterPage({
-  params,
-}: {
-  params: { id: string }
-}) {
+export default function EditCharacterPage() {
+  // Use useParams instead of params prop
+  const params = useParams()
+  const characterId = params?.id as string
+  
+  console.log("🔍 EditCharacterPage - Received ID from useParams:", characterId)
+  
   const { status } = useSession()
   const router = useRouter()
   const { toast } = useToast()
@@ -105,19 +107,30 @@ export default function EditCharacterPage({
   }, [status, router])
 
   useEffect(() => {
-    if (status === "authenticated") {
+    if (status === "authenticated" && characterId) {
+      console.log("📡 Fetching character for edit with ID:", characterId)
       fetchCharacter()
       fetchMeritsAndFlaws()
     }
-  }, [status, params.id])
+  }, [status, characterId])
 
   const fetchCharacter = async () => {
+    if (!characterId) {
+      console.error("No character ID available")
+      return
+    }
+    
     try {
-      const response = await fetch(`/api/characters/${params.id}`)
+      console.log("📡 Making API call to /api/characters/" + characterId)
+      const response = await fetch(`/api/characters/${characterId}`)
       if (response.ok) {
         const data = await response.json()
+        console.log("✅ Loaded character for edit:", data.name, "ID:", data.id)
+        console.log("📊 Has attributes:", !!data.attributes)
+        console.log("📊 Has abilities:", !!data.abilities)
         setCharacter(data)
       } else {
+        console.error("❌ Failed to fetch character, status:", response.status)
         router.push("/dashboard")
       }
     } catch (error) {
@@ -244,11 +257,19 @@ export default function EditCharacterPage({
   }
 
   const saveCharacter = async () => {
-    if (!character) return
+    if (!character || !characterId) return
     
     setIsSaving(true)
     try {
-      const response = await fetch(`/api/characters/${params.id}`, {
+      console.log("📡 Saving character with ID:", characterId)
+      console.log("📊 Data being saved:", {
+        name: character.name,
+        hasAttributes: !!character.attributes,
+        hasAbilities: !!character.abilities,
+        hasSpheres: !!character.spheres
+      })
+      
+      const response = await fetch(`/api/characters/${characterId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(character)
@@ -259,7 +280,7 @@ export default function EditCharacterPage({
           title: "Character Saved",
           description: "Your character has been updated"
         })
-        router.push(`/characters/${params.id}`)
+        router.push(`/characters/${characterId}`)
       } else {
         const error = await response.json()
         toast({
@@ -301,7 +322,7 @@ export default function EditCharacterPage({
           <div className="flex items-center justify-between mb-6">
             <Button
               variant="ghost"
-              onClick={() => router.push(`/characters/${params.id}`)}
+              onClick={() => router.push(`/characters/${characterId}`)}
               className="gap-2"
             >
               <ArrowLeft className="w-4 h-4" />
@@ -519,7 +540,7 @@ export default function EditCharacterPage({
               </Card>
             </TabsContent>
 
-            {/* Abilities Tab - Simplified for brevity, you can expand similarly */}
+            {/* Abilities Tab */}
             <TabsContent value="abilities" className="space-y-4">
               <Card>
                 <CardHeader>
