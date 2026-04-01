@@ -28,6 +28,8 @@ export default function CharacterSheetPage({
 }: {
   params: { id: string }
 }) {
+  console.log("🔍 CharacterSheetPage - Received ID from params:", params.id)
+  
   const { status } = useSession()
   const router = useRouter()
   const { toast } = useToast()
@@ -45,6 +47,7 @@ export default function CharacterSheetPage({
  
   useEffect(() => {
     if (status === "authenticated") {
+      console.log("📡 Fetching character with ID:", params.id)
       fetchCharacter()
       fetchAllRotes()
     }
@@ -52,12 +55,18 @@ export default function CharacterSheetPage({
  
   const fetchCharacter = async () => {
     try {
+      console.log("📡 Making API call to /api/characters/" + params.id)
       const response = await fetch(`/api/characters/${params.id}`)
       if (response.ok) {
         const data = await response.json()
-        console.log("Character data:", data) // Debug log
+        console.log("✅ Loaded character:", data.name, "ID:", data.id)
+        console.log("📊 Has attributes:", !!data.attributes)
+        console.log("📊 Has abilities:", !!data.abilities)
+        console.log("📊 Has spheres:", !!data.spheres)
+        console.log("📊 Attributes data:", data.attributes)
         setCharacter(data)
       } else {
+        console.error("❌ Failed to fetch character, status:", response.status)
         router.push("/dashboard")
       }
     } catch (error) {
