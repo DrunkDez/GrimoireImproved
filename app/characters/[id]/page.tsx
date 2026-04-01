@@ -199,10 +199,14 @@ export default function CharacterSheetPage({
                 variant="outline"
                 className="gap-2"
               >
-                <Edit className="w-4 h-4" />
-                Edit Character
-              </Button>
-            </div>
+               <Button
+  variant="outline"
+  className="gap-2"
+  onClick={() => router.push(`/characters/${params.id}/edit`)}
+>
+  <Edit className="w-4 h-4" />
+  Edit Character
+</Button>
  
             {/* Character Header */}
             <Card className="border-2 border-primary">
