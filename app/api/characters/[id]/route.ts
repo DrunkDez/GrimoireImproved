@@ -15,9 +15,13 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const characterId = params.id
+    console.log("📡 API GET - Requesting character ID:", characterId)
+    console.log("📡 API GET - User ID:", session.user.id)
+
     const character = await prisma.character.findFirst({
       where: {
-        id: params.id,
+        id: characterId,
         userId: session.user.id
       },
       include: {
@@ -30,9 +34,13 @@ export async function GET(
     })
 
     if (!character) {
+      console.log("❌ Character not found:", characterId)
       return NextResponse.json({ error: 'Character not found' }, { status: 404 })
     }
 
+    console.log("✅ API GET - Returning character:", character.id, character.name)
+    console.log("📊 Has attributes:", !!character.attributes)
+    
     return NextResponse.json(character)
   } catch (error) {
     console.error('Error fetching character:', error)
@@ -58,6 +66,9 @@ export async function PUT(
     const body = await request.json()
     const characterId = params.id
 
+    console.log("📡 API PUT - Updating character ID:", characterId)
+    console.log("📡 API PUT - User ID:", session.user.id)
+
     // Check if character exists and belongs to user
     const existingCharacter = await prisma.character.findFirst({
       where: {
@@ -67,6 +78,7 @@ export async function PUT(
     })
 
     if (!existingCharacter) {
+      console.log("❌ Character not found for update:", characterId)
       return NextResponse.json({ error: 'Character not found' }, { status: 404 })
     }
 
@@ -121,6 +133,8 @@ export async function PUT(
       },
     })
 
+    console.log("✅ API PUT - Character updated:", updatedCharacter.id, updatedCharacter.name)
+    
     return NextResponse.json(updatedCharacter)
   } catch (error) {
     console.error('Error updating character:', error)
