@@ -2,7 +2,7 @@
  
 import { useEffect, useState } from "react"
 import { useSession } from "next-auth/react"
-import { useRouter } from "next/navigation"
+import { useRouter, useParams } from "next/navigation"  // Add useParams
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { getTraditionSymbol, getSphereDots } from "@/lib/mage-data"
@@ -23,12 +23,12 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { GrimoireHeader } from "@/components/grimoire-header"
  
-export default function CharacterSheetPage({
-  params,
-}: {
-  params: { id: string }
-}) {
-  console.log("🔍 CharacterSheetPage - Received ID from params:", params.id)
+export default function CharacterSheetPage() {
+  // Use useParams instead of params prop
+  const params = useParams()
+  const characterId = params?.id as string
+  
+  console.log("🔍 CharacterSheetPage - Received ID from useParams:", characterId)
   
   const { status } = useSession()
   const router = useRouter()
@@ -46,17 +46,22 @@ export default function CharacterSheetPage({
   }, [status, router])
  
   useEffect(() => {
-    if (status === "authenticated") {
-      console.log("📡 Fetching character with ID:", params.id)
+    if (status === "authenticated" && characterId) {
+      console.log("📡 Fetching character with ID:", characterId)
       fetchCharacter()
       fetchAllRotes()
     }
-  }, [status, params.id])
+  }, [status, characterId])
  
   const fetchCharacter = async () => {
+    if (!characterId) {
+      console.error("No character ID available")
+      return
+    }
+    
     try {
-      console.log("📡 Making API call to /api/characters/" + params.id)
-      const response = await fetch(`/api/characters/${params.id}`)
+      console.log("📡 Making API call to /api/characters/" + characterId)
+      const response = await fetch(`/api/characters/${characterId}`)
       if (response.ok) {
         const data = await response.json()
         console.log("✅ Loaded character:", data.name, "ID:", data.id)
@@ -89,8 +94,10 @@ export default function CharacterSheetPage({
   }
  
   const handleAssignRote = async (roteId: string) => {
+    if (!characterId) return
+    
     try {
-      const response = await fetch(`/api/characters/${params.id}/rotes`, {
+      const response = await fetch(`/api/characters/${characterId}/rotes`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ roteId }),
@@ -120,9 +127,11 @@ export default function CharacterSheetPage({
   }
  
   const handleRemoveRote = async (roteId: string) => {
+    if (!characterId) return
+    
     try {
       const response = await fetch(
-        `/api/characters/${params.id}/rotes?roteId=${roteId}`,
+        `/api/characters/${characterId}/rotes?roteId=${roteId}`,
         {
           method: "DELETE",
         }
@@ -210,7 +219,7 @@ export default function CharacterSheetPage({
               <Button
                 variant="outline"
                 className="gap-2"
-                onClick={() => router.push(`/characters/${params.id}/edit`)}
+                onClick={() => router.push(`/characters/${characterId}/edit`)}
               >
                 <Edit className="w-4 h-4" />
                 Edit Character
