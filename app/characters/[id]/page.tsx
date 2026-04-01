@@ -55,6 +55,7 @@ export default function CharacterSheetPage({
       const response = await fetch(`/api/characters/${params.id}`)
       if (response.ok) {
         const data = await response.json()
+        console.log("Character data:", data) // Debug log
         setCharacter(data)
       } else {
         router.push("/dashboard")
@@ -136,6 +137,8 @@ export default function CharacterSheetPage({
  
   // Helper to render dots
   const renderDots = (value: number, max: number = 5) => {
+    // Ensure value is a number
+    const numValue = typeof value === 'number' ? value : 0
     return (
       <div className="flex gap-1">
         {[...Array(max)].map((_, i) => (
@@ -144,7 +147,7 @@ export default function CharacterSheetPage({
             className="w-4 h-4 rounded-full border-2"
             style={{
               borderColor: '#8b4513',
-              backgroundColor: i < value ? '#8b4513' : 'transparent'
+              backgroundColor: i < numValue ? '#8b4513' : 'transparent'
             }}
           />
         ))}
@@ -193,20 +196,17 @@ export default function CharacterSheetPage({
                 className="gap-2"
               >
                 <ArrowLeft className="w-4 h-4" />
-                Back to Characters
+                Back to Dashboard
               </Button>
               <Button
                 variant="outline"
                 className="gap-2"
+                onClick={() => router.push(`/characters/${params.id}/edit`)}
               >
-               <Button
-  variant="outline"
-  className="gap-2"
-  onClick={() => router.push(`/characters/${params.id}/edit`)}
->
-  <Edit className="w-4 h-4" />
-  Edit Character
-</Button>
+                <Edit className="w-4 h-4" />
+                Edit Character
+              </Button>
+            </div>
  
             {/* Character Header */}
             <Card className="border-2 border-primary">
@@ -219,9 +219,11 @@ export default function CharacterSheetPage({
                     <CardTitle className="text-3xl font-cinzel text-primary">
                       {character.name}
                     </CardTitle>
-                    <div className="flex gap-2 mt-2">
+                    <div className="flex gap-2 mt-2 flex-wrap">
                       <Badge variant="outline">{character.faction}</Badge>
-                      {character.concept && <Badge variant="secondary">{character.concept}</Badge>}
+                      {character.essence && <Badge variant="secondary">{character.essence}</Badge>}
+                      {character.arete && <Badge variant="default">Arete {character.arete}</Badge>}
+                      {character.concept && <Badge variant="outline">{character.concept}</Badge>}
                     </div>
                   </div>
                 </div>
@@ -239,11 +241,11 @@ export default function CharacterSheetPage({
                 {character.demeanor && (
                   <div><span className="font-semibold">Demeanor:</span> {character.demeanor}</div>
                 )}
-                {character.essence && (
-                  <div><span className="font-semibold">Essence:</span> {character.essence}</div>
-                )}
                 {character.sect && (
                   <div><span className="font-semibold">Sect:</span> {character.sect}</div>
+                )}
+                {character.avatar && (
+                  <div><span className="font-semibold">Avatar:</span> {character.avatar}</div>
                 )}
               </CardContent>
             </Card>
@@ -271,15 +273,15 @@ export default function CharacterSheetPage({
                         <div className="space-y-2">
                           <div className="flex justify-between items-center">
                             <span>Strength</span>
-                            {renderDots(character.attributes.strength)}
+                            {renderDots(character.attributes.strength, 5)}
                           </div>
                           <div className="flex justify-between items-center">
                             <span>Dexterity</span>
-                            {renderDots(character.attributes.dexterity)}
+                            {renderDots(character.attributes.dexterity, 5)}
                           </div>
                           <div className="flex justify-between items-center">
                             <span>Stamina</span>
-                            {renderDots(character.attributes.stamina)}
+                            {renderDots(character.attributes.stamina, 5)}
                           </div>
                         </div>
                       </div>
@@ -288,15 +290,15 @@ export default function CharacterSheetPage({
                         <div className="space-y-2">
                           <div className="flex justify-between items-center">
                             <span>Charisma</span>
-                            {renderDots(character.attributes.charisma)}
+                            {renderDots(character.attributes.charisma, 5)}
                           </div>
                           <div className="flex justify-between items-center">
                             <span>Manipulation</span>
-                            {renderDots(character.attributes.manipulation)}
+                            {renderDots(character.attributes.manipulation, 5)}
                           </div>
                           <div className="flex justify-between items-center">
                             <span>Appearance</span>
-                            {renderDots(character.attributes.appearance)}
+                            {renderDots(character.attributes.appearance, 5)}
                           </div>
                         </div>
                       </div>
@@ -305,15 +307,15 @@ export default function CharacterSheetPage({
                         <div className="space-y-2">
                           <div className="flex justify-between items-center">
                             <span>Perception</span>
-                            {renderDots(character.attributes.perception)}
+                            {renderDots(character.attributes.perception, 5)}
                           </div>
                           <div className="flex justify-between items-center">
                             <span>Intelligence</span>
-                            {renderDots(character.attributes.intelligence)}
+                            {renderDots(character.attributes.intelligence, 5)}
                           </div>
                           <div className="flex justify-between items-center">
                             <span>Wits</span>
-                            {renderDots(character.attributes.wits)}
+                            {renderDots(character.attributes.wits, 5)}
                           </div>
                         </div>
                       </div>
@@ -323,26 +325,22 @@ export default function CharacterSheetPage({
  
                 {/* Arete & Willpower */}
                 <div className="grid md:grid-cols-2 gap-4">
-                  {character.arete && (
-                    <Card className="border-2 border-accent">
-                      <CardHeader>
-                        <CardTitle className="font-cinzel">Arete</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        {renderDots(character.arete, 10)}
-                      </CardContent>
-                    </Card>
-                  )}
-                  {character.willpower && (
-                    <Card className="border-2 border-primary">
-                      <CardHeader>
-                        <CardTitle className="font-cinzel">Willpower</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        {renderDots(character.willpower, 10)}
-                      </CardContent>
-                    </Card>
-                  )}
+                  <Card className="border-2 border-accent">
+                    <CardHeader>
+                      <CardTitle className="font-cinzel">Arete</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      {renderDots(character.arete || 1, 10)}
+                    </CardContent>
+                  </Card>
+                  <Card className="border-2 border-primary">
+                    <CardHeader>
+                      <CardTitle className="font-cinzel">Willpower</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      {renderDots(character.willpower || 5, 10)}
+                    </CardContent>
+                  </Card>
                 </div>
  
                 {/* Backgrounds */}
@@ -355,7 +353,7 @@ export default function CharacterSheetPage({
                       {Object.entries(character.backgrounds).map(([name, value]: [string, any]) => (
                         <div key={name} className="flex justify-between items-center">
                           <span className="capitalize">{name.replace(/([A-Z])/g, ' $1').trim()}</span>
-                          {renderDots(value)}
+                          {renderDots(value, 5)}
                         </div>
                       ))}
                     </CardContent>
@@ -363,7 +361,7 @@ export default function CharacterSheetPage({
                 )}
  
                 {/* Merits & Flaws */}
-                {(character.merits || character.flaws) && (
+                {(character.merits?.length > 0 || character.flaws?.length > 0) && (
                   <div className="grid md:grid-cols-2 gap-4">
                     {character.merits && character.merits.length > 0 && (
                       <Card className="border-2 border-primary">
@@ -408,7 +406,7 @@ export default function CharacterSheetPage({
                     <CardHeader>
                       <CardTitle className="font-cinzel">Abilities</CardTitle>
                     </CardHeader>
-                    <CardContent className="grid md:grid-cols-3 gap-6">
+                    <CardContent className="grid md:grid-cols-3 gap-6 max-h-[600px] overflow-y-auto">
                       <div>
                         <h4 className="font-semibold mb-3">Talents</h4>
                         <div className="space-y-2">
@@ -418,7 +416,7 @@ export default function CharacterSheetPage({
                             return (
                               <div key={ability} className="flex justify-between items-center">
                                 <span className="capitalize">{ability}</span>
-                                {renderDots(value)}
+                                {renderDots(value, 5)}
                               </div>
                             )
                           })}
@@ -434,7 +432,7 @@ export default function CharacterSheetPage({
                             return (
                               <div key={ability} className="flex justify-between items-center">
                                 <span className="capitalize">{label}</span>
-                                {renderDots(value)}
+                                {renderDots(value, 5)}
                               </div>
                             )
                           })}
@@ -449,7 +447,7 @@ export default function CharacterSheetPage({
                             return (
                               <div key={ability} className="flex justify-between items-center">
                                 <span className="capitalize">{ability}</span>
-                                {renderDots(value)}
+                                {renderDots(value, 5)}
                               </div>
                             )
                           })}
@@ -485,22 +483,19 @@ export default function CharacterSheetPage({
                     <CardHeader>
                       <CardTitle className="font-cinzel">Spheres</CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-2">
-                      {Object.entries(character.spheres).map(([sphere, value]: [string, any]) => {
-                        if (value === 0) return null
-                        return (
-                          <div key={sphere} className="flex justify-between items-center">
-                            <span className="capitalize">{sphere}</span>
-                            {renderDots(value)}
-                          </div>
-                        )
-                      })}
+                    <CardContent className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                      {Object.entries(character.spheres).map(([sphere, value]: [string, any]) => (
+                        <div key={sphere} className="flex justify-between items-center">
+                          <span className="capitalize">{sphere}</span>
+                          {renderDots(value, 5)}
+                        </div>
+                      ))}
                     </CardContent>
                   </Card>
                 )}
               </TabsContent>
  
-              {/* Rotes Tab (existing code) */}
+              {/* Rotes Tab */}
               <TabsContent value="rotes" className="space-y-4">
                 <Card className="border-2 border-primary">
                   <CardHeader>
