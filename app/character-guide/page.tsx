@@ -9,6 +9,10 @@ import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { useRouter } from "next/navigation"
+import Link from "next/link"
+import { useToast } from "@/hooks/use-toast"
+import { Toaster } from "@/components/ui/toaster"
 
 type Priority = "primary" | "secondary" | "tertiary" | null
 
@@ -1055,11 +1059,12 @@ export default function FullMageSheetCreation() {
 
             {/* PHASE: COMPLETE */}
             {state.phase === "complete" && (
-  <CompletePhase state={state} />
-)}
+              <CompletePhase state={state} />
+            )}
           </div>
         </div>
       </div>
+      <Toaster />
     </div>
   )
 }
@@ -1959,160 +1964,119 @@ function FreebiePointsPhase({ state, setState, onBack, onContinue }: {
   )
 }
 
-// NEW: CompletePhase COMPONENT with PDF Generation (fills both text fields and dot checkboxes)
+// NEW: CompletePhase COMPONENT with Save to Database
 function CompletePhase({ state }: { state: CharacterState }) {
-  const [isGenerating, setIsGenerating] = useState(false)
-  const [pdfUrl, setPdfUrl] = useState<string | null>(null)
-  const [error, setError] = useState<string | null>(null)
+  const router = useRouter()
+  const { toast } = useToast()
+  const [isSaving, setIsSaving] = useState(false)
+  const [characterId, setCharacterId] = useState<string | null>(null)
 
-  const generatePDF = async () => {
-    setIsGenerating(true)
-    setError(null)
+  const calculateTotalDots = (category: string, name: string) => {
+    if (category === 'attributes') {
+      const baseDots = state.attributes[name as keyof typeof state.attributes]
+      const freebieDots = state.freebieDots.attributes[name] || 0
+      return baseDots + freebieDots
+    } else if (category === 'abilities') {
+      const baseDots = state.abilities[name as keyof typeof state.abilities]
+      const freebieDots = state.freebieDots.abilities[name] || 0
+      return baseDots + freebieDots
+    } else if (category === 'spheres') {
+      const baseDots = state.spheres[name as keyof typeof state.spheres]
+      const freebieDots = state.freebieDots.spheres[name] || 0
+      return baseDots + freebieDots
+    } else if (category === 'backgrounds') {
+      const baseDots = state.backgrounds[name] || 0
+      const freebieDots = state.freebieDots.backgrounds[name] || 0
+      return baseDots + freebieDots
+    }
+    return 0
+  }
+
+  const saveCharacter = async () => {
+    setIsSaving(true)
 
     try {
-      const existingPdfBytes = await fetch('/M20_Mage35thAnniversary_1-Page_Interactive.pdf').then(res =>
-        res.arrayBuffer()
-      )
-
-      const { PDFDocument } = await import('pdf-lib')
-      const pdfDoc = await PDFDocument.load(existingPdfBytes)
-      const form = pdfDoc.getForm()
-
-      // Helper to safely set a text field
-      const setField = (fieldName: string, value: string | number) => {
-        try {
-          const field = form.getTextField(fieldName)
-          field.setText(String(value))
-        } catch (e) {
-          // console.warn(`Field ${fieldName} not found`)
-        }
-      }
-
-      // Helper to check/uncheck a checkbox
-      const setCheckbox = (fieldName: string, checked: boolean) => {
-        try {
-          const field = form.getCheckBox(fieldName)
-          if (checked) field.check()
-          else field.uncheck()
-        } catch (e) {
-          // console.warn(`Checkbox ${fieldName} not found`)
-        }
-      }
-
-      // 1. Basic info
-      setField('name', state.name)
-      setField('player', state.player)
-      setField('chronicle', state.chronicle)
-      setField('nature', state.nature)
-      setField('demeanor', state.demeanor)
-      setField('essence', state.essence)
-      setField('affiliation', state.affiliation)
-      setField('sect', state.sect)
-      setField('concept', state.concept)
-
-      // Helper to get total dots including freebies
-      const getTotalDots = (baseDots: number, category: string, name: string) => {
-        return baseDots + (state.freebieDots[category as keyof typeof state.freebieDots][name] || 0)
-      }
-
-      // 2. Attributes
-      const attributeOrder = ['strength', 'dexterity', 'stamina', 'charisma', 'manipulation', 'appearance', 'perception', 'intelligence', 'wits']
-      attributeOrder.forEach((attr, idx) => {
-        const total = getTotalDots(state.attributes[attr as keyof typeof state.attributes], 'attributes', attr)
-        setField(`attributes${idx + 1}`, total)
-        // Fill dot checkboxes (assume first 45 `dotX` fields correspond to attributes, 5 per attribute)
-        for (let i = 0; i < total; i++) {
-          setCheckbox(`dot${idx * 5 + i + 1}`, true)
-        }
-        // Uncheck the rest (if any) – not strictly necessary but cleaner
-        for (let i = total; i < 5; i++) {
-          setCheckbox(`dot${idx * 5 + i + 1}`, false)
-        }
+      // Calculate final values
+      const finalAttributes: any = {}
+      Object.keys(state.attributes).forEach(attr => {
+        finalAttributes[attr] = calculateTotalDots('attributes', attr)
       })
 
-      // 3. Abilities
-      const abilityOrder = [
-        'alertness', 'art', 'athletics', 'awareness', 'brawl', 'empathy', 'expression', 'intimidation', 'leadership', 'streetwise', 'subterfuge',
-        'crafts', 'drive', 'etiquette', 'firearms', 'martialArts', 'meditation', 'melee', 'research', 'stealth', 'survival', 'technology',
-        'academics', 'computer', 'cosmology', 'enigmas', 'esoterica', 'investigation', 'law', 'medicine', 'occult', 'politics', 'science'
-      ]
-      abilityOrder.forEach((ability, idx) => {
-        const total = getTotalDots(state.abilities[ability as keyof typeof state.abilities], 'abilities', ability)
-        setField(`skills${idx + 1}`, total)
-        // Fill dot checkboxes (assume first 165 `sdotX` fields correspond to skills, 5 per skill)
-        for (let i = 0; i < total; i++) {
-          setCheckbox(`sdot${idx * 5 + i + 1}`, true)
-        }
-        for (let i = total; i < 5; i++) {
-          setCheckbox(`sdot${idx * 5 + i + 1}`, false)
-        }
+      const finalAbilities: any = {}
+      Object.keys(state.abilities).forEach(ability => {
+        finalAbilities[ability] = calculateTotalDots('abilities', ability)
       })
 
-      // 4. Spheres
-      const sphereOrder = ['correspondence', 'entropy', 'forces', 'life', 'matter', 'mind', 'prime', 'spirit', 'time']
-      sphereOrder.forEach((sphere, idx) => {
-        const total = state.spheres[sphere as keyof typeof state.spheres] + (state.freebieDots.spheres[sphere] || 0)
-        setField(`spheres${idx + 1}`, total)
-        // Fill dot checkboxes (assume first 45 `xdotX` fields correspond to spheres, 5 per sphere)
-        for (let i = 0; i < total; i++) {
-          setCheckbox(`xdot${idx * 5 + i + 1}`, true)
-        }
-        for (let i = total; i < 5; i++) {
-          setCheckbox(`xdot${idx * 5 + i + 1}`, false)
-        }
+      const finalSpheres: any = {}
+      Object.keys(state.spheres).forEach(sphere => {
+        finalSpheres[sphere] = calculateTotalDots('spheres', sphere)
       })
 
-      // 5. Backgrounds – we have only text fields, no dots (or they are separate, we'll just set the text)
-      const backgroundValues = Object.entries(state.backgrounds)
-        .map(([name, dots]) => dots + (state.freebieDots.backgrounds[name] || 0))
-      for (let i = 0; i < 6; i++) {
-        setField(`backgrounds${i + 1}`, backgroundValues[i] || '')
-      }
+      const finalBackgrounds: any = {}
+      Object.keys(state.backgrounds).forEach(bg => {
+        finalBackgrounds[bg] = calculateTotalDots('backgrounds', bg)
+      })
 
-      // 6. Arete & Willpower
       const totalArete = 1 + state.freebieDots.arete
       const totalWillpower = 5 + state.freebieDots.willpower
-      setField('othertraits1', totalArete)
-      setField('othertraits2', totalWillpower)
 
-      // Fill Arete dot checkboxes (use `bpdot` fields – common in Mage sheets)
-      for (let i = 0; i < totalArete; i++) {
-        setCheckbox(`bpdot${i + 1}`, true)
+      // Prepare character data
+      const characterData = {
+        name: state.name,
+        player: state.player,
+        chronicle: state.chronicle,
+        nature: state.nature,
+        demeanor: state.demeanor,
+        essence: state.essence,
+        faction: state.affiliation, // Use affiliation as faction
+        sect: state.sect,
+        concept: state.concept,
+        attributes: finalAttributes,
+        abilities: finalAbilities,
+        spheres: finalSpheres,
+        backgrounds: finalBackgrounds,
+        specialties: state.specialties,
+        arete: totalArete,
+        willpower: totalWillpower,
+        freebieDots: state.freebieDots,
+        merits: state.merits,
+        flaws: state.flaws
       }
-      for (let i = totalArete; i < 10; i++) {
-        setCheckbox(`bpdot${i + 1}`, false)
+
+      // Save to database
+      const response = await fetch('/api/characters', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(characterData)
+      })
+
+      if (response.ok) {
+        const savedCharacter = await response.json()
+        setCharacterId(savedCharacter.id)
+        toast({
+          title: "Character Saved!",
+          description: `${state.name} has been added to your characters.`
+        })
+      } else {
+        const error = await response.json()
+        toast({
+          title: "Error",
+          description: error.error || "Failed to save character",
+          variant: "destructive"
+        })
       }
-
-      // Fill Willpower dot checkboxes
-      for (let i = 0; i < totalWillpower; i++) {
-        setCheckbox(`willdot${i + 1}`, true)
-      }
-      for (let i = totalWillpower; i < 10; i++) {
-        setCheckbox(`willdot${i + 1}`, false)
-      }
-
-      // 7. Experience – leave blank or 0
-      setField('experience', 0)
-
-      // Generate PDF
-      const pdfBytes = await pdfDoc.save()
-      const blob = new Blob([pdfBytes], { type: 'application/pdf' })
-      const url = URL.createObjectURL(blob)
-      setPdfUrl(url)
-
-    } catch (err) {
-      console.error('PDF Generation Error:', err)
-      setError('Failed to generate PDF. Please try again.')
+    } catch (error) {
+      console.error('Error saving character:', error)
+      toast({
+        title: "Error",
+        description: "Failed to save character. Please try again.",
+        variant: "destructive"
+      })
     } finally {
-      setIsGenerating(false)
+      setIsSaving(false)
     }
   }
 
-  useEffect(() => {
-    generatePDF()
-  }, [])
-
-  // The JSX part remains exactly as before
   return (
     <div className="space-y-6 py-8">
       <div className="text-center space-y-4">
@@ -2129,62 +2093,62 @@ function CompletePhase({ state }: { state: CharacterState }) {
         </p>
       </div>
 
-      {/* PDF Download Section */}
-      <Card className="max-w-2xl mx-auto border-2 border-primary">
-        <CardHeader>
-          <CardTitle className="font-cinzel text-center">📄 Character Sheet</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {isGenerating && (
-            <div className="text-center py-8">
-              <div className="animate-spin w-12 h-12 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4" />
-              <p style={{ color: '#6b4423' }}>Generating your character sheet...</p>
-            </div>
-          )}
-
-          {error && (
-            <div className="p-4 bg-red-50 border-2 border-red-600 rounded text-center">
-              <p className="text-red-600 font-semibold">{error}</p>
-              <Button onClick={generatePDF} className="mt-2">Try Again</Button>
-            </div>
-          )}
-
-          {pdfUrl && !isGenerating && (
-            <div className="space-y-4">
-              <div className="aspect-[8.5/11] border-2 border-accent rounded overflow-hidden">
-                <iframe
-                  src={pdfUrl}
-                  className="w-full h-full"
-                  title="Character Sheet Preview"
-                />
-              </div>
-              
-              <div className="flex gap-3">
-                <a
-                  href={pdfUrl}
-                  download={`${state.name || 'Character'}_Sheet.pdf`}
-                  className="flex-1"
-                >
-                  <Button className="w-full" style={{
-                    background: 'linear-gradient(135deg, #d4af37, #8b6914)',
-                    color: '#2d1b4e'
-                  }}>
-                    📥 Download Character Sheet
-                  </Button>
-                </a>
-                
-                <Button 
-                  variant="outline" 
-                  onClick={() => window.print()}
-                  className="flex-1"
-                >
-                  🖨️ Print
+      {/* Save Button */}
+      {!characterId ? (
+        <Card className="max-w-2xl mx-auto border-2 border-primary">
+          <CardHeader>
+            <CardTitle className="font-cinzel text-center">💾 Save Character</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-center text-muted-foreground">
+              Save {state.name} to your account and start assigning rotes!
+            </p>
+            <Button 
+              onClick={saveCharacter}
+              disabled={isSaving}
+              className="w-full"
+              style={{
+                background: 'linear-gradient(135deg, #d4af37, #8b6914)',
+                color: '#2d1b4e',
+                fontSize: '1.1rem',
+                padding: '1.5rem'
+              }}
+            >
+              {isSaving ? (
+                <>
+                  <div className="animate-spin w-5 h-5 border-2 border-current border-t-transparent rounded-full mr-2" />
+                  Saving...
+                </>
+              ) : (
+                '💾 Save Character to My Account'
+              )}
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card className="max-w-2xl mx-auto border-2 border-green-600">
+          <CardHeader>
+            <CardTitle className="font-cinzel text-center text-green-600">✅ Character Saved!</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4 text-center">
+            <p className="text-muted-foreground">
+              {state.name} has been saved to your account!
+            </p>
+            <div className="flex gap-3">
+              <Link href={`/characters/${characterId}`} className="flex-1">
+                <Button className="w-full" variant="default">
+                  View Character Sheet
                 </Button>
-              </div>
+              </Link>
+              <Link href="/dashboard" className="flex-1">
+                <Button className="w-full" variant="outline">
+                  Go to Dashboard
+                </Button>
+              </Link>
             </div>
-          )}
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Summary */}
       <div className="grid grid-cols-2 gap-6 max-w-3xl mx-auto">
@@ -2201,13 +2165,13 @@ function CompletePhase({ state }: { state: CharacterState }) {
         </div>
 
         <div className="p-4 border-2 rounded" style={{ borderColor: '#8b4513', background: 'rgba(212, 175, 55, 0.05)' }}>
-          <h3 className="font-semibold mb-3 text-center" style={{ color: '#d4af37' }}>🎲 Freebie Points</h3>
+          <h3 className="font-semibold mb-3 text-center" style={{ color: '#d4af37' }}>🎲 Freebie Points Used</h3>
           <ul className="text-sm space-y-2" style={{ color: '#6b4423' }}>
-            <li>Merits: {state.merits.length} selected</li>
-            <li>Flaws: {state.flaws.length} selected (+{state.flaws.reduce((s, f) => s + f.cost, 0)} pts)</li>
-            <li>Extra Attributes: {Object.values(state.freebieDots.attributes).reduce((a, b) => a + b, 0)}</li>
-            <li>Extra Abilities: {Object.values(state.freebieDots.abilities).reduce((a, b) => a + b, 0)}</li>
-            <li>Extra Spheres: {Object.values(state.freebieDots.spheres).reduce((a, b) => a + b, 0)}</li>
+            <li>Merits: {state.merits.length} ({state.merits.reduce((s, m) => s + m.cost, 0)} pts)</li>
+            <li>Flaws: {state.flaws.length} (+{state.flaws.reduce((s, f) => s + f.cost, 0)} pts)</li>
+            <li>Attributes: {Object.values(state.freebieDots.attributes).reduce((a: number, b: number) => a + b, 0)} dots</li>
+            <li>Abilities: {Object.values(state.freebieDots.abilities).reduce((a: number, b: number) => a + b, 0)} dots</li>
+            <li>Spheres: {Object.values(state.freebieDots.spheres).reduce((a: number, b: number) => a + b, 0)} dots</li>
           </ul>
         </div>
       </div>
