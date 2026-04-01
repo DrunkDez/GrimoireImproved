@@ -54,32 +54,36 @@ export default function CharacterSheetPage() {
   }, [status, characterId])
  
   const fetchCharacter = async () => {
-    if (!characterId) {
-      console.error("No character ID available")
-      return
-    }
-    
-    try {
-      console.log("📡 Making API call to /api/characters/" + characterId)
-      const response = await fetch(`/api/characters/${characterId}`)
-      if (response.ok) {
-        const data = await response.json()
-        console.log("✅ Loaded character:", data.name, "ID:", data.id)
-        console.log("📊 Has attributes:", !!data.attributes)
-        console.log("📊 Has abilities:", !!data.abilities)
-        console.log("📊 Has spheres:", !!data.spheres)
-        console.log("📊 Attributes data:", data.attributes)
-        setCharacter(data)
-      } else {
-        console.error("❌ Failed to fetch character, status:", response.status)
-        router.push("/dashboard")
-      }
-    } catch (error) {
-      console.error("Error fetching character:", error)
-    } finally {
-      setIsLoading(false)
-    }
+  if (!characterId) {
+    console.error("No character ID available")
+    return
   }
+  
+  try {
+    console.log("📡 Making API call to /api/characters/" + characterId)
+    const response = await fetch(`/api/characters/${characterId}`)
+    if (response.ok) {
+      const data = await response.json()
+      console.log("✅ API Response:", data.id, data.name)
+      console.log("✅ Requested ID:", characterId)
+      console.log("✅ Returned ID:", data.id)
+      
+      // Check if the returned ID matches the requested ID
+      if (data.id !== characterId) {
+        console.error("❌ MISMATCH! Requested", characterId, "but got", data.id)
+      }
+      
+      setCharacter(data)
+    } else {
+      console.error("❌ Failed to fetch character, status:", response.status)
+      router.push("/dashboard")
+    }
+  } catch (error) {
+    console.error("Error fetching character:", error)
+  } finally {
+    setIsLoading(false)
+  }
+}
  
   const fetchAllRotes = async () => {
     try {
