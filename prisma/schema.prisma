@@ -27,11 +27,35 @@ model User {
 model Character {
   id           String          @id @default(cuid())
   name         String
-  faction      String          // Tradition or Technocracy convention
+  faction      String          // Tradition/affiliation from guided creation
   concept      String?         // Character concept/background
-  arete        Int?            // Arete rating (1-10)
-  avatar       String?         // Avatar description
+  
+  // Basic Info from guided creation
+  player       String?         // Player's name
+  chronicle    String?         // Campaign name
+  nature       String?         // Nature archetype
+  demeanor     String?         // Demeanor archetype
   essence      String?         // Dynamic, Pattern, Primordial, Questing
+  sect         String?         // Sect (optional)
+  
+  // Stats (stored as JSON for flexibility)
+  attributes   Json?           // { strength: 2, dexterity: 3, ... }
+  abilities    Json?           // { alertness: 2, brawl: 1, ... }
+  spheres      Json?           // { correspondence: 2, forces: 1, ... }
+  backgrounds  Json?           // { avatar: 3, library: 2, ... }
+  specialties  Json?           // { brawl: "Dirty Fighting", ... }
+  
+  // Derived from guided creation
+  arete        Int?            // Total arete (base 1 + freebie dots)
+  willpower    Int?            // Total willpower (base 5 + freebie dots)
+  
+  // Freebie tracking (for editing later)
+  freebieDots  Json?           // Store all freebie allocations
+  merits       Json?           // Array of { id, name, cost }
+  flaws        Json?           // Array of { id, name, cost }
+  
+  // Metadata
+  avatar       String?         // Avatar description
   userId       String
   user         User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   rotes        CharacterRote[]
