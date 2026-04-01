@@ -31,8 +31,16 @@ export async function GET() {
 // POST /api/rotes - Create a new rote
 export async function POST(request: NextRequest) {
   try {
+    // 🔒 SECURITY FIX: Require authentication
     const session = await getServerSession(authOptions)
     
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { error: 'Unauthorized: You must be logged in to create rotes' },
+        { status: 401 }
+      )
+    }
+
     const body = await request.json()
     const { name, tradition, description, spheres, level, pageRef } = body
 
@@ -44,6 +52,31 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // 🔒 SECURITY FIX: Validate spheres object structure
+    if (typeof spheres !== 'object' || Array.isArray(spheres)) {
+      return NextResponse.json(
+        { error: 'Spheres must be an object' },
+        { status: 400 }
+      )
+    }
+
+    // Validate sphere values
+    const validSpheres = ['Correspondence', 'Entropy', 'Forces', 'Life', 'Matter', 'Mind', 'Prime', 'Spirit', 'Time']
+    for (const [sphere, level] of Object.entries(spheres)) {
+      if (!validSpheres.includes(sphere)) {
+        return NextResponse.json(
+          { error: `Invalid sphere: ${sphere}` },
+          { status: 400 }
+        )
+      }
+      if (typeof level !== 'number' || level < 1 || level > 5) {
+        return NextResponse.json(
+          { error: `Invalid level for ${sphere}: must be 1-5` },
+          { status: 400 }
+        )
+      }
+    }
+
     const rote = await prisma.rote.create({
       data: {
         name,
@@ -52,7 +85,7 @@ export async function POST(request: NextRequest) {
         spheres,
         level,
         pageRef: pageRef || null,
-        userId: session?.user?.id || null, // Associate with user if logged in
+        userId: session.user.id, // 🔒 Always set userId
       },
       include: {
         user: {
