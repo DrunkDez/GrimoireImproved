@@ -27,7 +27,6 @@ export async function GET(
     console.log("params.id:", params?.id)
     console.log("URL path:", url.pathname)
     console.log("Extracted ID:", characterId)
-    console.log("User ID:", session.user.id)
 
     if (!characterId) {
       console.error("No character ID provided")
@@ -47,7 +46,6 @@ export async function GET(
       }
     })
 
-    console.log("Found character:", character?.id, character?.name)
     console.log("Character belongs to user:", character?.userId)
     console.log("Session user:", session.user.id)
 
