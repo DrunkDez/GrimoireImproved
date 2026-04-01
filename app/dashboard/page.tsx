@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { 
   Home, BookOpen, Users, Plus, Trash2, 
-  Calendar, User as UserIcon
+  Calendar, User as UserIcon, Edit, Eye
 } from "lucide-react"
 import Link from "next/link"
 import { GrimoireHeader } from "@/components/grimoire-header"
@@ -29,6 +29,7 @@ interface Character {
   faction: string
   concept: string | null
   arete: number | null
+  essence: string | null
   createdAt: string
   _count: {
     rotes: number
@@ -76,6 +77,7 @@ export default function DashboardPage() {
       const response = await fetch('/api/characters')
       if (response.ok) {
         const data = await response.json()
+        console.log("📋 Dashboard - Fetched characters:", data.map(c => ({ id: c.id, name: c.name, hasAttributes: !!c.attributes })))
         setMyCharacters(data)
       }
     } catch (error) {
@@ -93,6 +95,22 @@ export default function DashboardPage() {
       if (response.ok) fetchMyRotes()
     } catch (error) {
       console.error('Error deleting rote:', error)
+    }
+  }
+
+  const deleteCharacter = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this character? This cannot be undone.')) return
+
+    try {
+      const response = await fetch(`/api/characters/${id}`, { method: 'DELETE' })
+      if (response.ok) {
+        fetchMyCharacters()
+      } else {
+        const error = await response.json()
+        console.error('Error deleting character:', error)
+      }
+    } catch (error) {
+      console.error('Error deleting character:', error)
     }
   }
 
@@ -163,17 +181,112 @@ export default function DashboardPage() {
           </div>
 
           {/* Main Tabs */}
-          <Tabs defaultValue="rotes" className="space-y-6">
+          <Tabs defaultValue="characters" className="space-y-6">
             <TabsList className="grid w-full grid-cols-2 max-w-md">
-              <TabsTrigger value="rotes" className="gap-2">
-                <BookOpen className="w-4 h-4" />
-                My Rotes
-              </TabsTrigger>
               <TabsTrigger value="characters" className="gap-2">
                 <Users className="w-4 h-4" />
                 My Characters
               </TabsTrigger>
+              <TabsTrigger value="rotes" className="gap-2">
+                <BookOpen className="w-4 h-4" />
+                My Rotes
+              </TabsTrigger>
             </TabsList>
+
+            {/* My Characters Tab */}
+            <TabsContent value="characters" className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-2xl font-cinzel font-bold text-primary">
+                  Your Characters
+                </h2>
+                <Link href="/character-guide">
+                  <Button className="gap-2">
+                    <Plus className="w-4 h-4" />
+                    Create New Character
+                  </Button>
+                </Link>
+              </div>
+
+              {isLoadingCharacters ? (
+                <p className="text-muted-foreground">Loading your characters...</p>
+              ) : myCharacters.length === 0 ? (
+                <Card className="border-2 border-primary">
+                  <CardContent className="p-12 text-center">
+                    <Users className="w-12 h-12 mx-auto mb-4 text-muted-foreground opacity-50" />
+                    <h3 className="font-cinzel text-xl font-bold text-primary mb-2">
+                      No Characters Yet
+                    </h3>
+                    <p className="text-muted-foreground mb-4">
+                      Create your first mage character and begin your journey!
+                    </p>
+                    <Link href="/character-guide">
+                      <Button>Create Your First Character</Button>
+                    </Link>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {myCharacters.map((character) => (
+                    <Card key={character.id} className="border-2 border-primary hover:border-accent transition-colors">
+                      <CardHeader>
+                        <CardTitle className="text-lg font-cinzel">
+                          {character.name}
+                        </CardTitle>
+                        <CardDescription className="space-y-2">
+                          <Badge className="mr-2">{character.faction}</Badge>
+                          {character.arete && (
+                            <Badge variant="outline">Arete {character.arete}</Badge>
+                          )}
+                          {character.essence && (
+                            <Badge variant="secondary">{character.essence}</Badge>
+                          )}
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        {character.concept && (
+                          <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+                            {character.concept}
+                          </p>
+                        )}
+                        <div className="flex items-center justify-between">
+                          <div className="text-sm text-muted-foreground">
+                            <BookOpen className="w-4 h-4 inline mr-1" />
+                            {character._count.rotes} rote{character._count.rotes !== 1 ? 's' : ''}
+                          </div>
+                          <div className="flex gap-2">
+                            <Link href={`/characters/${character.id}/edit`}>
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                className="gap-1"
+                                onClick={() => console.log("📝 EDIT clicked - ID:", character.id, "Name:", character.name)}
+                              >
+                                <Edit className="w-3 h-3" />
+                                Edit
+                              </Button>
+                            </Link>
+                            <Link href={`/characters/${character.id}`}>
+                              <Button 
+                                size="sm" 
+                                className="gap-1"
+                                onClick={() => console.log("👁️ VIEW clicked - ID:", character.id, "Name:", character.name)}
+                              >
+                                <Eye className="w-3 h-3" />
+                                View
+                              </Button>
+                            </Link>
+                          </div>
+                        </div>
+                        <div className="mt-3 pt-3 border-t text-xs text-muted-foreground flex items-center gap-1">
+                          <Calendar className="w-3 h-3" />
+                          Created {new Date(character.createdAt).toLocaleDateString()}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </TabsContent>
 
             {/* My Rotes Tab */}
             <TabsContent value="rotes" className="space-y-4">
@@ -243,68 +356,6 @@ export default function DashboardPage() {
                         <p className="text-xs text-muted-foreground mt-2">
                           Created {new Date(rote.createdAt).toLocaleDateString()}
                         </p>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              )}
-            </TabsContent>
-
-            {/* My Characters Tab */}
-            <TabsContent value="characters" className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-cinzel font-bold text-primary">
-                  Your Characters
-                </h2>
-                <Link href="/characters/new">
-                  <Button className="gap-2">
-                    <Plus className="w-4 h-4" />
-                    Create New Character
-                  </Button>
-                </Link>
-              </div>
-
-              {isLoadingCharacters ? (
-                <p className="text-muted-foreground">Loading your characters...</p>
-              ) : myCharacters.length === 0 ? (
-                <Card className="border-2 border-primary">
-                  <CardContent className="p-12 text-center">
-                    <Users className="w-12 h-12 mx-auto mb-4 text-muted-foreground opacity-50" />
-                    <h3 className="font-cinzel text-xl font-bold text-primary mb-2">
-                      No Characters Yet
-                    </h3>
-                    <p className="text-muted-foreground mb-4">
-                      Create your first mage character and begin your journey!
-                    </p>
-                    <Link href="/characters/new">
-                      <Button>Create Your First Character</Button>
-                    </Link>
-                  </CardContent>
-                </Card>
-              ) : (
-                <div className="grid gap-4 md:grid-cols-2">
-                  {myCharacters.map((character) => (
-                    <Card key={character.id} className="border-2 border-primary hover:border-accent transition-colors">
-                      <CardHeader>
-                        <CardTitle className="text-lg font-cinzel flex items-center justify-between">
-                          <span>{character.name}</span>
-                          {character.arete && <Badge variant="outline">Arete {character.arete}</Badge>}
-                        </CardTitle>
-                        <CardDescription>
-                          <Badge>{character.faction}</Badge>
-                          {character.concept && <span className="ml-2 text-xs">• {character.concept}</span>}
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="flex items-center justify-between">
-                          <div className="text-sm text-muted-foreground">
-                            <BookOpen className="w-4 h-4 inline mr-1" />
-                            {character._count.rotes} rote{character._count.rotes !== 1 ? 's' : ''}
-                          </div>
-                          <Link href={`/characters/${character.id}`}>
-                            <Button variant="outline" size="sm">View Character</Button>
-                          </Link>
-                        </div>
                       </CardContent>
                     </Card>
                   ))}

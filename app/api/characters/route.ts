@@ -48,7 +48,30 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { name, faction, concept, arete, avatar, essence } = body
+    
+    // Extract all fields from the request
+    const {
+      name,
+      player,
+      chronicle,
+      nature,
+      demeanor,
+      essence,
+      faction,
+      sect,
+      concept,
+      attributes,
+      abilities,
+      spheres,
+      backgrounds,
+      specialties,
+      arete,
+      willpower,
+      freebieDots,
+      merits,
+      flaws,
+      avatar
+    } = body
 
     // Validate required fields
     if (!name || !faction) {
@@ -58,14 +81,29 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Create character with all fields
     const character = await prisma.character.create({
       data: {
         name,
         faction,
         concept: concept || null,
         arete: arete || null,
+        willpower: willpower || null,
         avatar: avatar || null,
         essence: essence || null,
+        player: player || null,
+        chronicle: chronicle || null,
+        nature: nature || null,
+        demeanor: demeanor || null,
+        sect: sect || null,
+        attributes: attributes || null,
+        abilities: abilities || null,
+        spheres: spheres || null,
+        backgrounds: backgrounds || null,
+        specialties: specialties || null,
+        freebieDots: freebieDots || null,
+        merits: merits || null,
+        flaws: flaws || null,
         userId: session.user.id,
       },
     })

@@ -1964,7 +1964,7 @@ function FreebiePointsPhase({ state, setState, onBack, onContinue }: {
   )
 }
 
-// NEW: CompletePhase COMPONENT with Save to Database
+// CompletePhase COMPONENT with Save to Database and debug logging
 function CompletePhase({ state }: { state: CharacterState }) {
   const router = useRouter()
   const { toast } = useToast()
@@ -2040,8 +2040,22 @@ function CompletePhase({ state }: { state: CharacterState }) {
         willpower: totalWillpower,
         freebieDots: state.freebieDots,
         merits: state.merits,
-        flaws: state.flaws
+        flaws: state.flaws,
+        avatar: "" // Add empty avatar if not present
       }
+
+      // Debug log what we're sending
+      console.log('=== SAVING CHARACTER ===')
+      console.log('Character name:', characterData.name)
+      console.log('Attributes:', Object.keys(characterData.attributes))
+      console.log('Abilities count:', Object.keys(characterData.abilities).length)
+      console.log('Spheres:', Object.keys(characterData.spheres))
+      console.log('Backgrounds:', Object.keys(characterData.backgrounds))
+      console.log('Specialties:', characterData.specialties)
+      console.log('Merits:', characterData.merits?.length)
+      console.log('Flaws:', characterData.flaws?.length)
+      console.log('Freebie dots:', characterData.freebieDots)
+      console.log('========================')
 
       // Save to database
       const response = await fetch('/api/characters', {
@@ -2050,18 +2064,20 @@ function CompletePhase({ state }: { state: CharacterState }) {
         body: JSON.stringify(characterData)
       })
 
+      const responseData = await response.json()
+      console.log('Response status:', response.status)
+      console.log('Response data:', responseData)
+
       if (response.ok) {
-        const savedCharacter = await response.json()
-        setCharacterId(savedCharacter.id)
+        setCharacterId(responseData.id)
         toast({
           title: "Character Saved!",
           description: `${state.name} has been added to your characters.`
         })
       } else {
-        const error = await response.json()
         toast({
           title: "Error",
-          description: error.error || "Failed to save character",
+          description: responseData.error || "Failed to save character",
           variant: "destructive"
         })
       }
