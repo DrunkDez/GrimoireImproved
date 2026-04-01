@@ -77,6 +77,7 @@ export default function DashboardPage() {
       const response = await fetch('/api/characters')
       if (response.ok) {
         const data = await response.json()
+        console.log("📋 Dashboard - Fetched characters:", data.map(c => ({ id: c.id, name: c.name, hasAttributes: !!c.attributes })))
         setMyCharacters(data)
       }
     } catch (error) {
@@ -254,13 +255,22 @@ export default function DashboardPage() {
                           </div>
                           <div className="flex gap-2">
                             <Link href={`/characters/${character.id}/edit`}>
-                              <Button variant="outline" size="sm" className="gap-1">
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                className="gap-1"
+                                onClick={() => console.log("📝 EDIT clicked - ID:", character.id, "Name:", character.name)}
+                              >
                                 <Edit className="w-3 h-3" />
                                 Edit
                               </Button>
                             </Link>
                             <Link href={`/characters/${character.id}`}>
-                              <Button size="sm" className="gap-1">
+                              <Button 
+                                size="sm" 
+                                className="gap-1"
+                                onClick={() => console.log("👁️ VIEW clicked - ID:", character.id, "Name:", character.name)}
+                              >
                                 <Eye className="w-3 h-3" />
                                 View
                               </Button>
