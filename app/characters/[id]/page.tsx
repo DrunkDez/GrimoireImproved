@@ -53,7 +53,7 @@ export default function CharacterSheetPage() {
     }
   }, [status, characterId])
  
-  const fetchCharacter = async () => {
+ const fetchCharacter = async () => {
   if (!characterId) {
     console.error("No character ID available")
     return
@@ -62,20 +62,27 @@ export default function CharacterSheetPage() {
   try {
     console.log("📡 Making API call to /api/characters/" + characterId)
     const response = await fetch(`/api/characters/${characterId}`)
+    
+    console.log("📡 Response status:", response.status)
+    
     if (response.ok) {
       const data = await response.json()
-      console.log("✅ API Response:", data.id, data.name)
+      console.log("✅ API Response:", data)
+      console.log("✅ Response ID:", data.id)
       console.log("✅ Requested ID:", characterId)
-      console.log("✅ Returned ID:", data.id)
       
       // Check if the returned ID matches the requested ID
       if (data.id !== characterId) {
         console.error("❌ MISMATCH! Requested", characterId, "but got", data.id)
+        // Force reload the page with the correct ID?
+        // router.push(`/characters/${data.id}`)
+        // return
       }
       
       setCharacter(data)
     } else {
-      console.error("❌ Failed to fetch character, status:", response.status)
+      const error = await response.json()
+      console.error("❌ Failed to fetch character:", error)
       router.push("/dashboard")
     }
   } catch (error) {
