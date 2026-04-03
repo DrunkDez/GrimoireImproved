@@ -3,7 +3,7 @@ import type { NextRequest } from 'next/server'
 import { getToken } from 'next-auth/jwt'
 
 // Routes that require authentication
-const PROTECTED_ROUTES = [
+const PROTECTED_ROUTES: string[] = [
   '/dashboard',
   '/character-guide',
   '/characters',
@@ -11,19 +11,21 @@ const PROTECTED_ROUTES = [
 ]
 
 // API routes that require authentication
-const PROTECTED_API_ROUTES = [
+const PROTECTED_API_ROUTES: string[] = [
   '/api/characters',
   '/api/rotes',
 ]
 
 // Admin-only routes
-const ADMIN_ROUTES = [
+const ADMIN_ROUTES: string[] = [
   '/admin',
 ]
 
 // Admin-only API routes
-const ADMIN_API_ROUTES = [
-  '/api/merits', // POST only
+// Note: /api/merits POST is handled in the API endpoint itself
+const ADMIN_API_ROUTES: string[] = [
+  // Add other admin API routes here if needed
+  // Example: '/api/users', '/api/settings', etc.
 ]
 
 export async function middleware(request: NextRequest) {
