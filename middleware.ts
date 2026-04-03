@@ -11,9 +11,10 @@ const PROTECTED_ROUTES: string[] = [
 ]
 
 // API routes that require authentication
+// Note: /api/rotes GET is public, POST has its own auth check
 const PROTECTED_API_ROUTES: string[] = [
   '/api/characters',
-  '/api/rotes',
+  // '/api/rotes',  // REMOVED - rotes are public to view
 ]
 
 // Admin-only routes
