@@ -2,15 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Modern font stack */
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
-  font-feature-settings: 'kern' 1, 'liga' 1, 'calt' 1;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
 @layer utilities {
   .text-balance {
     text-wrap: balance;
@@ -19,109 +10,136 @@ body {
 
 @layer base {
   :root {
-    /* Enhanced warm mystical palette */
-    --background: 36 42% 95%;
-    --foreground: 30 20% 15%;
-    --card: 0 0% 100%;
-    --card-foreground: 30 20% 15%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 30 20% 15%;
-    
-    /* Mystical purple primary */
-    --primary: 300 45% 25%;
-    --primary-foreground: 42 42% 95%;
-    
-    /* Warm secondary */
-    --secondary: 36 42% 88%;
-    --secondary-foreground: 30 20% 15%;
-    
-    /* Subtle muted */
-    --muted: 36 30% 90%;
-    --muted-foreground: 30 10% 45%;
-    
-    /* Golden accent */
-    --accent: 42 42% 59%;
-    --accent-foreground: 30 20% 15%;
-    
+    /* ═══════════════════════════════════════════════
+       LIGHT MODE — aged parchment + dried blood + gold
+       ═══════════════════════════════════════════════ */
+
+    /* Parchment base */
+    --background: 38 35% 92%;
+    --foreground: 20 30% 12%;
+
+    /* Aged vellum card */
+    --card: 38 28% 97%;
+    --card-foreground: 20 30% 12%;
+    --popover: 38 28% 97%;
+    --popover-foreground: 20 30% 12%;
+
+    /* PRIMARY: deep dried-blood crimson — the dominant force */
+    --primary: 8 55% 22%;
+    --primary-foreground: 38 35% 92%;
+
+    /* SECONDARY: aged ink shadow */
+    --secondary: 38 20% 84%;
+    --secondary-foreground: 20 30% 12%;
+
+    /* Muted parchment tones */
+    --muted: 38 22% 87%;
+    --muted-foreground: 30 15% 42%;
+
+    /* ACCENT: burnished gold — the commanding highlight */
+    --accent: 42 68% 48%;
+    --accent-foreground: 20 30% 10%;
+
     /* Destructive */
-    --destructive: 0 84% 60%;
+    --destructive: 0 72% 50%;
     --destructive-foreground: 0 0% 98%;
-    
-    /* Borders */
-    --border: 36 30% 85%;
-    --input: 36 30% 85%;
-    --ring: 42 42% 59%;
-    
+
+    /* Borders: warm sepia */
+    --border: 36 22% 78%;
+    --input: 36 22% 78%;
+
+    /* Ring: gold */
+    --ring: 42 68% 48%;
+
     /* Charts */
-    --chart-1: 42 60% 55%;
-    --chart-2: 300 45% 45%;
+    --chart-1: 42 68% 48%;
+    --chart-2: 8 55% 40%;
     --chart-3: 36 50% 50%;
-    --chart-4: 280 40% 55%;
-    --chart-5: 20 55% 60%;
-    
+    --chart-4: 280 30% 45%;
+    --chart-5: 20 55% 45%;
+
     --radius: 0.5rem;
-    
+
     /* Sidebar */
-    --sidebar-background: 36 42% 98%;
-    --sidebar-foreground: 30 20% 20%;
-    --sidebar-primary: 300 45% 25%;
-    --sidebar-primary-foreground: 42 42% 95%;
-    --sidebar-accent: 36 42% 93%;
-    --sidebar-accent-foreground: 30 20% 15%;
-    --sidebar-border: 36 30% 88%;
-    --sidebar-ring: 42 42% 59%;
+    --sidebar-background: 38 30% 95%;
+    --sidebar-foreground: 20 30% 15%;
+    --sidebar-primary: 8 55% 22%;
+    --sidebar-primary-foreground: 38 35% 92%;
+    --sidebar-accent: 38 22% 89%;
+    --sidebar-accent-foreground: 20 30% 12%;
+    --sidebar-border: 36 22% 80%;
+    --sidebar-ring: 42 68% 48%;
+
+    /* Custom semantic tokens */
+    --glow-primary: 8 55% 35%;
+    --glow-accent: 42 68% 55%;
+    --arcane-purple: 290 35% 30%;
   }
-  
+
   .dark {
-    /* Warm dark mode */
-    --background: 30 20% 8%;
-    --foreground: 42 42% 95%;
-    --card: 30 20% 10%;
-    --card-foreground: 42 42% 95%;
-    --popover: 30 20% 8%;
-    --popover-foreground: 42 42% 95%;
-    
-    /* Golden primary in dark */
-    --primary: 42 42% 70%;
-    --primary-foreground: 30 20% 10%;
-    
-    /* Dark secondary */
-    --secondary: 30 15% 15%;
-    --secondary-foreground: 42 42% 95%;
-    
-    /* Dark muted */
-    --muted: 30 15% 18%;
-    --muted-foreground: 36 20% 65%;
-    
-    /* Accent */
-    --accent: 42 42% 59%;
-    --accent-foreground: 30 20% 10%;
-    
+    /* ═══════════════════════════════════════════════
+       DARK MODE — void black + ember crimson + gold
+       Purple demoted to atmospheric glow only.
+       ═══════════════════════════════════════════════ */
+
+    /* Deep void — richer than a flat near-black */
+    --background: 20 18% 6%;
+    --foreground: 38 30% 88%;
+
+    /* Slightly lifted card surface */
+    --card: 20 16% 9%;
+    --card-foreground: 38 30% 88%;
+    --popover: 20 16% 9%;
+    --popover-foreground: 38 30% 88%;
+
+    /* PRIMARY: aged gold — luminous, commanding */
+    --primary: 42 62% 62%;
+    --primary-foreground: 20 18% 6%;
+
+    /* SECONDARY: smoldering ember dark */
+    --secondary: 15 18% 14%;
+    --secondary-foreground: 38 30% 85%;
+
+    /* Muted: barely-there warmth */
+    --muted: 18 14% 16%;
+    --muted-foreground: 36 15% 58%;
+
+    /* ACCENT: bright burnished gold — the sharp highlight */
+    --accent: 42 72% 55%;
+    --accent-foreground: 20 18% 6%;
+
     /* Destructive */
-    --destructive: 0 70% 50%;
+    --destructive: 0 65% 48%;
     --destructive-foreground: 0 0% 98%;
-    
-    /* Dark borders */
-    --border: 30 15% 20%;
-    --input: 30 15% 20%;
-    --ring: 42 42% 70%;
-    
-    /* Dark charts */
-    --chart-1: 42 65% 60%;
-    --chart-2: 300 50% 55%;
-    --chart-3: 36 55% 58%;
-    --chart-4: 280 45% 60%;
-    --chart-5: 20 60% 65%;
-    
+
+    /* Borders: warm ember shadow */
+    --border: 20 15% 18%;
+    --input: 20 15% 18%;
+
+    /* Ring: gold */
+    --ring: 42 62% 62%;
+
+    /* Charts */
+    --chart-1: 42 72% 58%;
+    --chart-2: 8 50% 50%;
+    --chart-3: 36 55% 55%;
+    --chart-4: 280 35% 55%;
+    --chart-5: 20 55% 58%;
+
     /* Dark sidebar */
-    --sidebar-background: 30 20% 10%;
-    --sidebar-foreground: 42 42% 95%;
-    --sidebar-primary: 42 42% 70%;
-    --sidebar-primary-foreground: 30 20% 10%;
-    --sidebar-accent: 30 15% 15%;
-    --sidebar-accent-foreground: 42 42% 95%;
-    --sidebar-border: 30 15% 18%;
-    --sidebar-ring: 42 42% 70%;
+    --sidebar-background: 20 16% 9%;
+    --sidebar-foreground: 38 30% 88%;
+    --sidebar-primary: 42 62% 62%;
+    --sidebar-primary-foreground: 20 18% 6%;
+    --sidebar-accent: 15 18% 14%;
+    --sidebar-accent-foreground: 38 30% 85%;
+    --sidebar-border: 20 15% 16%;
+    --sidebar-ring: 42 62% 62%;
+
+    /* Custom semantic tokens */
+    --glow-primary: 42 72% 55%;
+    --glow-accent: 8 55% 45%;
+    --arcane-purple: 290 40% 45%;
   }
 }
 
@@ -129,60 +147,66 @@ body {
   * {
     @apply border-border;
   }
-  
+
   body {
     @apply bg-background text-foreground;
+    /* Crimson Text from layout.tsx takes effect — NO system font override */
+    font-feature-settings: 'kern' 1, 'liga' 1, 'calt' 1;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     scroll-behavior: smooth;
   }
-  
-  /* Better focus states */
-  *:focus-visible {
-    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
-  }
-  
-  /* Smooth selection */
-  ::selection {
-    background-color: hsl(var(--accent) / 0.3);
-    color: hsl(var(--foreground));
-  }
-  
-  /* Typography improvements */
+
+  /* ── Headings: wide tracking for arcane gravitas ── */
   h1, h2, h3, h4, h5, h6 {
     font-weight: 700;
     line-height: 1.2;
-    letter-spacing: -0.02em;
+    /* Wide tracking — NOT the generic -0.02em */
+    letter-spacing: 0.06em;
   }
-  
+
   p {
-    line-height: 1.7;
+    line-height: 1.75;
   }
-  
-  /* Better code blocks */
+
   code {
     @apply rounded bg-muted px-1.5 py-0.5 font-mono text-sm;
   }
-  
-  /* Custom scrollbar */
-  ::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
+
+  /* Focus */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
   }
-  
+
+  /* Selection — gold tint */
+  ::selection {
+    background-color: hsl(var(--accent) / 0.28);
+    color: hsl(var(--foreground));
+  }
+
+  /* ── Arcane scrollbar ── */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
   ::-webkit-scrollbar-track {
     background: hsl(var(--muted));
   }
-  
+
   ::-webkit-scrollbar-thumb {
-    background: hsl(var(--accent) / 0.5);
-    border-radius: 5px;
+    background: hsl(var(--accent) / 0.4);
+    border-radius: 4px;
+    border: 2px solid hsl(var(--muted));
   }
-  
+
   ::-webkit-scrollbar-thumb:hover {
-    background: hsl(var(--accent));
+    background: hsl(var(--accent) / 0.75);
   }
 }
 
-/* Accessibility */
+/* ── Reduced motion ── */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

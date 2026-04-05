@@ -23,17 +23,14 @@ export default function Page() {
   const [selectedRote, setSelectedRote] = useState<Rote | null>(null)
   const [showAdminPanel, setShowAdminPanel] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
-  
-  // Track when we're returning from a rote detail view
+
   const [returningFromDetail, setReturningFromDetail] = useState(false)
-  
-  // Store browse panel state when viewing a rote
+
   const browsePanelStateRef = useRef<{
     scrollPosition: number
     timestamp: number
   } | null>(null)
 
-  // Fetch rotes from API
   const fetchRotes = useCallback(async () => {
     try {
       const response = await fetch('/api/rotes')
@@ -53,7 +50,6 @@ export default function Page() {
   }, [fetchRotes])
 
   const handleSelectRote = useCallback((rote: Rote) => {
-    // Save current scroll position before viewing rote
     browsePanelStateRef.current = {
       scrollPosition: window.scrollY,
       timestamp: Date.now()
@@ -64,10 +60,7 @@ export default function Page() {
   const handleBackFromDetail = useCallback(() => {
     setSelectedRote(null)
     setReturningFromDetail(true)
-    
-    // Restore scroll position after state updates
     if (browsePanelStateRef.current) {
-      // Use setTimeout to ensure DOM has updated
       setTimeout(() => {
         window.scrollTo({
           top: browsePanelStateRef.current?.scrollPosition || 0,
@@ -84,9 +77,8 @@ export default function Page() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(rote),
       })
-
       if (response.ok) {
-        fetchRotes() // Refresh the list
+        fetchRotes()
       }
     } catch (error) {
       console.error('Error adding rote:', error)
@@ -95,32 +87,31 @@ export default function Page() {
 
   const handleNavigate = useCallback((tab: TabId) => {
     setSelectedRote(null)
-    
-    // Navigate to separate pages
-    if (tab === "browse") {
-      router.push("/browse")
-      return
-    }
-    if (tab === "merits") {
-      router.push("/merits-flaws")
-      return
-    }
-    if (tab === "resources") {
-      router.push("/recommended")
-      return
-    }
-    
+    if (tab === "browse") { router.push("/browse"); return }
+    if (tab === "merits") { router.push("/merits-flaws"); return }
+    if (tab === "resources") { router.push("/recommended"); return }
     setActiveTab(tab)
   }, [router])
 
   const uniqueTraditions = new Set(rotes.map((r) => r.tradition)).size
 
-  // Show admin panel if activated
+  /* ── Shared outer frame ── */
+  const frameClasses = `
+    max-w-[1400px] mx-auto bg-background border-[3px] border-primary rounded-lg overflow-hidden relative
+    shadow-[0_0_0_1px_hsl(42_68%_48%),0_0_0_8px_hsl(38_35%_88%),0_0_0_11px_hsl(8_55%_22%),inset_0_0_80px_rgba(139,45,30,0.06),0_14px_40px_rgba(20,14,8,0.35)]
+    dark:shadow-[0_0_0_1px_hsl(42_68%_48%),0_0_0_8px_hsl(20_18%_10%),0_0_0_11px_hsl(8_55%_22%),inset_0_0_80px_rgba(139,45,30,0.08),0_14px_40px_rgba(0,0,0,0.5)]
+  `
+
+  /* ── Atmospheric page background — replaces flat solid ── */
+  const pageWrapperClasses = `
+    min-h-screen relative z-[1] py-6 px-3 md:py-8 md:px-4 grimoire-bg
+  `
+
   if (showAdminPanel) {
     return (
       <>
-        <div className="min-h-screen relative z-[1] py-6 px-3 md:py-8 md:px-4">
-          <div className="max-w-[1400px] mx-auto bg-background border-[3px] border-primary rounded-lg overflow-hidden relative shadow-[0_0_0_1px_hsl(42_42%_59%),0_0_0_8px_hsl(36_42%_88%),0_0_0_11px_hsl(300_45%_20%),inset_0_0_80px_rgba(139,71,38,0.08),0_14px_40px_rgba(26,21,16,0.25)]">
+        <div className={pageWrapperClasses}>
+          <div className={frameClasses}>
             <AdminPanel
               rotes={rotes}
               onRotesChange={fetchRotes}
@@ -135,24 +126,22 @@ export default function Page() {
 
   return (
     <>
-      <div className="min-h-screen relative z-[1] py-6 px-3 md:py-8 md:px-4">
-        <div
-          className="max-w-[1400px] mx-auto bg-background border-[3px] border-primary rounded-lg overflow-hidden relative
-            shadow-[0_0_0_1px_hsl(42_42%_59%),0_0_0_8px_hsl(36_42%_88%),0_0_0_11px_hsl(300_45%_20%),inset_0_0_80px_rgba(139,71,38,0.08),0_14px_40px_rgba(26,21,16,0.25)]"
-        >
+      <div className={pageWrapperClasses}>
+        <div className={frameClasses}>
+
           {/* Corner decorations */}
-          <div className="absolute -top-2 -left-2 text-4xl text-ring drop-shadow-[0_0_10px_rgba(107,45,107,0.8)] z-10 font-serif" aria-hidden="true">
-            {'\u25C8'}
+          <div className="absolute -top-2 -left-2 text-4xl text-ring drop-shadow-[0_0_10px_hsl(42_68%_48%/0.7)] z-10 font-serif" aria-hidden="true">
+            ◈
           </div>
-          <div className="absolute -top-2 -right-2 text-4xl text-ring drop-shadow-[0_0_10px_rgba(107,45,107,0.8)] z-10 font-serif" aria-hidden="true">
-            {'\u25C8'}
+          <div className="absolute -top-2 -right-2 text-4xl text-ring drop-shadow-[0_0_10px_hsl(42_68%_48%/0.7)] z-10 font-serif" aria-hidden="true">
+            ◈
           </div>
 
-          {/* Admin button - top right corner */}
+          {/* Admin button */}
           <Button
             variant="ghost"
             size="sm"
-            className="absolute top-4 right-4 z-20 opacity-30 hover:opacity-100 transition-opacity"
+            className="absolute top-4 right-4 z-20 opacity-20 hover:opacity-100 transition-opacity"
             onClick={() => setShowAdminPanel(true)}
             title="Admin Panel"
           >
@@ -163,8 +152,8 @@ export default function Page() {
           <div
             className="h-1 w-full"
             style={{
-              background: 'linear-gradient(90deg, transparent 0%, hsl(42 42% 59%) 10%, hsl(300 45% 30%) 30%, hsl(42 42% 59%) 50%, hsl(300 45% 30%) 70%, hsl(42 42% 59%) 90%, transparent 100%)',
-              boxShadow: '0 1px 3px rgba(107,45,107,0.5)',
+              background: 'linear-gradient(90deg, hsl(42 68% 48%) 0%, hsl(42 68% 48% / 0.6) 20%, hsl(290 35% 40% / 0.4) 50%, hsl(42 68% 48% / 0.6) 80%, transparent 100%)',
+              boxShadow: '0 1px 4px hsl(42 68% 48% / 0.3)',
             }}
             aria-hidden="true"
           />
@@ -172,18 +161,20 @@ export default function Page() {
           <GrimoireHeader />
           <GrimoireNav activeTab={activeTab} onTabChange={handleNavigate} />
 
-          {/* Main content area with subtle background pattern */}
+          {/* Main content area — visible cross-hatch pattern */}
           <main
             className="min-h-[500px]"
             style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0 L 30 60 M 0 30 L 60 30' stroke='%234a1a4a' strokeWidth='0.3' opacity='0.06'/%3E%3C/svg%3E")`,
+              backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M40 0 L0 0 0 40' fill='none' stroke='%23a07830' stroke-width='0.4' opacity='0.08'/%3E%3C/svg%3E")`,
             }}
           >
             {isLoading ? (
               <div className="flex items-center justify-center min-h-[500px]">
-                <div className="flex items-center gap-3">
-                  <span className="text-2xl text-accent animate-spin">⚙</span>
-                  <p className="text-muted-foreground">Turning the Wheel...</p>
+                <div className="flex flex-col items-center gap-4">
+                  <span className="text-4xl text-accent animate-spin" style={{ animationDuration: '3s' }}>⚙</span>
+                  <p className="font-serif text-sm uppercase tracking-[0.2em] text-muted-foreground">
+                    Turning the Wheel…
+                  </p>
                 </div>
               </div>
             ) : selectedRote ? (
