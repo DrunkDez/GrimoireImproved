@@ -13,22 +13,22 @@ interface HomePanelProps {
 
 export function HomePanel({ totalRotes, traditions, onNavigate }: HomePanelProps) {
   const [welcomeTitle, setWelcomeTitle] = useState("Welcome, Newly Awakened")
-  const [welcomeText, setWelcomeText] = useState("")
-  const [howToUse, setHowToUse] = useState("")
-  const [isLoading, setIsLoading] = useState(true)
+  const [welcomeText, setWelcomeText]   = useState("")
+  const [howToUse, setHowToUse]         = useState("")
+  const [isLoading, setIsLoading]       = useState(true)
 
   useEffect(() => {
     const fetchContent = async () => {
       try {
-        const response = await fetch('/api/site-settings')
-        if (response.ok) {
-          const settings = await response.json()
-          setWelcomeTitle(settings.welcomeTitle || "Welcome, Newly Awakened")
-          setWelcomeText(settings.welcomeText || "Within these pages lies a curated compendium of mystical Rotes drawn from the Nine Traditions and beyond.\n\nEach Rote represents a proven path through the Tapestry, a well-worn groove in reality that an Awakened will may follow.\n\nBrowse the collection, search by Sphere or Tradition, or inscribe your own discoveries for others to study.")
-          setHowToUse(settings.howToUse || "Browse rotes, search by tradition or sphere, and add your own discoveries.")
+        const res = await fetch('/api/site-settings')
+        if (res.ok) {
+          const s = await res.json()
+          setWelcomeTitle(s.welcomeTitle || "Welcome, Newly Awakened")
+          setWelcomeText(s.welcomeText   || "Within these pages lies a curated compendium of mystical Rotes drawn from the Nine Traditions and beyond.\n\nEach Rote represents a proven path through the Tapestry — a well-worn groove in reality that an Awakened will may follow.\n\nBrowse the collection, search by Sphere or Tradition, or inscribe your own discoveries for others to study.")
+          setHowToUse(s.howToUse        || "Browse rotes, search by tradition or sphere, and add your own discoveries.")
         }
-      } catch (error) {
-        console.error('Error fetching content:', error)
+      } catch (e) {
+        console.error(e)
       } finally {
         setIsLoading(false)
       }
@@ -37,90 +37,127 @@ export function HomePanel({ totalRotes, traditions, onNavigate }: HomePanelProps
   }, [])
 
   const stats = [
-    { value: totalRotes, label: "Rotes Inscribed",              symbol: "✎" },
-    { value: traditions,  label: "Traditions & Practices",      symbol: "✦" },
-    { value: 12,          label: "Spheres",                     symbol: "⚙" },
+    { value: totalRotes, label: "Rotes Inscribed"           },
+    { value: traditions,  label: "Traditions & Practices"   },
+    { value: 12,          label: "Spheres of Reality"       },
   ]
 
   return (
-    <div className="animate-fade-in-up flex flex-col gap-6 p-5 md:p-8">
+    <div className="animate-fade-in-up flex flex-col gap-5 p-5 md:p-7">
 
-      {/* ── Hero card — glass morphism ── */}
+      {/* ══ Hero card — layered glass with mesh gradient ══ */}
       <div
-        className="relative rounded-xl overflow-hidden text-center px-6 py-14"
+        className="relative rounded-xl overflow-hidden px-6 py-12 text-center"
         style={{
-          background: 'linear-gradient(135deg, hsl(var(--card) / 0.7) 0%, hsl(var(--card) / 0.4) 100%)',
-          backdropFilter: 'blur(16px)',
-          WebkitBackdropFilter: 'blur(16px)',
-          border: '1px solid hsl(var(--accent) / 0.2)',
+          /* Glassmorphism base */
+          background: `
+            linear-gradient(
+              135deg,
+              hsl(var(--card) / 0.65) 0%,
+              hsl(var(--card) / 0.35) 100%
+            )
+          `,
+          backdropFilter:       "blur(18px)",
+          WebkitBackdropFilter: "blur(18px)",
+          /* Single refined border */
+          border:      "1px solid hsl(var(--accent) / 0.18)",
+          borderRadius: "12px",
           boxShadow: `
-            inset 0 1px 0 hsl(var(--accent) / 0.15),
-            inset 0 -1px 0 hsl(var(--primary) / 0.1),
-            0 8px 40px hsl(var(--background) / 0.6),
-            0 0 0 1px hsl(var(--border) / 0.5)
+            inset 0 1px 0 hsl(var(--accent) / 0.12),
+            inset 0 -1px 0 hsl(var(--background) / 0.3),
+            0 4px 32px hsl(var(--background) / 0.5)
           `,
         }}
       >
-        {/* Corner accent glows */}
-        <div
-          className="absolute top-0 left-0 w-48 h-48 rounded-br-full pointer-events-none"
-          aria-hidden="true"
-          style={{ background: 'radial-gradient(circle, hsl(var(--accent) / 0.06) 0%, transparent 70%)' }}
-        />
-        <div
-          className="absolute bottom-0 right-0 w-64 h-32 pointer-events-none"
-          aria-hidden="true"
-          style={{ background: 'radial-gradient(ellipse, hsl(var(--primary) / 0.08) 0%, transparent 70%)' }}
-        />
+        {/* Ambient corner glows */}
+        <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+          <div style={{
+            position: "absolute", top: 0, left: 0, right: 0, bottom: 0,
+            background: `
+              radial-gradient(ellipse 60% 50% at 10% 0%,  hsl(var(--accent) / 0.07) 0%, transparent 60%),
+              radial-gradient(ellipse 40% 40% at 90% 100%, hsl(8 55% 25% / 0.08)   0%, transparent 55%)
+            `,
+          }} />
+          {/* Faint hex texture inside card */}
+          <svg className="absolute inset-0 w-full h-full opacity-[0.018]" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <pattern id="hexcard" x="0" y="0" width="22" height="25" patternUnits="userSpaceOnUse">
+                <polygon points="11,1 21,6.5 21,18.5 11,24 1,18.5 1,6.5" fill="none" stroke="hsl(42 68% 55%)" strokeWidth="0.5" />
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#hexcard)" />
+          </svg>
+        </div>
 
         {/* Sphere symbols */}
         <div className="relative z-10">
-          <RandomSphereSymbols />
+          <div className="opacity-60 mb-2">
+            <RandomSphereSymbols />
+          </div>
 
-          <h2 className="font-serif text-2xl md:text-3xl font-bold text-primary uppercase tracking-[0.14em] mb-5 mt-2">
+          <h2
+            className="font-serif font-bold uppercase text-primary mb-4"
+            style={{
+              fontSize: "clamp(1.1rem, 3vw, 1.5rem)",
+              letterSpacing: "0.14em",
+              textShadow: "0 0 30px hsl(var(--accent) / 0.2)",
+            }}
+          >
             {welcomeTitle}
           </h2>
 
-          <div className="max-w-xl mx-auto">
+          <div className="max-w-lg mx-auto">
             <MarkdownRenderer
               content={welcomeText}
-              className="text-base md:text-lg text-foreground/80 leading-relaxed"
+              className="text-sm md:text-base text-foreground/70 leading-[1.85]"
             />
           </div>
         </div>
       </div>
 
-      {/* ── Stats row ── */}
-      <div className="grid grid-cols-3 gap-3 md:gap-4">
-        {stats.map((stat, i) => (
+      {/* ══ Stats — refined cards with gradient top-border ══ */}
+      <div className="grid grid-cols-3 gap-3">
+        {stats.map((stat) => (
           <div
             key={stat.label}
-            className="relative rounded-lg px-4 py-5 text-center group overflow-hidden
+            className="relative group rounded-lg px-4 py-5 text-center overflow-hidden
               transition-all duration-300 hover:-translate-y-0.5"
             style={{
-              background: 'linear-gradient(135deg, hsl(var(--card) / 0.8), hsl(var(--card) / 0.5))',
-              border: '1px solid hsl(var(--border) / 0.6)',
-              boxShadow: 'inset 0 1px 0 hsl(var(--accent) / 0.08), 0 2px 12px hsl(var(--background) / 0.5)',
+              background: "hsl(var(--card) / 0.7)",
+              border:     "1px solid hsl(var(--border) / 0.5)",
+              boxShadow:  "inset 0 1px 0 hsl(var(--accent) / 0.07)",
             }}
           >
-            {/* Hover glow */}
+            {/* Gradient top border */}
             <div
-              className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-lg"
+              className="absolute top-0 left-0 right-0 h-[2px] rounded-t-lg"
               aria-hidden="true"
               style={{
-                background: 'radial-gradient(ellipse at 50% 0%, hsl(var(--accent) / 0.08) 0%, transparent 70%)',
+                background: "linear-gradient(90deg, transparent, hsl(var(--accent) / 0.5), transparent)",
+                opacity: 0.7,
+              }}
+            />
+            {/* Hover glow */}
+            <div
+              className="absolute inset-0 opacity-0 group-hover:opacity-100 pointer-events-none
+                transition-opacity duration-300 rounded-lg"
+              aria-hidden="true"
+              style={{
+                background: "radial-gradient(ellipse at 50% 0%, hsl(var(--accent) / 0.07) 0%, transparent 70%)",
               }}
             />
 
             <div className="relative z-10">
-              <div className="text-xs text-accent/60 mb-1 font-serif" aria-hidden="true">
-                {stat.symbol}
-              </div>
-              <div className="text-4xl md:text-5xl font-serif font-black text-primary leading-none mb-2
-                drop-shadow-[0_2px_8px_hsl(var(--primary)/0.3)]">
+              <div
+                className="font-serif font-black text-primary leading-none mb-1.5"
+                style={{
+                  fontSize: "clamp(2rem, 4vw, 2.8rem)",
+                  textShadow: "0 0 20px hsl(var(--accent) / 0.2)",
+                }}
+              >
                 {stat.value}
               </div>
-              <div className="font-serif text-[10px] md:text-xs text-muted-foreground uppercase tracking-[0.14em] leading-tight">
+              <div className="font-serif text-[10px] uppercase tracking-[0.14em] text-muted-foreground/60 leading-tight">
                 {stat.label}
               </div>
             </div>
@@ -128,120 +165,111 @@ export function HomePanel({ totalRotes, traditions, onNavigate }: HomePanelProps
         ))}
       </div>
 
-      {/* ── How to use — slim glass card ── */}
-      <div
-        className="rounded-lg px-5 py-5 md:px-7"
-        style={{
-          background: 'linear-gradient(135deg, hsl(var(--card) / 0.6), hsl(var(--card) / 0.3))',
-          backdropFilter: 'blur(8px)',
-          WebkitBackdropFilter: 'blur(8px)',
-          borderLeft: '3px solid hsl(var(--accent) / 0.6)',
-          border: '1px solid hsl(var(--border) / 0.4)',
-          borderLeftWidth: '3px',
-          borderLeftColor: 'hsl(var(--accent) / 0.6)',
-        }}
-      >
-        <h3 className="font-serif text-sm font-bold text-primary uppercase tracking-[0.16em] mb-3 flex items-center gap-2">
-          <span className="text-accent text-base" aria-hidden="true">✦</span>
-          How to Use The Wheel
-        </h3>
+      {/* ══ How to use — slim accent callout ══ */}
+      {!isLoading && howToUse && (
+        <div
+          className="rounded-lg px-5 py-4"
+          style={{
+            background:    "hsl(var(--card) / 0.45)",
+            border:        "1px solid hsl(var(--border) / 0.35)",
+            borderLeft:    "2px solid hsl(var(--accent) / 0.55)",
+          }}
+        >
+          <h3 className="font-serif text-[10px] uppercase tracking-[0.2em] text-accent/60 mb-2 flex items-center gap-2">
+            <span aria-hidden="true">✦</span>
+            How to Use The Wheel
+          </h3>
+          <MarkdownRenderer
+            content={howToUse}
+            className="text-sm text-muted-foreground/70"
+          />
+        </div>
+      )}
 
-        {isLoading ? (
-          <div className="flex items-center gap-2 py-2">
-            <span className="text-accent animate-spin text-lg">⚙</span>
-            <p className="text-xs text-muted-foreground font-serif tracking-widest uppercase">Loading…</p>
-          </div>
-        ) : (
-          <MarkdownRenderer content={howToUse} />
-        )}
-      </div>
-
-      {/* ── CTA buttons — sleek pills with glow ── */}
+      {/* ══ CTA buttons — pill style with glow ══ */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
 
-        {/* Primary CTA */}
+        {/* Primary */}
         <button
           type="button"
           onClick={() => onNavigate("browse")}
-          className="group relative overflow-hidden rounded-full px-6 py-3.5
-            font-serif text-xs uppercase tracking-[0.16em] font-bold
-            transition-all duration-300 cursor-pointer
-            hover:-translate-y-0.5 active:translate-y-0"
+          className="group relative overflow-hidden rounded-full px-6 py-3
+            font-serif text-[11px] uppercase tracking-[0.18em] font-bold
+            transition-all duration-250 cursor-pointer hover:-translate-y-px active:translate-y-0"
           style={{
-            background: 'linear-gradient(135deg, hsl(var(--accent)) 0%, hsl(var(--accent) / 0.8) 100%)',
-            color: 'hsl(var(--accent-foreground))',
-            boxShadow: '0 0 0 1px hsl(var(--accent) / 0.4), 0 4px 16px hsl(var(--accent) / 0.25)',
+            background:  "linear-gradient(135deg, hsl(var(--accent)) 0%, hsl(var(--accent) / 0.75) 100%)",
+            color:       "hsl(var(--accent-foreground))",
+            boxShadow:   "0 0 0 1px hsl(var(--accent) / 0.35), 0 4px 18px hsl(var(--accent) / 0.22)",
+            border:      "none",
           }}
           onMouseEnter={e => {
-            (e.currentTarget as HTMLButtonElement).style.boxShadow =
-              '0 0 0 1px hsl(var(--accent) / 0.6), 0 6px 24px hsl(var(--accent) / 0.4), 0 0 40px hsl(var(--accent) / 0.15)'
+            (e.currentTarget as HTMLElement).style.boxShadow =
+              "0 0 0 1px hsl(var(--accent) / 0.55), 0 6px 28px hsl(var(--accent) / 0.38), 0 0 48px hsl(var(--accent) / 0.12)"
           }}
           onMouseLeave={e => {
-            (e.currentTarget as HTMLButtonElement).style.boxShadow =
-              '0 0 0 1px hsl(var(--accent) / 0.4), 0 4px 16px hsl(var(--accent) / 0.25)'
+            (e.currentTarget as HTMLElement).style.boxShadow =
+              "0 0 0 1px hsl(var(--accent) / 0.35), 0 4px 18px hsl(var(--accent) / 0.22)"
           }}
         >
-          {/* Shimmer sweep on hover */}
+          {/* Shimmer */}
           <span
             className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
             aria-hidden="true"
             style={{
-              background: 'linear-gradient(105deg, transparent 20%, rgba(255,255,255,0.18) 50%, transparent 80%)',
+              background: "linear-gradient(105deg, transparent 25%, rgba(255,255,255,0.16) 50%, transparent 75%)",
             }}
           />
           <span className="relative flex items-center justify-center gap-2">
-            <span aria-hidden="true">✧</span>
+            <span aria-hidden="true" className="text-base leading-none">✧</span>
             Browse the Library
           </span>
         </button>
 
-        {/* Secondary CTA */}
+        {/* Secondary */}
         <button
           type="button"
           onClick={() => onNavigate("add")}
-          className="group relative overflow-hidden rounded-full px-6 py-3.5
-            font-serif text-xs uppercase tracking-[0.16em] font-semibold
-            transition-all duration-300 cursor-pointer
-            hover:-translate-y-0.5 active:translate-y-0"
+          className="rounded-full px-6 py-3
+            font-serif text-[11px] uppercase tracking-[0.18em] font-semibold
+            transition-all duration-200 cursor-pointer hover:-translate-y-px active:translate-y-0
+            text-primary/75 hover:text-primary"
           style={{
-            background: 'hsl(var(--card) / 0.6)',
-            backdropFilter: 'blur(8px)',
-            color: 'hsl(var(--primary))',
-            border: '1px solid hsl(var(--primary) / 0.35)',
-            boxShadow: 'inset 0 1px 0 hsl(var(--primary) / 0.1)',
+            background:  "hsl(var(--card) / 0.5)",
+            backdropFilter: "blur(8px)",
+            border:      "1px solid hsl(var(--primary) / 0.28)",
+            boxShadow:   "inset 0 1px 0 hsl(var(--primary) / 0.08)",
           }}
           onMouseEnter={e => {
-            (e.currentTarget as HTMLButtonElement).style.borderColor = 'hsl(var(--accent) / 0.5)'
-            ;(e.currentTarget as HTMLButtonElement).style.color = 'hsl(var(--accent))'
+            (e.currentTarget as HTMLElement).style.borderColor = "hsl(var(--accent) / 0.4)"
+            ;(e.currentTarget as HTMLElement).style.background  = "hsl(var(--card) / 0.65)"
           }}
           onMouseLeave={e => {
-            (e.currentTarget as HTMLButtonElement).style.borderColor = 'hsl(var(--primary) / 0.35)'
-            ;(e.currentTarget as HTMLButtonElement).style.color = 'hsl(var(--primary))'
+            (e.currentTarget as HTMLElement).style.borderColor = "hsl(var(--primary) / 0.28)"
+            ;(e.currentTarget as HTMLElement).style.background  = "hsl(var(--card) / 0.5)"
           }}
         >
-          <span className="relative flex items-center justify-center gap-2">
-            <span aria-hidden="true">✎</span>
+          <span className="flex items-center justify-center gap-2">
+            <span aria-hidden="true" className="text-base leading-none">✎</span>
             Inscribe a Rote
           </span>
         </button>
 
-        {/* Tertiary CTA */}
+        {/* Tertiary */}
         <Link
           href="/character-creation"
-          className="group relative overflow-hidden rounded-full px-6 py-3.5
-            font-serif text-xs uppercase tracking-[0.16em] font-semibold text-center
-            transition-all duration-300
-            hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center"
+          className="rounded-full px-6 py-3 flex items-center justify-center
+            font-serif text-[11px] uppercase tracking-[0.18em] font-semibold
+            transition-all duration-200 hover:-translate-y-px active:translate-y-0
+            text-primary/75 hover:text-primary"
           style={{
-            background: 'hsl(var(--card) / 0.6)',
-            backdropFilter: 'blur(8px)',
-            color: 'hsl(var(--primary))',
-            border: '1px solid hsl(var(--primary) / 0.35)',
-            boxShadow: 'inset 0 1px 0 hsl(var(--primary) / 0.1)',
+            background:  "hsl(var(--card) / 0.5)",
+            backdropFilter: "blur(8px)",
+            border:      "1px solid hsl(var(--primary) / 0.28)",
+            boxShadow:   "inset 0 1px 0 hsl(var(--primary) / 0.08)",
           }}
         >
-          <span className="relative flex items-center justify-center gap-2">
-            <span aria-hidden="true">◈</span>
+          <span className="flex items-center justify-center gap-2">
+            <span aria-hidden="true" className="text-base leading-none">◈</span>
             Character Creation
           </span>
         </Link>
