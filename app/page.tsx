@@ -72,62 +72,63 @@ export default function Page() {
 
   return (
     <>
-      {/* Outer wrapper — subtle padding + grimoire atmosphere */}
       <div className="min-h-screen grimoire-bg py-5 px-3 md:py-7 md:px-5">
         <div
           className="max-w-[1400px] mx-auto bg-background rounded-xl overflow-hidden relative"
           style={{
-            /* Single refined border — no multi-ring stack */
-            border: "1px solid hsl(var(--accent) / 0.22)",
+            /* Purple border ring — single, refined */
+            border:    "1px solid hsl(var(--primary) / 0.28)",
             boxShadow: `
-              0 0 0 1px hsl(var(--background) / 0.8),
-              0 1px 0 hsl(var(--accent) / 0.3),
+              0 0 0 1px hsl(var(--background) / 0.9),
+              inset 0 1px 0 hsl(var(--primary) / 0.12),
               0 20px 60px hsl(var(--background) / 0.8),
               0 4px 20px rgba(0,0,0,0.4)
             `,
           }}
         >
-          {/* Diamond corner accents */}
-          {["top-[-6px] left-[-6px]", "top-[-6px] right-[-6px]"].map((pos, i) => (
+          {/* Purple diamond corner accents */}
+          {[
+            "absolute -top-[6px] -left-[6px]",
+            "absolute -top-[6px] -right-[6px]",
+          ].map((cls, i) => (
             <div
               key={i}
-              className={`absolute ${pos} text-accent z-10 text-xl pointer-events-none`}
-              style={{ filter: "drop-shadow(0 0 6px hsl(var(--accent) / 0.5))" }}
+              className={`${cls} text-primary z-10 text-xl pointer-events-none`}
+              style={{ filter: "drop-shadow(0 0 6px hsl(var(--primary) / 0.55))" }}
               aria-hidden="true"
             >
               ◈
             </div>
           ))}
 
-          {/* Admin button — barely visible until hover */}
+          {/* Admin button */}
           <Button
             variant="ghost"
             size="sm"
-            className="absolute top-3 right-[72px] z-30 opacity-0 hover:opacity-50
-              focus:opacity-50 transition-opacity"
+            className="absolute top-3 right-[72px] z-30 opacity-0 hover:opacity-40
+              focus:opacity-40 transition-opacity"
             onClick={() => setShowAdminPanel(true)}
             title="Admin Panel"
           >
             <ShieldAlert className="w-3.5 h-3.5" />
           </Button>
 
-          {/* Top gold hairline */}
+          {/* Top purple hairline */}
           <div
             className="h-px w-full pointer-events-none"
             aria-hidden="true"
             style={{
-              background: "linear-gradient(90deg, hsl(var(--accent) / 0.6) 0%, hsl(var(--accent) / 0.2) 40%, transparent 75%)",
+              background: "linear-gradient(90deg, hsl(var(--accent) / 0.5) 0%, hsl(var(--primary) / 0.5) 15%, hsl(var(--primary) / 0.15) 55%, transparent 100%)",
             }}
           />
 
           <GrimoireHeader />
           <GrimoireNav activeTab={activeTab} onTabChange={handleNavigate} />
 
-          {/* Content */}
           <main
             className="min-h-[520px]"
             style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M40 0L0 0 0 40' fill='none' stroke='%23a07830' stroke-width='0.35' opacity='0.07'/%3E%3C/svg%3E")`,
+              backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M40 0L0 0 0 40' fill='none' stroke='%237b5ea7' stroke-width='0.35' opacity='0.06'/%3E%3C/svg%3E")`,
             }}
           >
             {showAdminPanel ? (
@@ -149,7 +150,11 @@ export default function Page() {
             ) : (
               <>
                 {activeTab === "home" && (
-                  <HomePanel totalRotes={rotes.length} traditions={uniqueTraditions} onNavigate={handleNavigate} />
+                  <HomePanel
+                    totalRotes={rotes.length}
+                    traditions={uniqueTraditions}
+                    onNavigate={handleNavigate}
+                  />
                 )}
                 {activeTab === "add" && (
                   <AddRotePanel onAdd={handleAddRote} />
