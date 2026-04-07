@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
 import { UserPlus } from "lucide-react"
+import { ShareButton } from "@/components/share-button" 
 
 interface RoteDetailProps {
   rote: Rote
@@ -300,7 +301,15 @@ export function RoteDetail({ rote, onBack }: RoteDetailProps) {
         >
           Rank: {rote.level}
         </div>
-
+      {/* Share button */}
+    <div className="flex justify-end pt-6">
+    <ShareButton 
+    url={`/rotes/${rote.id}`}
+    title={rote.name}
+    size="sm"
+    variant="outline"
+    />
+    </div>
         {/* Page reference */}
         {rote.pageRef && (
           <div className="font-mono text-muted-foreground text-sm italic pt-6 border-t-2 border-primary">

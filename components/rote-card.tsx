@@ -4,6 +4,8 @@ import { useState } from "react"
 import type { Rote } from "@/lib/mage-data"
 import { getTraditionSymbol, isTechnocracySphere } from "@/lib/mage-data"
 import { SphereDots } from "./sphere-dots"
+import { ShareButton } from "./share-button"
+import Link from "next/link"
 
 interface RoteWithUser extends Rote {
   user?: {
@@ -239,6 +241,28 @@ export function RoteCard({ rote, onClick, compact = false, matchingSpheres }: Ro
             Created by {rote.user.name || rote.user.email}
           </div>
         )}
+        {/* Share button */}
+        <div className="mt-2 flex gap-2">
+          <Link href={`/rotes/${rote.id}`} className="flex-1">
+            <button
+              type="button"
+              className="w-full px-3 py-2 text-xs font-serif font-semibold uppercase tracking-wide
+                bg-primary/10 hover:bg-primary/20 border border-primary/40 hover:border-primary
+                rounded-sm transition-colors"
+              onClick={(e) => e.stopPropagation()}
+            >
+              View Details
+            </button>
+          </Link>
+          <div onClick={(e) => e.stopPropagation()}>
+            <ShareButton 
+              url={`/rotes/${rote.id}`}
+              title={rote.name}
+              size="sm"
+              variant="outline"
+            />
+          </div>
+        </div>
       </div>
     </button>
   )
