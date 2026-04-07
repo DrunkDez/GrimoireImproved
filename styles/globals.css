@@ -10,136 +10,138 @@
 
 @layer base {
   :root {
-    /* ═══════════════════════════════════════════════
-       LIGHT MODE — aged parchment + dried blood + gold
-       ═══════════════════════════════════════════════ */
+    /* ═══════════════════════════════════════════════════════
+       LIGHT MODE — warm parchment + deep inkwell purple + gold
+       NOT silvery grey — genuinely warm aged paper
+       ═══════════════════════════════════════════════════════ */
 
-    /* Parchment base */
-    --background: 38 35% 92%;
-    --foreground: 20 30% 12%;
+    /* True parchment — warm ivory, not grey */
+    --background:       38 45% 93%;
+    --foreground:       28 35% 12%;   /* warm dark brown — readable, not harsh black */
 
     /* Aged vellum card */
-    --card: 38 28% 97%;
-    --card-foreground: 20 30% 12%;
-    --popover: 38 28% 97%;
-    --popover-foreground: 20 30% 12%;
+    --card:             38 40% 97%;
+    --card-foreground:  28 35% 12%;
+    --popover:          38 40% 97%;
+    --popover-foreground: 28 35% 12%;
 
-    /* PRIMARY: deep dried-blood crimson — the dominant force */
-    --primary: 8 55% 22%;
-    --primary-foreground: 38 35% 92%;
+    /* PRIMARY: deep inkwell purple — the structural color */
+    --primary:          272 50% 28%;
+    --primary-foreground: 38 45% 93%;
 
-    /* SECONDARY: aged ink shadow */
-    --secondary: 38 20% 84%;
-    --secondary-foreground: 20 30% 12%;
+    /* SECONDARY: warm parchment shadow */
+    --secondary:        36 28% 85%;
+    --secondary-foreground: 28 35% 18%;
 
-    /* Muted parchment tones */
-    --muted: 38 22% 87%;
-    --muted-foreground: 30 15% 42%;
+    /* Muted: warm mid-tone */
+    --muted:            36 25% 88%;
+    --muted-foreground: 30 18% 40%;
 
-    /* ACCENT: burnished gold — the commanding highlight */
-    --accent: 42 68% 48%;
-    --accent-foreground: 20 30% 10%;
+    /* ACCENT: burnished gold — used sparingly for highlights only */
+    --accent:           42 65% 46%;
+    --accent-foreground: 28 35% 10%;
 
     /* Destructive */
-    --destructive: 0 72% 50%;
+    --destructive:      0 70% 50%;
     --destructive-foreground: 0 0% 98%;
 
-    /* Borders: warm sepia */
-    --border: 36 22% 78%;
-    --input: 36 22% 78%;
+    /* Borders: warm sepia, not grey */
+    --border:           34 25% 78%;
+    --input:            34 25% 78%;
 
-    /* Ring: gold */
-    --ring: 42 68% 48%;
+    /* Ring: purple */
+    --ring:             272 50% 40%;
 
     /* Charts */
-    --chart-1: 42 68% 48%;
-    --chart-2: 8 55% 40%;
+    --chart-1: 42 65% 46%;
+    --chart-2: 272 50% 45%;
     --chart-3: 36 50% 50%;
-    --chart-4: 280 30% 45%;
+    --chart-4: 300 40% 45%;
     --chart-5: 20 55% 45%;
 
     --radius: 0.5rem;
 
     /* Sidebar */
-    --sidebar-background: 38 30% 95%;
-    --sidebar-foreground: 20 30% 15%;
-    --sidebar-primary: 8 55% 22%;
-    --sidebar-primary-foreground: 38 35% 92%;
-    --sidebar-accent: 38 22% 89%;
-    --sidebar-accent-foreground: 20 30% 12%;
-    --sidebar-border: 36 22% 80%;
-    --sidebar-ring: 42 68% 48%;
+    --sidebar-background:        38 42% 96%;
+    --sidebar-foreground:        28 35% 15%;
+    --sidebar-primary:           272 50% 28%;
+    --sidebar-primary-foreground: 38 45% 93%;
+    --sidebar-accent:            36 28% 90%;
+    --sidebar-accent-foreground: 28 35% 12%;
+    --sidebar-border:            34 25% 82%;
+    --sidebar-ring:              42 65% 46%;
 
-    /* Custom semantic tokens */
-    --glow-primary: 8 55% 35%;
-    --glow-accent: 42 68% 55%;
-    --arcane-purple: 290 35% 30%;
+    /* Semantic glow tokens */
+    --glow-primary:  272 50% 45%;
+    --glow-accent:   42 65% 52%;
+    --arcane-purple: 272 55% 35%;
   }
 
   .dark {
-    /* ═══════════════════════════════════════════════
-       DARK MODE — void black + ember crimson + gold
-       Purple demoted to atmospheric glow only.
-       ═══════════════════════════════════════════════ */
+    /* ═══════════════════════════════════════════════════════
+       DARK MODE — void black + deep amethyst + gold accent
+       Purple is PRIMARY. Gold is ACCENT (glows, CTAs, sparks).
+       Foreground is warm cream — readable, never harsh.
+       ═══════════════════════════════════════════════════════ */
 
-    /* Deep void — richer than a flat near-black */
-    --background: 20 18% 6%;
-    --foreground: 38 30% 88%;
+    /* Deep void — slight warm undertone keeps it from feeling cold */
+    --background:       260 12% 7%;
+    --foreground:       38 28% 88%;   /* warm cream — not pure white */
 
-    /* Slightly lifted card surface */
-    --card: 20 16% 9%;
-    --card-foreground: 38 30% 88%;
-    --popover: 20 16% 9%;
-    --popover-foreground: 38 30% 88%;
+    /* Slightly lifted card */
+    --card:             260 10% 10%;
+    --card-foreground:  38 28% 88%;
+    --popover:          260 10% 10%;
+    --popover-foreground: 38 28% 88%;
 
-    /* PRIMARY: aged gold — luminous, commanding */
-    --primary: 42 62% 62%;
-    --primary-foreground: 20 18% 6%;
+    /* PRIMARY: deep amethyst purple — luminous, commanding */
+    --primary:          272 55% 68%;
+    --primary-foreground: 260 12% 7%;
 
-    /* SECONDARY: smoldering ember dark */
-    --secondary: 15 18% 14%;
-    --secondary-foreground: 38 30% 85%;
+    /* SECONDARY: shadow purple */
+    --secondary:        268 15% 15%;
+    --secondary-foreground: 38 28% 85%;
 
-    /* Muted: barely-there warmth */
-    --muted: 18 14% 16%;
-    --muted-foreground: 36 15% 58%;
+    /* Muted: barely-there purple shadow */
+    --muted:            265 12% 17%;
+    --muted-foreground: 272 15% 58%;
 
-    /* ACCENT: bright burnished gold — the sharp highlight */
-    --accent: 42 72% 55%;
-    --accent-foreground: 20 18% 6%;
+    /* ACCENT: burnished gold — the sharp spark, used sparingly */
+    --accent:           42 68% 55%;
+    --accent-foreground: 260 12% 7%;
 
     /* Destructive */
-    --destructive: 0 65% 48%;
+    --destructive:      0 62% 46%;
     --destructive-foreground: 0 0% 98%;
 
-    /* Borders: warm ember shadow */
-    --border: 20 15% 18%;
-    --input: 20 15% 18%;
+    /* Borders: soft purple shadow */
+    --border:           265 15% 18%;
+    --input:            265 15% 18%;
 
-    /* Ring: gold */
-    --ring: 42 62% 62%;
+    /* Ring: purple */
+    --ring:             272 55% 60%;
 
     /* Charts */
-    --chart-1: 42 72% 58%;
-    --chart-2: 8 50% 50%;
-    --chart-3: 36 55% 55%;
-    --chart-4: 280 35% 55%;
-    --chart-5: 20 55% 58%;
+    --chart-1: 272 60% 65%;
+    --chart-2: 42 68% 55%;
+    --chart-3: 300 45% 60%;
+    --chart-4: 36 55% 55%;
+    --chart-5: 220 45% 60%;
 
     /* Dark sidebar */
-    --sidebar-background: 20 16% 9%;
-    --sidebar-foreground: 38 30% 88%;
-    --sidebar-primary: 42 62% 62%;
-    --sidebar-primary-foreground: 20 18% 6%;
-    --sidebar-accent: 15 18% 14%;
-    --sidebar-accent-foreground: 38 30% 85%;
-    --sidebar-border: 20 15% 16%;
-    --sidebar-ring: 42 62% 62%;
+    --sidebar-background:        260 10% 10%;
+    --sidebar-foreground:        38 28% 88%;
+    --sidebar-primary:           272 55% 68%;
+    --sidebar-primary-foreground: 260 12% 7%;
+    --sidebar-accent:            268 15% 15%;
+    --sidebar-accent-foreground: 38 28% 85%;
+    --sidebar-border:            265 15% 16%;
+    --sidebar-ring:              272 55% 60%;
 
-    /* Custom semantic tokens */
-    --glow-primary: 42 72% 55%;
-    --glow-accent: 8 55% 45%;
-    --arcane-purple: 290 40% 45%;
+    /* Semantic glow tokens */
+    --glow-primary:  272 60% 65%;
+    --glow-accent:   42 68% 55%;
+    --arcane-purple: 272 55% 45%;
   }
 }
 
@@ -150,7 +152,7 @@
 
   body {
     @apply bg-background text-foreground;
-    /* Crimson Text from layout.tsx takes effect — NO system font override */
+    /* Crimson Text / Cinzel from layout.tsx — NO system font override here */
     font-feature-settings: 'kern' 1, 'liga' 1, 'calt' 1;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
@@ -158,11 +160,10 @@
     scroll-behavior: smooth;
   }
 
-  /* ── Headings: wide tracking for arcane gravitas ── */
+  /* Wide tracking on headings — arcane gravitas */
   h1, h2, h3, h4, h5, h6 {
     font-weight: 700;
     line-height: 1.2;
-    /* Wide tracking — NOT the generic -0.02em */
     letter-spacing: 0.06em;
   }
 
@@ -174,43 +175,30 @@
     @apply rounded bg-muted px-1.5 py-0.5 font-mono text-sm;
   }
 
-  /* Focus */
   *:focus-visible {
     @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
   }
 
-  /* Selection — gold tint */
+  /* Selection — purple tint in dark, parchment in light */
   ::selection {
-    background-color: hsl(var(--accent) / 0.28);
+    background-color: hsl(var(--primary) / 0.22);
     color: hsl(var(--foreground));
   }
 
   /* ── Arcane scrollbar ── */
-  ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-  }
-
-  ::-webkit-scrollbar-track {
-    background: hsl(var(--muted));
-  }
-
-  ::-webkit-scrollbar-thumb {
-    background: hsl(var(--accent) / 0.4);
+  ::-webkit-scrollbar        { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track  { background: hsl(var(--muted)); }
+  ::-webkit-scrollbar-thumb  {
+    background: hsl(var(--primary) / 0.35);
     border-radius: 4px;
     border: 2px solid hsl(var(--muted));
   }
-
-  ::-webkit-scrollbar-thumb:hover {
-    background: hsl(var(--accent) / 0.75);
-  }
+  ::-webkit-scrollbar-thumb:hover { background: hsl(var(--primary) / 0.6); }
 }
 
 /* ── Reduced motion ── */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  *, *::before, *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
