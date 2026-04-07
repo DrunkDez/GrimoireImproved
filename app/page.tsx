@@ -3,7 +3,6 @@
 import { useState, useCallback, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import type { Rote } from "@/lib/mage-data"
-import { SAMPLE_ROTES, TRADITIONS } from "@/lib/mage-data"
 import { GrimoireHeader } from "@/components/grimoire-header"
 import { GrimoireNav, type TabId } from "@/components/grimoire-nav"
 import { GrimoireFooter } from "@/components/grimoire-footer"
@@ -24,169 +23,133 @@ export default function Page() {
   const [showAdminPanel, setShowAdminPanel] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
 
-  const [returningFromDetail, setReturningFromDetail] = useState(false)
-
-  const browsePanelStateRef = useRef<{
-    scrollPosition: number
-    timestamp: number
-  } | null>(null)
+  const browsePanelStateRef = useRef<{ scrollPosition: number; timestamp: number } | null>(null)
 
   const fetchRotes = useCallback(async () => {
     try {
       const response = await fetch('/api/rotes')
-      if (response.ok) {
-        const data = await response.json()
-        setRotes(data)
-      }
-    } catch (error) {
-      console.error('Error fetching rotes:', error)
-    } finally {
-      setIsLoading(false)
-    }
+      if (response.ok) setRotes(await response.json())
+    } catch (e) { console.error(e) }
+    finally { setIsLoading(false) }
   }, [])
 
-  useEffect(() => {
-    fetchRotes()
-  }, [fetchRotes])
+  useEffect(() => { fetchRotes() }, [fetchRotes])
 
   const handleSelectRote = useCallback((rote: Rote) => {
-    browsePanelStateRef.current = {
-      scrollPosition: window.scrollY,
-      timestamp: Date.now()
-    }
+    browsePanelStateRef.current = { scrollPosition: window.scrollY, timestamp: Date.now() }
     setSelectedRote(rote)
   }, [])
 
   const handleBackFromDetail = useCallback(() => {
     setSelectedRote(null)
-    setReturningFromDetail(true)
     if (browsePanelStateRef.current) {
       setTimeout(() => {
-        window.scrollTo({
-          top: browsePanelStateRef.current?.scrollPosition || 0,
-          behavior: 'instant'
-        })
+        window.scrollTo({ top: browsePanelStateRef.current?.scrollPosition || 0, behavior: 'instant' })
       }, 0)
     }
   }, [])
 
   const handleAddRote = useCallback(async (rote: Rote) => {
     try {
-      const response = await fetch('/api/rotes', {
+      const res = await fetch('/api/rotes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(rote),
       })
-      if (response.ok) {
-        fetchRotes()
-      }
-    } catch (error) {
-      console.error('Error adding rote:', error)
-    }
+      if (res.ok) fetchRotes()
+    } catch (e) { console.error(e) }
   }, [fetchRotes])
 
   const handleNavigate = useCallback((tab: TabId) => {
     setSelectedRote(null)
-    if (tab === "browse") { router.push("/browse"); return }
-    if (tab === "merits") { router.push("/merits-flaws"); return }
-    if (tab === "resources") { router.push("/recommended"); return }
+    if (tab === "browse")    { router.push("/browse");       return }
+    if (tab === "merits")    { router.push("/merits-flaws"); return }
+    if (tab === "resources") { router.push("/recommended");  return }
     setActiveTab(tab)
   }, [router])
 
-  const uniqueTraditions = new Set(rotes.map((r) => r.tradition)).size
-
-  /* ── Shared outer frame ── */
-  const frameClasses = `
-    max-w-[1400px] mx-auto bg-background border-[3px] border-primary rounded-lg overflow-hidden relative
-    shadow-[0_0_0_1px_hsl(42_68%_48%),0_0_0_8px_hsl(38_35%_88%),0_0_0_11px_hsl(8_55%_22%),inset_0_0_80px_rgba(139,45,30,0.06),0_14px_40px_rgba(20,14,8,0.35)]
-    dark:shadow-[0_0_0_1px_hsl(42_68%_48%),0_0_0_8px_hsl(20_18%_10%),0_0_0_11px_hsl(8_55%_22%),inset_0_0_80px_rgba(139,45,30,0.08),0_14px_40px_rgba(0,0,0,0.5)]
-  `
-
-  /* ── Atmospheric page background — replaces flat solid ── */
-  const pageWrapperClasses = `
-    min-h-screen relative z-[1] py-6 px-3 md:py-8 md:px-4 grimoire-bg
-  `
-
-  if (showAdminPanel) {
-    return (
-      <>
-        <div className={pageWrapperClasses}>
-          <div className={frameClasses}>
-            <AdminPanel
-              rotes={rotes}
-              onRotesChange={fetchRotes}
-              onClose={() => setShowAdminPanel(false)}
-            />
-          </div>
-        </div>
-        <Toaster />
-      </>
-    )
-  }
+  const uniqueTraditions = new Set(rotes.map(r => r.tradition)).size
 
   return (
     <>
-      <div className={pageWrapperClasses}>
-        <div className={frameClasses}>
+      {/* Outer wrapper — subtle padding + grimoire atmosphere */}
+      <div className="min-h-screen grimoire-bg py-5 px-3 md:py-7 md:px-5">
+        <div
+          className="max-w-[1400px] mx-auto bg-background rounded-xl overflow-hidden relative"
+          style={{
+            /* Single refined border — no multi-ring stack */
+            border: "1px solid hsl(var(--accent) / 0.22)",
+            boxShadow: `
+              0 0 0 1px hsl(var(--background) / 0.8),
+              0 1px 0 hsl(var(--accent) / 0.3),
+              0 20px 60px hsl(var(--background) / 0.8),
+              0 4px 20px rgba(0,0,0,0.4)
+            `,
+          }}
+        >
+          {/* Diamond corner accents */}
+          {["top-[-6px] left-[-6px]", "top-[-6px] right-[-6px]"].map((pos, i) => (
+            <div
+              key={i}
+              className={`absolute ${pos} text-accent z-10 text-xl pointer-events-none`}
+              style={{ filter: "drop-shadow(0 0 6px hsl(var(--accent) / 0.5))" }}
+              aria-hidden="true"
+            >
+              ◈
+            </div>
+          ))}
 
-          {/* Corner decorations */}
-          <div className="absolute -top-2 -left-2 text-4xl text-ring drop-shadow-[0_0_10px_hsl(42_68%_48%/0.7)] z-10 font-serif" aria-hidden="true">
-            ◈
-          </div>
-          <div className="absolute -top-2 -right-2 text-4xl text-ring drop-shadow-[0_0_10px_hsl(42_68%_48%/0.7)] z-10 font-serif" aria-hidden="true">
-            ◈
-          </div>
-
-          {/* Admin button */}
+          {/* Admin button — barely visible until hover */}
           <Button
             variant="ghost"
             size="sm"
-            className="absolute top-4 right-4 z-20 opacity-20 hover:opacity-100 transition-opacity"
+            className="absolute top-3 right-[72px] z-30 opacity-0 hover:opacity-50
+              focus:opacity-50 transition-opacity"
             onClick={() => setShowAdminPanel(true)}
             title="Admin Panel"
           >
-            <ShieldAlert className="w-4 h-4" />
+            <ShieldAlert className="w-3.5 h-3.5" />
           </Button>
 
-          {/* Top ornamental border */}
+          {/* Top gold hairline */}
           <div
-            className="h-1 w-full"
-            style={{
-              background: 'linear-gradient(90deg, hsl(42 68% 48%) 0%, hsl(42 68% 48% / 0.6) 20%, hsl(290 35% 40% / 0.4) 50%, hsl(42 68% 48% / 0.6) 80%, transparent 100%)',
-              boxShadow: '0 1px 4px hsl(42 68% 48% / 0.3)',
-            }}
+            className="h-px w-full pointer-events-none"
             aria-hidden="true"
+            style={{
+              background: "linear-gradient(90deg, hsl(var(--accent) / 0.6) 0%, hsl(var(--accent) / 0.2) 40%, transparent 75%)",
+            }}
           />
 
           <GrimoireHeader />
           <GrimoireNav activeTab={activeTab} onTabChange={handleNavigate} />
 
-          {/* Main content area — visible cross-hatch pattern */}
+          {/* Content */}
           <main
-            className="min-h-[500px]"
+            className="min-h-[520px]"
             style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M40 0 L0 0 0 40' fill='none' stroke='%23a07830' stroke-width='0.4' opacity='0.08'/%3E%3C/svg%3E")`,
+              backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M40 0L0 0 0 40' fill='none' stroke='%23a07830' stroke-width='0.35' opacity='0.07'/%3E%3C/svg%3E")`,
             }}
           >
-            {isLoading ? (
-              <div className="flex items-center justify-center min-h-[500px]">
-                <div className="flex flex-col items-center gap-4">
-                  <span className="text-4xl text-accent animate-spin" style={{ animationDuration: '3s' }}>⚙</span>
-                  <p className="font-serif text-sm uppercase tracking-[0.2em] text-muted-foreground">
-                    Turning the Wheel…
-                  </p>
-                </div>
+            {showAdminPanel ? (
+              <AdminPanel rotes={rotes} onRotesChange={fetchRotes} onClose={() => setShowAdminPanel(false)} />
+            ) : isLoading ? (
+              <div className="flex flex-col items-center justify-center min-h-[520px] gap-4">
+                <span
+                  className="text-accent text-4xl"
+                  style={{ animation: "spin 3s linear infinite", display: "inline-block" }}
+                >
+                  ⚙
+                </span>
+                <p className="font-serif text-[11px] uppercase tracking-[0.28em] text-muted-foreground/40">
+                  Turning the Wheel…
+                </p>
               </div>
             ) : selectedRote ? (
               <RoteDetail rote={selectedRote} onBack={handleBackFromDetail} />
             ) : (
               <>
                 {activeTab === "home" && (
-                  <HomePanel
-                    totalRotes={rotes.length}
-                    traditions={uniqueTraditions}
-                    onNavigate={handleNavigate}
-                  />
+                  <HomePanel totalRotes={rotes.length} traditions={uniqueTraditions} onNavigate={handleNavigate} />
                 )}
                 {activeTab === "add" && (
                   <AddRotePanel onAdd={handleAddRote} />
