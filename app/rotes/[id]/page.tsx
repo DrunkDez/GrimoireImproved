@@ -1,5 +1,4 @@
 import { Metadata } from 'next'
-import { notFound } from 'next/navigation'
 import RotePageClient from './client'
 
 interface PageProps {
@@ -20,15 +19,22 @@ function formatSpheresForMeta(spheres: any): string {
 // Generate metadata for SEO and social sharing
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   try {
-    // Fetch the rote data
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://the-paradox-wheel.com'
-    const response = await fetch(`${baseUrl}/api/rotes/${params.id}`, {
-      cache: 'no-store', // Always get fresh data for metadata
+    // Use different URLs for server-side fetching vs. public URLs
+    const publicUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://the-paradox-wheel.com'
+    
+    // For server-side API calls, use internal URL
+    const apiBaseUrl = process.env.VERCEL_URL 
+      ? `https://${process.env.VERCEL_URL}`
+      : process.env.NEXTAUTH_URL || 'http://localhost:3000'
+    
+    const response = await fetch(`${apiBaseUrl}/api/rotes/${params.id}`, {
+      cache: 'no-store',
     })
 
     if (!response.ok) {
       return {
         title: 'Rote Not Found | The Paradox Wheel',
+        description: 'This rote could not be found in the grimoire.',
       }
     }
 
@@ -45,7 +51,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     // Create full description for Open Graph (can be longer)
     const ogDescription = `${rote.tradition} • ${rote.level}${spheresText ? ` • ${spheresText}` : ''}\n\n${description}`
 
-    const url = `${baseUrl}/rotes/${params.id}`
+    const url = `${publicUrl}/rotes/${params.id}`
 
     return {
       title: `${rote.name} | The Paradox Wheel`,
@@ -61,7 +67,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         locale: 'en_US',
         images: [
           {
-            url: `${baseUrl}/og-image.png`, // You can create a dynamic OG image later
+            url: `${publicUrl}/og-image.png`,
             width: 1200,
             height: 630,
             alt: `${rote.name} - ${rote.tradition}`,
@@ -74,7 +80,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         card: 'summary_large_image',
         title: rote.name,
         description: ogDescription,
-        images: [`${baseUrl}/og-image.png`],
+        images: [`${publicUrl}/og-image.png`],
       },
 
       // Additional SEO
@@ -106,6 +112,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     console.error('Error generating metadata:', error)
     return {
       title: 'Rote | The Paradox Wheel',
+      description: 'Explore rotes from Mage: The Ascension',
     }
   }
 }
