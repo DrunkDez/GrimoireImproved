@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useParams, useRouter } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import type { Rote } from "@/lib/mage-data"
 import { getTraditionSymbol, isTechnocracySphere } from "@/lib/mage-data"
@@ -22,6 +22,11 @@ import { useToast } from "@/hooks/use-toast"
 import { Toaster } from "@/components/ui/toaster"
 import { ArrowLeft, UserPlus, Home } from "lucide-react"
 import Link from "next/link"
+import Head from "next/head"
+
+interface RotePageClientProps {
+  id: string
+}
 
 interface Character {
   id: string
@@ -57,8 +62,7 @@ function getAllCombinations(spheres: any): Array<{ [key: string]: number }> {
   return [];
 }
 
-export default function RotePage() {
-  const params = useParams()
+export default function RotePageClient({ id }: RotePageClientProps) {
   const router = useRouter()
   const { data: session } = useSession()
   const { toast } = useToast()
@@ -73,7 +77,7 @@ export default function RotePage() {
   useEffect(() => {
     const fetchRote = async () => {
       try {
-        const response = await fetch(`/api/rotes/${params.id}`)
+        const response = await fetch(`/api/rotes/${id}`)
         if (response.ok) {
           const data = await response.json()
           setRote(data)
@@ -88,10 +92,10 @@ export default function RotePage() {
       }
     }
 
-    if (params.id) {
+    if (id) {
       fetchRote()
     }
-  }, [params.id, router])
+  }, [id, router])
 
   // Fetch user's characters when logged in
   useEffect(() => {
