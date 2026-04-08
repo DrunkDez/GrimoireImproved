@@ -20,9 +20,8 @@ import {
 } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
 import { Toaster } from "@/components/ui/toaster"
-import { ArrowLeft, UserPlus, Home } from "lucide-react"
+import { ArrowLeft, UserPlus } from "lucide-react"
 import Link from "next/link"
-import Head from "next/head"
 
 interface RotePageClientProps {
   id: string
