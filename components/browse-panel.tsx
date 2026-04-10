@@ -1,14 +1,12 @@
 "use client"
 
-import { useState, useMemo, useEffect } from "react"
-import type { Rote } from "@/lib/mage-data"
-import { getLinkedSpheres } from "@/lib/mage-data"
-import { RoteCard } from "./rote-card"
-import { SphereFilter } from "./sphere-filter"
-import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Label } from "@/components/ui/label"
-import { LayoutList, LayoutGrid } from "lucide-react"
+import { useState, useMemo, useEffect } from 'react'
+import { Rote } from '@/lib/mage-data'
+import { RoteCard } from './rote-card'
+import { Input } from '@/components/ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Button } from '@/components/ui/button'
+import { Search, X, ChevronDown } from 'lucide-react'
 
 interface BrowsePanelProps {
   rotes: Rote[]
@@ -17,445 +15,363 @@ interface BrowsePanelProps {
   onStateRestored?: () => void
 }
 
-interface RoteWithMatchingCombo {
-  rote: Rote
-  matchingCombo?: Record<string, number>
+// Fisher-Yates shuffle algorithm
+function shuffleArray<T>(array: T[]): T[] {
+  const shuffled = [...array]
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+  }
+  return shuffled
 }
 
+// Sphere names
+const SPHERE_NAMES = ['Correspondence', 'Entropy', 'Forces', 'Life', 'Matter', 'Mind', 'Prime', 'Spirit', 'Time']
+const TECHNOCRACY_SPHERES = ['Data', 'Dimensional Science', 'Primal Utility']
+const ITEMS_PER_PAGE = 20
+
 export function BrowsePanel({ rotes, onSelectRote, shouldRestoreState, onStateRestored }: BrowsePanelProps) {
-  const [sphereFilters, setSphereFilters] = useState<Record<string, number>>({})
-  const [traditionFilter, setTraditionFilter] = useState("")
-  const [searchTerm, setSearchTerm] = useState("")
-  const [mixAndMatch, setMixAndMatch] = useState(false)
-  const [displayLimit, setDisplayLimit] = useState(20)
-  const [viewMode, setViewMode] = useState<"card" | "compact">("card")
-  const [hasRestoredState, setHasRestoredState] = useState(false)
-  
-  // Restore state when coming back from rote detail
+  const [searchQuery, setSearchQuery] = useState('')
+  const [selectedTradition, setSelectedTradition] = useState<string>('All Factions')
+  const [selectedSpheres, setSelectedSpheres] = useState<{ [key: string]: number }>({})
+  const [randomSeed, setRandomSeed] = useState(Math.random())
+  const [displayCount, setDisplayCount] = useState(ITEMS_PER_PAGE)
+
+  // Get unique traditions
+  const traditions = useMemo(() => {
+    const uniqueTraditions = new Set(rotes.map(r => r.tradition))
+    return ['All Factions', ...Array.from(uniqueTraditions).sort()]
+  }, [rotes])
+
+  // Toggle sphere level
+  const toggleSphereLevel = (sphere: string, level: number) => {
+    setSelectedSpheres(prev => {
+      const current = prev[sphere] || 0
+      if (current === level) {
+        // Clicking same level turns it off
+        const newSpheres = { ...prev }
+        delete newSpheres[sphere]
+        return newSpheres
+      } else {
+        // Set to new level
+        return { ...prev, [sphere]: level }
+      }
+    })
+  }
+
+  // Check if rote matches sphere filters
+  const matchesSphereFilter = (rote: Rote): boolean => {
+    if (Object.keys(selectedSpheres).length === 0) return true
+
+    const roteSpheres = Array.isArray(rote.spheres) ? rote.spheres[0] : rote.spheres
+    if (!roteSpheres || typeof roteSpheres !== 'object') return false
+
+    // Check if rote has ALL selected spheres at the required levels
+    for (const [sphere, requiredLevel] of Object.entries(selectedSpheres)) {
+      const roteLevel = roteSpheres[sphere] || 0
+      if (roteLevel < requiredLevel) return false
+    }
+
+    return true
+  }
+
+  // Filter and randomize rotes
+  const filteredRotes = useMemo(() => {
+    let result = rotes
+
+    // Apply search filter
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase()
+      result = result.filter(rote =>
+        rote.name.toLowerCase().includes(query) ||
+        rote.description.toLowerCase().includes(query) ||
+        rote.tradition.toLowerCase().includes(query)
+      )
+    }
+
+    // Apply tradition filter
+    if (selectedTradition !== 'All Factions') {
+      result = result.filter(rote => rote.tradition === selectedTradition)
+    }
+
+    // Apply sphere filter
+    result = result.filter(matchesSphereFilter)
+
+    // Always randomize
+    return shuffleArray(result)
+  }, [rotes, searchQuery, selectedTradition, selectedSpheres, randomSeed])
+
+  // Get rotes to display (with pagination)
+  const displayedRotes = useMemo(() => {
+    return filteredRotes.slice(0, displayCount)
+  }, [filteredRotes, displayCount])
+
+  // Check if there are more rotes to load
+  const hasMore = displayCount < filteredRotes.length
+  const remainingCount = filteredRotes.length - displayCount
+
+  // Load more rotes
+  const loadMore = () => {
+    setDisplayCount(prev => prev + ITEMS_PER_PAGE)
+  }
+
+  // Reset display count when filters change
+  useEffect(() => {
+    setDisplayCount(ITEMS_PER_PAGE)
+  }, [searchQuery, selectedTradition, selectedSpheres])
+
+  // Reset random seed when filters change
+  useEffect(() => {
+    if (searchQuery || selectedTradition !== 'All Factions' || Object.keys(selectedSpheres).length > 0) {
+      setRandomSeed(Math.random())
+    }
+  }, [searchQuery, selectedTradition, selectedSpheres])
+
+  // Restore state if needed
   useEffect(() => {
     if (shouldRestoreState) {
-      const savedState = sessionStorage.getItem('browsePanelState')
-      if (savedState) {
-        try {
-          const state = JSON.parse(savedState)
-          setSphereFilters(state.sphereFilters || {})
-          setTraditionFilter(state.traditionFilter || "")
-          setSearchTerm(state.searchTerm || "")
-          setMixAndMatch(state.mixAndMatch || false)
-          setDisplayLimit(state.displayLimit || 20)
-          setViewMode(state.viewMode || "card")
-          setHasRestoredState(true)
-        } catch (e) {
-          console.error('Failed to restore state:', e)
-        }
-      }
+      const savedQuery = sessionStorage.getItem('browseSearchQuery')
+      const savedTradition = sessionStorage.getItem('browseTradition')
+      const savedSpheres = sessionStorage.getItem('browseSpheres')
+      const savedDisplayCount = sessionStorage.getItem('browseDisplayCount')
+
+      if (savedQuery) setSearchQuery(savedQuery)
+      if (savedTradition) setSelectedTradition(savedTradition)
+      if (savedSpheres) setSelectedSpheres(JSON.parse(savedSpheres))
+      if (savedDisplayCount) setDisplayCount(parseInt(savedDisplayCount, 10))
+
       onStateRestored?.()
     }
   }, [shouldRestoreState, onStateRestored])
 
-  // Save state to sessionStorage - but ONLY after initial restoration
+  // Save state when it changes
   useEffect(() => {
-    if (!hasRestoredState && shouldRestoreState) {
-      // Don't save yet - we're still restoring
-      return
-    }
-    
-    const saveState = () => {
-      const state = {
-        sphereFilters,
-        traditionFilter,
-        searchTerm,
-        mixAndMatch,
-        displayLimit,
-        viewMode
-      }
-      sessionStorage.setItem('browsePanelState', JSON.stringify(state))
-    }
-    
-    saveState()
-  }, [sphereFilters, traditionFilter, searchTerm, mixAndMatch, displayLimit, viewMode, hasRestoredState, shouldRestoreState])
+    sessionStorage.setItem('browseSearchQuery', searchQuery)
+    sessionStorage.setItem('browseTradition', selectedTradition)
+    sessionStorage.setItem('browseSpheres', JSON.stringify(selectedSpheres))
+    sessionStorage.setItem('browseDisplayCount', displayCount.toString())
+  }, [searchQuery, selectedTradition, selectedSpheres, displayCount])
 
-  const filteredRotes = useMemo(() => {
-    const results: RoteWithMatchingCombo[] = []
-    
-    rotes.forEach((rote) => {
-      // Text search
-      if (searchTerm) {
-        const q = searchTerm.toLowerCase()
-        const textMatch =
-          rote.name.toLowerCase().includes(q) ||
-          rote.tradition.toLowerCase().includes(q) ||
-          rote.description.toLowerCase().includes(q)
-        if (!textMatch) return
-      }
+  // Calculate if filters are active
+  const hasActiveFilters = searchQuery || selectedTradition !== 'All Factions' || Object.keys(selectedSpheres).length > 0
 
-      // Tradition filter
-      if (traditionFilter && rote.tradition !== traditionFilter) return
-
-      // Sphere filters - EXACT MATCHING
-      const activeSphereFilters = Object.entries(sphereFilters).filter(([_, level]) => level > 0)
-      
-      if (activeSphereFilters.length > 0) {
-        // Normalize rote.spheres to always be an array of combinations
-        const roteCombinations = Array.isArray(rote.spheres) ? rote.spheres : [rote.spheres]
-        
-        let matchingCombo: Record<string, number> | undefined = undefined
-        
-        if (mixAndMatch) {
-          // What Can I Do?: Find the combo that matches
-          const selectedSphereNames = activeSphereFilters.map(([sphere, _]) => {
-            return getLinkedSpheres(sphere)
-          }).flat().map(s => s.toLowerCase())
-
-          for (const combo of roteCombinations) {
-            // Check if this combo has at least one selected sphere
-            const hasAtLeastOne = activeSphereFilters.some(([sphere, maxLevel]) => {
-              const linkedSpheres = getLinkedSpheres(sphere)
-              return linkedSpheres.some((s) => {
-                const roteLevel = combo[s] || 0
-                return roteLevel > 0 && roteLevel <= maxLevel
-              })
-            })
-
-            if (!hasAtLeastOne) continue
-
-            // Check that combo ONLY has selected spheres
-            const onlySelectedSpheres = Object.keys(combo).every((roteSphere) => {
-              const level = combo[roteSphere]
-              if (!level || level === 0) return true
-              return selectedSphereNames.includes(roteSphere.toLowerCase())
-            })
-
-            if (!onlySelectedSpheres) continue
-
-            // All spheres in combo must be at or below your levels
-            const allSpheresWithinLimits = Object.entries(combo).every(([roteSphere, roteLevel]) => {
-              if (!roteLevel || roteLevel === 0) return true
-              
-              const maxAllowedLevel = activeSphereFilters.find(([sphere, _]) => {
-                const linkedSpheres = getLinkedSpheres(sphere)
-                return linkedSpheres.some(s => s.toLowerCase() === roteSphere.toLowerCase())
-              })?.[1]
-
-              return maxAllowedLevel !== undefined && roteLevel <= maxAllowedLevel
-            })
-
-            if (allSpheresWithinLimits) {
-              matchingCombo = combo
-              break
-            }
-          }
-
-          if (!matchingCombo) return
-          
-        } else {
-          // Standard mode: Find exact match
-          for (const combo of roteCombinations) {
-            // Check that ALL selected spheres are present at EXACT level
-            const allPresentExactly = activeSphereFilters.every(([sphere, exactLevel]) => {
-              const linkedSpheres = getLinkedSpheres(sphere)
-              return linkedSpheres.some((s) => (combo[s] || 0) === exactLevel)
-            })
-
-            if (!allPresentExactly) continue
-
-            // Check that combo has ONLY the selected spheres (no extras)
-            const onlySelectedSpheres = Object.keys(combo).every((roteSphere) => {
-              const level = combo[roteSphere]
-              if (!level || level === 0) return true
-              
-              return activeSphereFilters.some(([sphere, _]) => {
-                const linkedSpheres = getLinkedSpheres(sphere)
-                return linkedSpheres.some(s => 
-                  s.toLowerCase() === roteSphere.toLowerCase()
-                )
-              })
-            })
-
-            if (onlySelectedSpheres) {
-              matchingCombo = combo
-              break
-            }
-          }
-
-          if (!matchingCombo) return
-        }
-        
-        results.push({ rote, matchingCombo })
-      } else {
-        // No sphere filters - include all
-        results.push({ rote })
-      }
-    })
-    
-    return results
-  }, [rotes, sphereFilters, traditionFilter, searchTerm, mixAndMatch])
-
-  const displayedRotes = useMemo(() => {
-    return filteredRotes.slice(0, displayLimit)
-  }, [filteredRotes, displayLimit])
-
-  const handleSphereChange = (sphere: string, level: number) => {
-    setSphereFilters((prev) => ({ ...prev, [sphere]: level }))
+  // Clear all filters
+  const clearFilters = () => {
+    setSearchQuery('')
+    setSelectedTradition('All Factions')
+    setSelectedSpheres({})
+    setDisplayCount(ITEMS_PER_PAGE)
+    setRandomSeed(Math.random()) // New random order
   }
 
-  const handleReset = () => {
-    setSphereFilters({})
-    setTraditionFilter("")
-    setSearchTerm("")
-    setMixAndMatch(false)
-    setDisplayLimit(20)
+  // Render sphere dots
+  const renderSphereDots = (sphere: string) => {
+    const selectedLevel = selectedSpheres[sphere] || 0
+    
+    return (
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-xs sm:text-sm font-medium uppercase tracking-wider">{sphere}</span>
+        <div className="flex gap-1">
+          {[1, 2, 3, 4, 5].map(level => (
+            <button
+              key={level}
+              onClick={() => toggleSphereLevel(sphere, level)}
+              className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 transition-all ${
+                level <= selectedLevel
+                  ? 'bg-primary border-primary'
+                  : 'border-primary/40 hover:border-primary/60'
+              }`}
+              aria-label={`${sphere} level ${level}`}
+            />
+          ))}
+        </div>
+      </div>
+    )
   }
-
-  const handleLoadMore = () => {
-    setDisplayLimit(prev => prev + 20)
-  }
-
-  const activeFilterCount =
-    Object.values(sphereFilters).filter((v) => v > 0).length +
-    (traditionFilter ? 1 : 0) +
-    (searchTerm ? 1 : 0)
-
-  const hasMore = displayedRotes.length < filteredRotes.length
-  const remainingCount = filteredRotes.length - displayedRotes.length
 
   return (
-    <div className="animate-fade-in-up flex flex-col gap-8 p-6 md:p-10">
-      {/* Search Input */}
-      <div className="bg-card border-2 border-primary rounded-md p-5 shadow-[inset_0_0_20px_rgba(139,71,38,0.05)]">
-        <h2 className="font-serif text-xl font-bold text-primary uppercase tracking-[0.15em] mb-4 flex items-center gap-3">
-          <span className="text-ring text-lg drop-shadow-[0_0_8px_rgba(107,45,107,0.5)]" aria-hidden="true">
-            ⌕
-          </span>
-          Search The Wheel
-          <span className="ml-auto text-accent text-lg" aria-hidden="true">◈</span>
-        </h2>
-        <input
+    <div className="p-3 sm:p-4 md:p-6">
+      {/* Search Section */}
+      <div className="mb-4 md:mb-6 border-2 border-primary/30 rounded-lg p-3 sm:p-4 md:p-6 bg-card/50">
+        <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+          <Search className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+          <h2 className="font-serif text-base sm:text-lg md:text-xl font-bold text-foreground uppercase tracking-wider">
+            Search The Wheel
+          </h2>
+          <div className="ml-auto text-primary">◆</div>
+        </div>
+        <Input
           type="text"
           placeholder="Search by name, tradition, or description..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full px-4 py-3 bg-background/60 border-2 border-primary rounded-sm
-            text-foreground font-mono text-base placeholder:text-foreground/40 placeholder:italic
-            transition-all duration-300
-            shadow-[inset_2px_2px_5px_rgba(0,0,0,0.1)]
-            focus:outline-none focus:border-ring focus:bg-background/80
-            focus:shadow-[inset_2px_2px_5px_rgba(0,0,0,0.1),0_0_10px_rgba(107,45,107,0.3)]"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="bg-background/50 border-2 border-primary/30 focus:border-primary text-sm md:text-base italic"
         />
       </div>
 
-      {/* Filter section */}
-      <SphereFilter
-        sphereFilters={sphereFilters}
-        traditionFilter={traditionFilter}
-        onSphereChange={handleSphereChange}
-        onTraditionChange={setTraditionFilter}
-        onReset={handleReset}
-      />
-
-      {/* What Can I Do? Toggle */}
-      {Object.values(sphereFilters).filter((v) => v > 0).length > 0 && (
-        <div className="bg-card border-2 border-accent rounded-md p-4 shadow-[inset_0_0_20px_rgba(201,169,97,0.05)]">
-          <div className="flex items-center space-x-3">
-            <Checkbox
-              id="what-can-i-do"
-              checked={mixAndMatch}
-              onCheckedChange={(checked) => {
-                setMixAndMatch(checked as boolean)
-                setDisplayLimit(20)
-              }}
-            />
-            <div className="flex-1">
-              <Label 
-                htmlFor="what-can-i-do"
-                className="font-serif text-base font-semibold text-primary cursor-pointer flex items-center gap-2"
-              >
-                <span className="text-accent" aria-hidden="true">✦</span>
-                What Can I Do? Mode
-              </Label>
-              <p className="text-xs text-muted-foreground font-mono mt-1">
-                {mixAndMatch 
-                  ? "Showing what you can do with ONLY these spheres (at or below your levels)" 
-                  : "Showing rotes with selected spheres at EXACT levels"}
-              </p>
-            </div>
-          </div>
-          
-          {mixAndMatch && Object.values(sphereFilters).filter((v) => v > 0).length === 1 && (
-            <div className="mt-3 p-3 bg-accent/10 border border-accent/30 rounded text-xs font-mono text-foreground">
-              <span className="font-semibold">Example:</span> With Correspondence 3 selected:
-              <ul className="mt-1 ml-4 space-y-0.5">
-                <li>✓ Correspondence 3 alone</li>
-                <li>✓ Correspondence 2 alone</li>
-                <li>✓ Correspondence 1 alone</li>
-                <li>✗ Correspondence 4 (too high)</li>
-                <li>✗ Correspondence 3 + Life 2 (has other sphere)</li>
-              </ul>
-              <p className="mt-2 text-muted-foreground italic">
-                Perfect for discovering what you can cast with just this sphere!
-              </p>
-            </div>
-          )}
-          
-          {mixAndMatch && Object.values(sphereFilters).filter((v) => v > 0).length > 1 && (
-            <div className="mt-3 p-3 bg-accent/10 border border-accent/30 rounded text-xs font-mono text-foreground">
-              <span className="font-semibold">Example:</span> With Life 2, Correspondence 3 selected:
-              <ul className="mt-1 ml-4 space-y-0.5">
-                <li>✓ Life 2 alone</li>
-                <li>✓ Life 1 alone</li>
-                <li>✓ Correspondence 3 alone</li>
-                <li>✓ Life 2 + Correspondence 3</li>
-                <li>✓ Life 1 + Correspondence 2</li>
-                <li>✗ Life 2 + Entropy 3 (has unselected sphere)</li>
-                <li>✗ Life 3 alone (too high)</li>
-              </ul>
-              <p className="mt-2 text-muted-foreground italic">
-                Shows all combinations possible with ONLY your selected spheres!
-              </p>
-            </div>
-          )}
-          
-          {!mixAndMatch && (
-            <div className="mt-3 p-3 bg-primary/10 border border-primary/30 rounded text-xs font-mono text-foreground">
-              <span className="font-semibold">Exact Match Mode:</span> {Object.values(sphereFilters).filter((v) => v > 0).length === 1 ? (
-                <>With Correspondence 3 selected:</>
-              ) : (
-                <>With Life 2, Correspondence 3 selected:</>
-              )}
-              <ul className="mt-1 ml-4 space-y-0.5">
-                {Object.values(sphereFilters).filter((v) => v > 0).length === 1 ? (
-                  <>
-                    <li>✓ Correspondence 3 alone (exact match)</li>
-                    <li>✗ Correspondence 2 (too low)</li>
-                    <li>✗ Correspondence 4 (too high)</li>
-                    <li>✗ Correspondence 3 + Life 2 (has extra sphere)</li>
-                  </>
-                ) : (
-                  <>
-                    <li>✓ Life 2 + Correspondence 3 (exact match)</li>
-                    <li>✗ Life 3 + Correspondence 3 (Life too high)</li>
-                    <li>✗ Life 2 + Correspondence 2 (Correspondence too low)</li>
-                    <li>✗ Life 2 + Correspondence 3 + Prime 1 (has extra sphere)</li>
-                    <li>✗ Life 2 alone (missing Correspondence)</li>
-                  </>
-                )}
-              </ul>
-            </div>
-          )}
+      {/* Filter Section */}
+      <div className="mb-4 md:mb-6 border-2 border-primary/30 rounded-lg p-3 sm:p-4 md:p-6 bg-card/50">
+        <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+          <span className="text-primary">✦</span>
+          <h2 className="font-serif text-base sm:text-lg md:text-xl font-bold text-foreground uppercase tracking-wider">
+            Filter Rotes
+          </h2>
+          <div className="ml-auto text-primary">◆</div>
         </div>
-      )}
 
-      {/* Results header */}
-      <div className="flex items-center justify-between flex-wrap gap-4">
-        <h2 className="font-serif text-xl font-bold text-primary uppercase tracking-[0.15em] flex items-center gap-3">
-          <span className="text-ring text-lg drop-shadow-[0_0_8px_rgba(107,45,107,0.5)]" aria-hidden="true">
-            ✧
-          </span>
-          The Wheel's Archives
-          <span className="ml-2 text-accent text-lg" aria-hidden="true">◈</span>
-        </h2>
-        
-        <div className="flex items-center gap-4">
-          {/* View mode toggle */}
-          <div className="flex gap-1 bg-muted rounded-sm p-1">
-            <Button
-              variant={viewMode === "card" ? "default" : "ghost"}
-              size="sm"
-              onClick={() => setViewMode("card")}
-              className="gap-2 h-8"
-            >
-              <LayoutGrid className="w-4 h-4" />
-              <span className="hidden sm:inline">Cards</span>
-            </Button>
-            <Button
-              variant={viewMode === "compact" ? "default" : "ghost"}
-              size="sm"
-              onClick={() => setViewMode("compact")}
-              className="gap-2 h-8"
-            >
-              <LayoutList className="w-4 h-4" />
-              <span className="hidden sm:inline">Compact</span>
-            </Button>
+        {/* Tradition Filter */}
+        <div className="mb-4 sm:mb-6">
+          <div className="flex items-center gap-2 mb-2 sm:mb-3">
+            <span className="text-primary text-xs sm:text-base">✦</span>
+            <h3 className="font-serif font-semibold text-foreground uppercase tracking-wider text-xs sm:text-sm md:text-base">
+              Tradition / Convention
+            </h3>
           </div>
-          
-          <span className="font-mono text-sm text-muted-foreground italic">
-            Showing {displayedRotes.length} of {filteredRotes.length} rotes
-            {filteredRotes.length !== rotes.length && ` (filtered from ${rotes.length} total)`}
-            {activeFilterCount > 0 && ` • ${activeFilterCount} filter${activeFilterCount > 1 ? 's' : ''} active`}
-          </span>
+          <Select value={selectedTradition} onValueChange={setSelectedTradition}>
+            <SelectTrigger className="bg-background/50 border-2 border-primary/30 focus:border-primary h-11 md:h-12 text-sm md:text-base">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="max-h-[60vh]">
+              {traditions.map((tradition) => (
+                <SelectItem 
+                  key={tradition} 
+                  value={tradition}
+                  className="text-sm md:text-base min-h-[44px] flex items-center"
+                >
+                  {tradition}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Spheres Filter */}
+        <div className="mb-4 sm:mb-6">
+          <div className="flex items-center gap-2 mb-2 sm:mb-3">
+            <span className="text-primary text-xs sm:text-base">✦</span>
+            <h3 className="font-serif font-semibold text-foreground uppercase tracking-wider text-xs sm:text-sm md:text-base">
+              Spheres
+            </h3>
+          </div>
+          <p className="text-xs md:text-sm text-muted-foreground italic mb-3 sm:mb-4">
+            Click dots to set minimum sphere level. Linked spheres (e.g. Data/Correspondence) match automatically.
+          </p>
+
+          {/* Traditional Spheres */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 mb-4 sm:mb-6">
+            {SPHERE_NAMES.map(sphere => (
+              <div
+                key={sphere}
+                className="bg-background/50 border-2 border-primary/30 rounded-lg p-2 sm:p-3"
+              >
+                {renderSphereDots(sphere)}
+              </div>
+            ))}
+          </div>
+
+          {/* Technocracy Spheres */}
+          <div className="border-t-2 border-primary/20 pt-3 sm:pt-4">
+            <div className="flex items-center gap-2 mb-2 sm:mb-3">
+              <span className="text-muted-foreground text-xs sm:text-base">⚙</span>
+              <h4 className="font-serif font-semibold text-muted-foreground uppercase tracking-wider text-xs md:text-sm">
+                Technocracy Spheres
+              </h4>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
+              {TECHNOCRACY_SPHERES.map(sphere => (
+                <div
+                  key={sphere}
+                  className="bg-background/50 border-2 border-primary/30 rounded-lg p-2 sm:p-3"
+                >
+                  {renderSphereDots(sphere)}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Reset Filters Button */}
+        <div className="border-t-2 border-primary/20 pt-3 sm:pt-4">
+          <Button
+            onClick={clearFilters}
+            variant="outline"
+            className="w-full gap-2 min-h-[44px] border-2 border-primary/30 hover:border-primary hover:bg-primary/10 text-sm md:text-base"
+          >
+            <span className="text-primary">◆</span>
+            Reset Filters
+            <span className="text-primary">◆</span>
+          </Button>
         </div>
       </div>
 
-      {/* Rote grid */}
-      {displayedRotes.length > 0 ? (
+      {/* Results Info */}
+      <div className="mb-3 sm:mb-4 text-center">
+        <p className="text-xs sm:text-sm md:text-base text-muted-foreground">
+          {hasActiveFilters 
+            ? `Showing ${displayedRotes.length} of ${filteredRotes.length} rotes`
+            : `Exploring ${displayedRotes.length} of ${rotes.length} rotes (random order)`
+          }
+        </p>
+      </div>
+
+      {/* Results */}
+      {filteredRotes.length === 0 ? (
+        <div className="text-center py-12 border-2 border-primary/30 rounded-lg bg-card/50">
+          <p className="text-muted-foreground mb-2">No rotes found</p>
+          <p className="text-sm text-muted-foreground mb-4">
+            Try adjusting your search or filters
+          </p>
+          {hasActiveFilters && (
+            <Button
+              onClick={clearFilters}
+              variant="outline"
+              className="gap-2"
+            >
+              <X className="w-4 h-4" />
+              Clear all filters
+            </Button>
+          )}
+        </div>
+      ) : (
         <>
-          <div className={viewMode === "compact" 
-            ? "flex flex-col gap-2" 
-            : "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"
-          }>
-            {displayedRotes.map(({ rote, matchingCombo }) => (
-              <RoteCard 
-                key={rote.id} 
-                rote={rote} 
-                onClick={onSelectRote}
-                compact={viewMode === "compact"}
-                matchingSpheres={matchingCombo}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+            {displayedRotes.map((rote) => (
+              <RoteCard
+                key={rote.id}
+                rote={rote}
+                onSelect={onSelectRote}
               />
             ))}
           </div>
 
           {/* Load More Button */}
           {hasMore && (
-            <div className="flex flex-col items-center gap-4 py-8">
-              <div className="text-center">
-                <p className="font-mono text-sm text-muted-foreground mb-2">
-                  {remainingCount} more rote{remainingCount !== 1 ? 's' : ''} available
-                </p>
-                <Button
-                  onClick={handleLoadMore}
-                  size="lg"
-                  className="font-serif px-8 py-6 bg-secondary text-secondary-foreground border-2 border-primary rounded-sm
-                    font-semibold text-base uppercase tracking-[0.15em]
-                    transition-all duration-300
-                    shadow-[0_4px_8px_rgba(0,0,0,0.15)]
-                    hover:bg-background hover:border-ring hover:-translate-y-1
-                    hover:shadow-[0_6px_12px_rgba(0,0,0,0.2),0_0_20px_rgba(107,45,107,0.2)]
-                    active:translate-y-0"
-                >
-                  <span className="text-accent mr-2" aria-hidden="true">📖</span>
-                  Turn 20 More Pages
-                  <span className="text-accent ml-2" aria-hidden="true">📖</span>
-                </Button>
-              </div>
-              
-              {/* Progress indicator */}
-              <div className="w-full max-w-md">
-                <div className="h-2 bg-muted rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-gradient-to-r from-primary to-accent transition-all duration-500"
-                    style={{ width: `${(displayedRotes.length / filteredRotes.length) * 100}%` }}
-                  />
-                </div>
-                <p className="text-center text-xs text-muted-foreground mt-2 font-mono">
-                  {Math.round((displayedRotes.length / filteredRotes.length) * 100)}% of archives explored
-                </p>
-              </div>
+            <div className="mt-6 sm:mt-8 text-center">
+              <Button
+                onClick={loadMore}
+                variant="outline"
+                size="lg"
+                className="gap-2 min-h-[48px] px-6 sm:px-8 border-2 border-primary/30 hover:border-primary hover:bg-primary/10"
+              >
+                <ChevronDown className="w-5 h-5" />
+                Load {remainingCount < ITEMS_PER_PAGE ? remainingCount : ITEMS_PER_PAGE} More Rotes
+                <ChevronDown className="w-5 h-5" />
+              </Button>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-2">
+                {remainingCount} more rotes available
+              </p>
+            </div>
+          )}
+
+          {/* End Message */}
+          {!hasMore && displayedRotes.length > ITEMS_PER_PAGE && (
+            <div className="mt-6 sm:mt-8 text-center">
+              <p className="text-sm text-muted-foreground italic">
+                You've reached the end • {filteredRotes.length} rotes shown
+              </p>
             </div>
           )}
         </>
-      ) : (
-        <div
-          className="bg-card border-4 border-double border-primary rounded-lg px-6 py-16 text-center
-            shadow-[inset_0_0_60px_rgba(139,71,38,0.08)]"
-        >
-          <div className="text-5xl text-primary opacity-40 mb-4" aria-hidden="true">✧</div>
-          <h3 className="font-serif text-xl font-bold text-primary uppercase tracking-widest mb-3">
-            No Rotes Found
-          </h3>
-          <p className="font-mono text-muted-foreground italic text-base">
-            No rotes match your current filters. Try adjusting your search criteria.
-          </p>
-        </div>
       )}
     </div>
   )
