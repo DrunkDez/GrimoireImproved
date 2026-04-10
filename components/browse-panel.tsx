@@ -6,7 +6,7 @@ import { RoteCard } from './rote-card'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
-import { Search, X } from 'lucide-react'
+import { Search, X, ChevronDown } from 'lucide-react'
 
 interface BrowsePanelProps {
   rotes: Rote[]
@@ -28,12 +28,14 @@ function shuffleArray<T>(array: T[]): T[] {
 // Sphere names
 const SPHERE_NAMES = ['Correspondence', 'Entropy', 'Forces', 'Life', 'Matter', 'Mind', 'Prime', 'Spirit', 'Time']
 const TECHNOCRACY_SPHERES = ['Data', 'Dimensional Science', 'Primal Utility']
+const ITEMS_PER_PAGE = 20
 
 export function BrowsePanel({ rotes, onSelectRote, shouldRestoreState, onStateRestored }: BrowsePanelProps) {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedTradition, setSelectedTradition] = useState<string>('All Factions')
   const [selectedSpheres, setSelectedSpheres] = useState<{ [key: string]: number }>({})
   const [randomSeed, setRandomSeed] = useState(Math.random())
+  const [displayCount, setDisplayCount] = useState(ITEMS_PER_PAGE)
 
   // Get unique traditions
   const traditions = useMemo(() => {
@@ -99,6 +101,25 @@ export function BrowsePanel({ rotes, onSelectRote, shouldRestoreState, onStateRe
     return shuffleArray(result)
   }, [rotes, searchQuery, selectedTradition, selectedSpheres, randomSeed])
 
+  // Get rotes to display (with pagination)
+  const displayedRotes = useMemo(() => {
+    return filteredRotes.slice(0, displayCount)
+  }, [filteredRotes, displayCount])
+
+  // Check if there are more rotes to load
+  const hasMore = displayCount < filteredRotes.length
+  const remainingCount = filteredRotes.length - displayCount
+
+  // Load more rotes
+  const loadMore = () => {
+    setDisplayCount(prev => prev + ITEMS_PER_PAGE)
+  }
+
+  // Reset display count when filters change
+  useEffect(() => {
+    setDisplayCount(ITEMS_PER_PAGE)
+  }, [searchQuery, selectedTradition, selectedSpheres])
+
   // Reset random seed when filters change
   useEffect(() => {
     if (searchQuery || selectedTradition !== 'All Factions' || Object.keys(selectedSpheres).length > 0) {
@@ -112,10 +133,12 @@ export function BrowsePanel({ rotes, onSelectRote, shouldRestoreState, onStateRe
       const savedQuery = sessionStorage.getItem('browseSearchQuery')
       const savedTradition = sessionStorage.getItem('browseTradition')
       const savedSpheres = sessionStorage.getItem('browseSpheres')
+      const savedDisplayCount = sessionStorage.getItem('browseDisplayCount')
 
       if (savedQuery) setSearchQuery(savedQuery)
       if (savedTradition) setSelectedTradition(savedTradition)
       if (savedSpheres) setSelectedSpheres(JSON.parse(savedSpheres))
+      if (savedDisplayCount) setDisplayCount(parseInt(savedDisplayCount, 10))
 
       onStateRestored?.()
     }
@@ -126,7 +149,8 @@ export function BrowsePanel({ rotes, onSelectRote, shouldRestoreState, onStateRe
     sessionStorage.setItem('browseSearchQuery', searchQuery)
     sessionStorage.setItem('browseTradition', selectedTradition)
     sessionStorage.setItem('browseSpheres', JSON.stringify(selectedSpheres))
-  }, [searchQuery, selectedTradition, selectedSpheres])
+    sessionStorage.setItem('browseDisplayCount', displayCount.toString())
+  }, [searchQuery, selectedTradition, selectedSpheres, displayCount])
 
   // Calculate if filters are active
   const hasActiveFilters = searchQuery || selectedTradition !== 'All Factions' || Object.keys(selectedSpheres).length > 0
@@ -136,6 +160,7 @@ export function BrowsePanel({ rotes, onSelectRote, shouldRestoreState, onStateRe
     setSearchQuery('')
     setSelectedTradition('All Factions')
     setSelectedSpheres({})
+    setDisplayCount(ITEMS_PER_PAGE)
     setRandomSeed(Math.random()) // New random order
   }
 
@@ -145,13 +170,13 @@ export function BrowsePanel({ rotes, onSelectRote, shouldRestoreState, onStateRe
     
     return (
       <div className="flex items-center justify-between gap-2">
-        <span className="text-sm font-medium uppercase tracking-wider">{sphere}</span>
+        <span className="text-xs sm:text-sm font-medium uppercase tracking-wider">{sphere}</span>
         <div className="flex gap-1">
           {[1, 2, 3, 4, 5].map(level => (
             <button
               key={level}
               onClick={() => toggleSphereLevel(sphere, level)}
-              className={`w-6 h-6 rounded-full border-2 transition-all ${
+              className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 transition-all ${
                 level <= selectedLevel
                   ? 'bg-primary border-primary'
                   : 'border-primary/40 hover:border-primary/60'
@@ -165,12 +190,12 @@ export function BrowsePanel({ rotes, onSelectRote, shouldRestoreState, onStateRe
   }
 
   return (
-    <div className="p-4 md:p-6">
+    <div className="p-3 sm:p-4 md:p-6">
       {/* Search Section */}
-      <div className="mb-6 border-2 border-primary/30 rounded-lg p-4 md:p-6 bg-card/50">
-        <div className="flex items-center gap-3 mb-4">
-          <Search className="w-5 h-5 text-primary" />
-          <h2 className="font-serif text-lg md:text-xl font-bold text-foreground uppercase tracking-wider">
+      <div className="mb-4 md:mb-6 border-2 border-primary/30 rounded-lg p-3 sm:p-4 md:p-6 bg-card/50">
+        <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+          <Search className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+          <h2 className="font-serif text-base sm:text-lg md:text-xl font-bold text-foreground uppercase tracking-wider">
             Search The Wheel
           </h2>
           <div className="ml-auto text-primary">◆</div>
@@ -185,25 +210,25 @@ export function BrowsePanel({ rotes, onSelectRote, shouldRestoreState, onStateRe
       </div>
 
       {/* Filter Section */}
-      <div className="mb-6 border-2 border-primary/30 rounded-lg p-4 md:p-6 bg-card/50">
-        <div className="flex items-center gap-3 mb-6">
+      <div className="mb-4 md:mb-6 border-2 border-primary/30 rounded-lg p-3 sm:p-4 md:p-6 bg-card/50">
+        <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
           <span className="text-primary">✦</span>
-          <h2 className="font-serif text-lg md:text-xl font-bold text-foreground uppercase tracking-wider">
+          <h2 className="font-serif text-base sm:text-lg md:text-xl font-bold text-foreground uppercase tracking-wider">
             Filter Rotes
           </h2>
           <div className="ml-auto text-primary">◆</div>
         </div>
 
         {/* Tradition Filter */}
-        <div className="mb-6">
-          <div className="flex items-center gap-2 mb-3">
-            <span className="text-primary">✦</span>
-            <h3 className="font-serif font-semibold text-foreground uppercase tracking-wider text-sm md:text-base">
+        <div className="mb-4 sm:mb-6">
+          <div className="flex items-center gap-2 mb-2 sm:mb-3">
+            <span className="text-primary text-xs sm:text-base">✦</span>
+            <h3 className="font-serif font-semibold text-foreground uppercase tracking-wider text-xs sm:text-sm md:text-base">
               Tradition / Convention
             </h3>
           </div>
           <Select value={selectedTradition} onValueChange={setSelectedTradition}>
-            <SelectTrigger className="bg-background/50 border-2 border-primary/30 focus:border-primary h-11 md:h-12">
+            <SelectTrigger className="bg-background/50 border-2 border-primary/30 focus:border-primary h-11 md:h-12 text-sm md:text-base">
               <SelectValue />
             </SelectTrigger>
             <SelectContent className="max-h-[60vh]">
@@ -221,23 +246,23 @@ export function BrowsePanel({ rotes, onSelectRote, shouldRestoreState, onStateRe
         </div>
 
         {/* Spheres Filter */}
-        <div className="mb-6">
-          <div className="flex items-center gap-2 mb-3">
-            <span className="text-primary">✦</span>
-            <h3 className="font-serif font-semibold text-foreground uppercase tracking-wider text-sm md:text-base">
+        <div className="mb-4 sm:mb-6">
+          <div className="flex items-center gap-2 mb-2 sm:mb-3">
+            <span className="text-primary text-xs sm:text-base">✦</span>
+            <h3 className="font-serif font-semibold text-foreground uppercase tracking-wider text-xs sm:text-sm md:text-base">
               Spheres
             </h3>
           </div>
-          <p className="text-xs md:text-sm text-muted-foreground italic mb-4">
+          <p className="text-xs md:text-sm text-muted-foreground italic mb-3 sm:mb-4">
             Click dots to set minimum sphere level. Linked spheres (e.g. Data/Correspondence) match automatically.
           </p>
 
           {/* Traditional Spheres */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 mb-4 sm:mb-6">
             {SPHERE_NAMES.map(sphere => (
               <div
                 key={sphere}
-                className="bg-background/50 border-2 border-primary/30 rounded-lg p-3"
+                className="bg-background/50 border-2 border-primary/30 rounded-lg p-2 sm:p-3"
               >
                 {renderSphereDots(sphere)}
               </div>
@@ -245,18 +270,18 @@ export function BrowsePanel({ rotes, onSelectRote, shouldRestoreState, onStateRe
           </div>
 
           {/* Technocracy Spheres */}
-          <div className="border-t-2 border-primary/20 pt-4">
-            <div className="flex items-center gap-2 mb-3">
-              <span className="text-muted-foreground">⚙</span>
+          <div className="border-t-2 border-primary/20 pt-3 sm:pt-4">
+            <div className="flex items-center gap-2 mb-2 sm:mb-3">
+              <span className="text-muted-foreground text-xs sm:text-base">⚙</span>
               <h4 className="font-serif font-semibold text-muted-foreground uppercase tracking-wider text-xs md:text-sm">
                 Technocracy Spheres
               </h4>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
               {TECHNOCRACY_SPHERES.map(sphere => (
                 <div
                   key={sphere}
-                  className="bg-background/50 border-2 border-primary/30 rounded-lg p-3"
+                  className="bg-background/50 border-2 border-primary/30 rounded-lg p-2 sm:p-3"
                 >
                   {renderSphereDots(sphere)}
                 </div>
@@ -266,11 +291,11 @@ export function BrowsePanel({ rotes, onSelectRote, shouldRestoreState, onStateRe
         </div>
 
         {/* Reset Filters Button */}
-        <div className="border-t-2 border-primary/20 pt-4">
+        <div className="border-t-2 border-primary/20 pt-3 sm:pt-4">
           <Button
             onClick={clearFilters}
             variant="outline"
-            className="w-full gap-2 min-h-[44px] border-2 border-primary/30 hover:border-primary hover:bg-primary/10"
+            className="w-full gap-2 min-h-[44px] border-2 border-primary/30 hover:border-primary hover:bg-primary/10 text-sm md:text-base"
           >
             <span className="text-primary">◆</span>
             Reset Filters
@@ -280,11 +305,11 @@ export function BrowsePanel({ rotes, onSelectRote, shouldRestoreState, onStateRe
       </div>
 
       {/* Results Info */}
-      <div className="mb-4 text-center">
-        <p className="text-sm md:text-base text-muted-foreground">
+      <div className="mb-3 sm:mb-4 text-center">
+        <p className="text-xs sm:text-sm md:text-base text-muted-foreground">
           {hasActiveFilters 
-            ? `Showing ${filteredRotes.length} of ${rotes.length} rotes`
-            : `Exploring ${rotes.length} rotes in random order`
+            ? `Showing ${displayedRotes.length} of ${filteredRotes.length} rotes`
+            : `Exploring ${displayedRotes.length} of ${rotes.length} rotes (random order)`
           }
         </p>
       </div>
@@ -308,15 +333,45 @@ export function BrowsePanel({ rotes, onSelectRote, shouldRestoreState, onStateRe
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
-          {filteredRotes.map((rote) => (
-            <RoteCard
-              key={rote.id}
-              rote={rote}
-              onSelect={onSelectRote}
-            />
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+            {displayedRotes.map((rote) => (
+              <RoteCard
+                key={rote.id}
+                rote={rote}
+                onSelect={onSelectRote}
+              />
+            ))}
+          </div>
+
+          {/* Load More Button */}
+          {hasMore && (
+            <div className="mt-6 sm:mt-8 text-center">
+              <Button
+                onClick={loadMore}
+                variant="outline"
+                size="lg"
+                className="gap-2 min-h-[48px] px-6 sm:px-8 border-2 border-primary/30 hover:border-primary hover:bg-primary/10"
+              >
+                <ChevronDown className="w-5 h-5" />
+                Load {remainingCount < ITEMS_PER_PAGE ? remainingCount : ITEMS_PER_PAGE} More Rotes
+                <ChevronDown className="w-5 h-5" />
+              </Button>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-2">
+                {remainingCount} more rotes available
+              </p>
+            </div>
+          )}
+
+          {/* End Message */}
+          {!hasMore && displayedRotes.length > ITEMS_PER_PAGE && (
+            <div className="mt-6 sm:mt-8 text-center">
+              <p className="text-sm text-muted-foreground italic">
+                You've reached the end • {filteredRotes.length} rotes shown
+              </p>
+            </div>
+          )}
+        </>
       )}
     </div>
   )
