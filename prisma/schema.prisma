@@ -22,6 +22,7 @@ model User {
   rotes         Rote[]      // User's created rotes
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
+  wonders       Wonder[] 
 }
 
 model Character {
@@ -29,6 +30,7 @@ model Character {
   name         String
   faction      String          // Tradition/affiliation from guided creation
   concept      String?         // Character concept/background
+  wonders      CharacterWonder[] 
   
   // Basic Info from guided creation
   player       String?         // Player's name
@@ -116,6 +118,49 @@ model Merit {
   @@index([type])
   @@index([subtype])
 }
+model Wonder {
+  id              String   @id @default(cuid())
+  name            String
+  category        String   // "Artifact/Invention", "Charm/Gadget", "Talisman/Device", "Fetish", "Grimoire/Principia", "Primer", "Periapt/Matrix"
+  description     String   @db.Text
+  
+  // Wonder-specific traits
+  backgroundCost  String?  // "1", "2-5", "Variable", etc.
+  arete           Int?     // Arete requirement (or Gnosis for Fetishes)
+  quintessence    Int?     // Quintessence cost
+  
+  // Optional fields
+  spheres         Json?    // Required spheres (if any): { "Prime": 3, "Forces": 2 }
+  pageRef         String?
+  
+  // Creator info
+  userId          String?
+  user            User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  
+  // Relations
+  characters      CharacterWonder[]
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([category])
+  @@index([userId])
+  @@index([name])
+}
+model CharacterWonder {
+  id          String    @id @default(cuid())
+  characterId String
+  wonderId    String
+  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  wonder      Wonder    @relation(fields: [wonderId], references: [id], onDelete: Cascade)
+  notes       String?   @db.Text
+  createdAt   DateTime  @default(now())
+  
+  @@unique([characterId, wonderId])
+  @@index([characterId])
+  @@index([wonderId])
+}
+
 model MageGroup {
   id                  String   @id @default(cuid())
   name                String   @unique
