@@ -87,6 +87,12 @@ export function GrimoireHeader() {
             Merits & Flaws
           </Button>
         </Link>
+        <Link href="/wonders">
+  <Button variant="outline" size="sm" className="gap-2 font-serif">
+    <span className="text-base">{'\u2728'}</span>
+    Wonders
+  </Button>
+</Link>
         <Link href="/recommended">
           <Button variant="outline" size="sm" className="gap-2 font-serif">
             <span className="text-base">{'\u{1F4DA}'}</span>
