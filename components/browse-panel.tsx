@@ -25,39 +25,55 @@ function shuffleArray<T>(array: T[]): T[] {
   return shuffled
 }
 
+// Sphere names
+const SPHERE_NAMES = ['Correspondence', 'Entropy', 'Forces', 'Life', 'Matter', 'Mind', 'Prime', 'Spirit', 'Time']
+const TECHNOCRACY_SPHERES = ['Data', 'Dimensional Science', 'Primal Utility']
+
 export function BrowsePanel({ rotes, onSelectRote, shouldRestoreState, onStateRestored }: BrowsePanelProps) {
   const [searchQuery, setSearchQuery] = useState('')
-  const [selectedTradition, setSelectedTradition] = useState<string>('All')
-  const [selectedLevel, setSelectedLevel] = useState<string>('All')
-  const [selectedSphere, setSelectedSphere] = useState<string>('All')
-  const [sortBy, setSortBy] = useState<string>('random')
+  const [selectedTradition, setSelectedTradition] = useState<string>('All Factions')
+  const [selectedSpheres, setSelectedSpheres] = useState<{ [key: string]: number }>({})
   const [randomSeed, setRandomSeed] = useState(Math.random())
 
   // Get unique traditions
   const traditions = useMemo(() => {
     const uniqueTraditions = new Set(rotes.map(r => r.tradition))
-    return ['All', ...Array.from(uniqueTraditions).sort()]
+    return ['All Factions', ...Array.from(uniqueTraditions).sort()]
   }, [rotes])
 
-  // Get unique levels
-  const levels = useMemo(() => {
-    const uniqueLevels = new Set(rotes.map(r => r.level))
-    return ['All', ...Array.from(uniqueLevels).sort()]
-  }, [rotes])
-
-  // Get unique spheres
-  const spheres = useMemo(() => {
-    const uniqueSpheres = new Set<string>()
-    rotes.forEach(rote => {
-      const sphereObj = Array.isArray(rote.spheres) ? rote.spheres[0] : rote.spheres
-      if (sphereObj && typeof sphereObj === 'object') {
-        Object.keys(sphereObj).forEach(sphere => uniqueSpheres.add(sphere))
+  // Toggle sphere level
+  const toggleSphereLevel = (sphere: string, level: number) => {
+    setSelectedSpheres(prev => {
+      const current = prev[sphere] || 0
+      if (current === level) {
+        // Clicking same level turns it off
+        const newSpheres = { ...prev }
+        delete newSpheres[sphere]
+        return newSpheres
+      } else {
+        // Set to new level
+        return { ...prev, [sphere]: level }
       }
     })
-    return ['All', ...Array.from(uniqueSpheres).sort()]
-  }, [rotes])
+  }
 
-  // Filter and sort rotes
+  // Check if rote matches sphere filters
+  const matchesSphereFilter = (rote: Rote): boolean => {
+    if (Object.keys(selectedSpheres).length === 0) return true
+
+    const roteSpheres = Array.isArray(rote.spheres) ? rote.spheres[0] : rote.spheres
+    if (!roteSpheres || typeof roteSpheres !== 'object') return false
+
+    // Check if rote has ALL selected spheres at the required levels
+    for (const [sphere, requiredLevel] of Object.entries(selectedSpheres)) {
+      const roteLevel = roteSpheres[sphere] || 0
+      if (roteLevel < requiredLevel) return false
+    }
+
+    return true
+  }
+
+  // Filter and randomize rotes
   const filteredRotes = useMemo(() => {
     let result = rotes
 
@@ -72,59 +88,34 @@ export function BrowsePanel({ rotes, onSelectRote, shouldRestoreState, onStateRe
     }
 
     // Apply tradition filter
-    if (selectedTradition !== 'All') {
+    if (selectedTradition !== 'All Factions') {
       result = result.filter(rote => rote.tradition === selectedTradition)
     }
 
-    // Apply level filter
-    if (selectedLevel !== 'All') {
-      result = result.filter(rote => rote.level === selectedLevel)
-    }
-
     // Apply sphere filter
-    if (selectedSphere !== 'All') {
-      result = result.filter(rote => {
-        const sphereObj = Array.isArray(rote.spheres) ? rote.spheres[0] : rote.spheres
-        return sphereObj && typeof sphereObj === 'object' && selectedSphere in sphereObj
-      })
-    }
+    result = result.filter(matchesSphereFilter)
 
-    // Apply sorting
-    switch (sortBy) {
-      case 'name':
-        return [...result].sort((a, b) => a.name.localeCompare(b.name))
-      case 'tradition':
-        return [...result].sort((a, b) => a.tradition.localeCompare(b.tradition))
-      case 'level':
-        return [...result].sort((a, b) => a.level.localeCompare(b.level))
-      case 'random':
-      default:
-        // Use randomSeed to ensure same random order until filters change
-        return shuffleArray(result)
-    }
-  }, [rotes, searchQuery, selectedTradition, selectedLevel, selectedSphere, sortBy, randomSeed])
+    // Always randomize
+    return shuffleArray(result)
+  }, [rotes, searchQuery, selectedTradition, selectedSpheres, randomSeed])
 
-  // Reset random seed when filters change (to get new random order)
+  // Reset random seed when filters change
   useEffect(() => {
-    if (sortBy === 'random' && (searchQuery || selectedTradition !== 'All' || selectedLevel !== 'All' || selectedSphere !== 'All')) {
+    if (searchQuery || selectedTradition !== 'All Factions' || Object.keys(selectedSpheres).length > 0) {
       setRandomSeed(Math.random())
     }
-  }, [searchQuery, selectedTradition, selectedLevel, selectedSphere, sortBy])
+  }, [searchQuery, selectedTradition, selectedSpheres])
 
   // Restore state if needed
   useEffect(() => {
     if (shouldRestoreState) {
       const savedQuery = sessionStorage.getItem('browseSearchQuery')
       const savedTradition = sessionStorage.getItem('browseTradition')
-      const savedLevel = sessionStorage.getItem('browseLevel')
-      const savedSphere = sessionStorage.getItem('browseSphere')
-      const savedSort = sessionStorage.getItem('browseSort')
+      const savedSpheres = sessionStorage.getItem('browseSpheres')
 
       if (savedQuery) setSearchQuery(savedQuery)
       if (savedTradition) setSelectedTradition(savedTradition)
-      if (savedLevel) setSelectedLevel(savedLevel)
-      if (savedSphere) setSelectedSphere(savedSphere)
-      if (savedSort) setSortBy(savedSort)
+      if (savedSpheres) setSelectedSpheres(JSON.parse(savedSpheres))
 
       onStateRestored?.()
     }
@@ -134,31 +125,162 @@ export function BrowsePanel({ rotes, onSelectRote, shouldRestoreState, onStateRe
   useEffect(() => {
     sessionStorage.setItem('browseSearchQuery', searchQuery)
     sessionStorage.setItem('browseTradition', selectedTradition)
-    sessionStorage.setItem('browseLevel', selectedLevel)
-    sessionStorage.setItem('browseSphere', selectedSphere)
-    sessionStorage.setItem('browseSort', sortBy)
-  }, [searchQuery, selectedTradition, selectedLevel, selectedSphere, sortBy])
+    sessionStorage.setItem('browseSpheres', JSON.stringify(selectedSpheres))
+  }, [searchQuery, selectedTradition, selectedSpheres])
 
   // Calculate if filters are active
-  const hasActiveFilters = searchQuery || selectedTradition !== 'All' || selectedLevel !== 'All' || selectedSphere !== 'All'
+  const hasActiveFilters = searchQuery || selectedTradition !== 'All Factions' || Object.keys(selectedSpheres).length > 0
 
   // Clear all filters
   const clearFilters = () => {
     setSearchQuery('')
-    setSelectedTradition('All')
-    setSelectedLevel('All')
-    setSelectedSphere('All')
-    setSortBy('random')
+    setSelectedTradition('All Factions')
+    setSelectedSpheres({})
     setRandomSeed(Math.random()) // New random order
+  }
+
+  // Render sphere dots
+  const renderSphereDots = (sphere: string) => {
+    const selectedLevel = selectedSpheres[sphere] || 0
+    
+    return (
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-sm font-medium uppercase tracking-wider">{sphere}</span>
+        <div className="flex gap-1">
+          {[1, 2, 3, 4, 5].map(level => (
+            <button
+              key={level}
+              onClick={() => toggleSphereLevel(sphere, level)}
+              className={`w-6 h-6 rounded-full border-2 transition-all ${
+                level <= selectedLevel
+                  ? 'bg-primary border-primary'
+                  : 'border-primary/40 hover:border-primary/60'
+              }`}
+              aria-label={`${sphere} level ${level}`}
+            />
+          ))}
+        </div>
+      </div>
+    )
   }
 
   return (
     <div className="p-4 md:p-6">
-      {/* Header */}
-      <div className="mb-4 md:mb-6">
-        <h2 className="font-serif text-xl md:text-2xl font-bold text-foreground mb-2">
-          Browse Rotes
-        </h2>
+      {/* Search Section */}
+      <div className="mb-6 border-2 border-primary/30 rounded-lg p-4 md:p-6 bg-card/50">
+        <div className="flex items-center gap-3 mb-4">
+          <Search className="w-5 h-5 text-primary" />
+          <h2 className="font-serif text-lg md:text-xl font-bold text-foreground uppercase tracking-wider">
+            Search The Wheel
+          </h2>
+          <div className="ml-auto text-primary">◆</div>
+        </div>
+        <Input
+          type="text"
+          placeholder="Search by name, tradition, or description..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="bg-background/50 border-2 border-primary/30 focus:border-primary text-sm md:text-base italic"
+        />
+      </div>
+
+      {/* Filter Section */}
+      <div className="mb-6 border-2 border-primary/30 rounded-lg p-4 md:p-6 bg-card/50">
+        <div className="flex items-center gap-3 mb-6">
+          <span className="text-primary">✦</span>
+          <h2 className="font-serif text-lg md:text-xl font-bold text-foreground uppercase tracking-wider">
+            Filter Rotes
+          </h2>
+          <div className="ml-auto text-primary">◆</div>
+        </div>
+
+        {/* Tradition Filter */}
+        <div className="mb-6">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-primary">✦</span>
+            <h3 className="font-serif font-semibold text-foreground uppercase tracking-wider text-sm md:text-base">
+              Tradition / Convention
+            </h3>
+          </div>
+          <Select value={selectedTradition} onValueChange={setSelectedTradition}>
+            <SelectTrigger className="bg-background/50 border-2 border-primary/30 focus:border-primary h-11 md:h-12">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="max-h-[60vh]">
+              {traditions.map((tradition) => (
+                <SelectItem 
+                  key={tradition} 
+                  value={tradition}
+                  className="text-sm md:text-base min-h-[44px] flex items-center"
+                >
+                  {tradition}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Spheres Filter */}
+        <div className="mb-6">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-primary">✦</span>
+            <h3 className="font-serif font-semibold text-foreground uppercase tracking-wider text-sm md:text-base">
+              Spheres
+            </h3>
+          </div>
+          <p className="text-xs md:text-sm text-muted-foreground italic mb-4">
+            Click dots to set minimum sphere level. Linked spheres (e.g. Data/Correspondence) match automatically.
+          </p>
+
+          {/* Traditional Spheres */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
+            {SPHERE_NAMES.map(sphere => (
+              <div
+                key={sphere}
+                className="bg-background/50 border-2 border-primary/30 rounded-lg p-3"
+              >
+                {renderSphereDots(sphere)}
+              </div>
+            ))}
+          </div>
+
+          {/* Technocracy Spheres */}
+          <div className="border-t-2 border-primary/20 pt-4">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-muted-foreground">⚙</span>
+              <h4 className="font-serif font-semibold text-muted-foreground uppercase tracking-wider text-xs md:text-sm">
+                Technocracy Spheres
+              </h4>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {TECHNOCRACY_SPHERES.map(sphere => (
+                <div
+                  key={sphere}
+                  className="bg-background/50 border-2 border-primary/30 rounded-lg p-3"
+                >
+                  {renderSphereDots(sphere)}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Reset Filters Button */}
+        <div className="border-t-2 border-primary/20 pt-4">
+          <Button
+            onClick={clearFilters}
+            variant="outline"
+            className="w-full gap-2 min-h-[44px] border-2 border-primary/30 hover:border-primary hover:bg-primary/10"
+          >
+            <span className="text-primary">◆</span>
+            Reset Filters
+            <span className="text-primary">◆</span>
+          </Button>
+        </div>
+      </div>
+
+      {/* Results Info */}
+      <div className="mb-4 text-center">
         <p className="text-sm md:text-base text-muted-foreground">
           {hasActiveFilters 
             ? `Showing ${filteredRotes.length} of ${rotes.length} rotes`
@@ -167,106 +289,20 @@ export function BrowsePanel({ rotes, onSelectRote, shouldRestoreState, onStateRe
         </p>
       </div>
 
-      {/* Search Bar */}
-      <div className="mb-4 md:mb-6">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-            type="text"
-            placeholder="Search rotes..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 text-sm md:text-base"
-          />
-        </div>
-      </div>
-
-      {/* Filters */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4 mb-4 md:mb-6">
-        {/* Tradition Filter */}
-        <Select value={selectedTradition} onValueChange={setSelectedTradition}>
-          <SelectTrigger className="text-sm md:text-base">
-            <SelectValue placeholder="All Traditions" />
-          </SelectTrigger>
-          <SelectContent>
-            {traditions.map((tradition) => (
-              <SelectItem key={tradition} value={tradition} className="text-sm md:text-base">
-                {tradition}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        {/* Level Filter */}
-        <Select value={selectedLevel} onValueChange={setSelectedLevel}>
-          <SelectTrigger className="text-sm md:text-base">
-            <SelectValue placeholder="All Levels" />
-          </SelectTrigger>
-          <SelectContent>
-            {levels.map((level) => (
-              <SelectItem key={level} value={level} className="text-sm md:text-base">
-                {level}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        {/* Sphere Filter */}
-        <Select value={selectedSphere} onValueChange={setSelectedSphere}>
-          <SelectTrigger className="text-sm md:text-base">
-            <SelectValue placeholder="All Spheres" />
-          </SelectTrigger>
-          <SelectContent>
-            {spheres.map((sphere) => (
-              <SelectItem key={sphere} value={sphere} className="text-sm md:text-base">
-                {sphere}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        {/* Sort Filter */}
-        <Select value={sortBy} onValueChange={setSortBy}>
-          <SelectTrigger className="text-sm md:text-base">
-            <SelectValue placeholder="Sort by..." />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="random" className="text-sm md:text-base">Random Order</SelectItem>
-            <SelectItem value="name" className="text-sm md:text-base">Name (A-Z)</SelectItem>
-            <SelectItem value="tradition" className="text-sm md:text-base">Tradition</SelectItem>
-            <SelectItem value="level" className="text-sm md:text-base">Level</SelectItem>
-          </SelectContent>
-        </Select>
-
-        {/* Clear Filters Button */}
-        {hasActiveFilters && (
-          <Button
-            onClick={clearFilters}
-            variant="outline"
-            size="sm"
-            className="gap-2 text-sm md:text-base"
-          >
-            <X className="w-4 h-4" />
-            <span className="hidden sm:inline">Clear Filters</span>
-            <span className="sm:hidden">Clear</span>
-          </Button>
-        )}
-      </div>
-
       {/* Results */}
       {filteredRotes.length === 0 ? (
-        <div className="text-center py-12">
+        <div className="text-center py-12 border-2 border-primary/30 rounded-lg bg-card/50">
           <p className="text-muted-foreground mb-2">No rotes found</p>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-muted-foreground mb-4">
             Try adjusting your search or filters
           </p>
           {hasActiveFilters && (
             <Button
               onClick={clearFilters}
               variant="outline"
-              size="sm"
-              className="mt-4"
+              className="gap-2"
             >
+              <X className="w-4 h-4" />
               Clear all filters
             </Button>
           )}
