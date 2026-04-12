@@ -35,6 +35,7 @@ export const metadata: Metadata = {
   description:
     'Your comprehensive digital grimoire for Mage: The Ascension. Navigate the Spheres, browse rotes from the Nine Traditions, Technocracy, and beyond. Where Reality Bends.',
   keywords: ['Mage the Ascension', 'Paradox Wheel', 'World of Darkness', 'rotes', 'traditions', 'spheres', 'Technocracy', 'character creation'],
+}
 
 export default function RootLayout({
   children,
