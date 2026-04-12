@@ -53,21 +53,11 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <AuthProvider>{children}</AuthProvider>
-        </ThemeProvider>
-      </body>
-    </html>
-  )
-export default function RootLayout({ children }) {
-  return (
-    <html lang="en" suppressHydrationWarning>
-      <body>
-        <ThemeProvider>
-          <ReaderModeProvider>  {/* ← Add this */}
+          <ReaderModeProvider>
             <AuthProvider>
               {children}
             </AuthProvider>
-          </ReaderModeProvider>  {/* ← And this */}
+          </ReaderModeProvider>
         </ThemeProvider>
       </body>
     </html>
