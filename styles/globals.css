@@ -192,3 +192,207 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+/* Reader Mode Styles - Add to globals.css */
+
+/* Reader Mode Variables - Simplified Colors */
+.reader-mode {
+  /* Light mode reader colors */
+  --background: 0 0% 98%;
+  --foreground: 0 0% 10%;
+  --card: 0 0% 100%;
+  --card-foreground: 0 0% 10%;
+  --primary: 0 0% 20%;
+  --primary-foreground: 0 0% 98%;
+  --secondary: 0 0% 95%;
+  --secondary-foreground: 0 0% 20%;
+  --muted: 0 0% 95%;
+  --muted-foreground: 0 0% 40%;
+  --accent: 0 0% 90%;
+  --accent-foreground: 0 0% 20%;
+  --border: 0 0% 90%;
+  --ring: 0 0% 60%;
+}
+
+/* Dark mode reader colors */
+.dark.reader-mode {
+  --background: 0 0% 12%;
+  --foreground: 0 0% 95%;
+  --card: 0 0% 15%;
+  --card-foreground: 0 0% 95%;
+  --primary: 0 0% 85%;
+  --primary-foreground: 0 0% 15%;
+  --secondary: 0 0% 18%;
+  --secondary-foreground: 0 0% 90%;
+  --muted: 0 0% 18%;
+  --muted-foreground: 0 0% 60%;
+  --accent: 0 0% 22%;
+  --accent-foreground: 0 0% 90%;
+  --border: 0 0% 25%;
+  --ring: 0 0% 50%;
+}
+
+/* Reader Mode Adjustments */
+.reader-mode {
+  /* Simplified typography */
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+}
+
+/* Hide decorative elements in reader mode */
+.reader-mode .reader-hide {
+  display: none !important;
+}
+
+/* Simplify borders */
+.reader-mode .border-primary,
+.reader-mode .border-accent,
+.reader-mode .border-ring {
+  border-color: hsl(var(--border)) !important;
+}
+
+.reader-mode .border-double {
+  border-style: solid !important;
+}
+
+.reader-mode .border-\[3px\],
+.reader-mode .border-\[4px\] {
+  border-width: 1px !important;
+}
+
+/* Simplify shadows */
+.reader-mode [class*="shadow-"] {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Remove background patterns */
+.reader-mode [style*="backgroundImage"] {
+  background-image: none !important;
+}
+
+/* Simplify gradients */
+.reader-mode [style*="linear-gradient"] {
+  background: transparent !important;
+}
+
+/* Hide decorative symbols */
+.reader-mode [aria-hidden="true"] {
+  opacity: 0.3;
+}
+
+/* Remove animations */
+.reader-mode .animate-spin,
+.reader-mode .animate-spin-slow {
+  animation: none !important;
+}
+
+/* Simplify header in reader mode */
+.reader-mode header {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+
+.reader-mode h1,
+.reader-mode h2,
+.reader-mode h3 {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+/* Better line height for reading */
+.reader-mode p,
+.reader-mode .prose {
+  line-height: 1.75;
+}
+
+/* Increase contrast for text */
+.reader-mode .text-muted-foreground {
+  color: hsl(var(--foreground)) !important;
+  opacity: 0.8;
+}
+
+/* Simplify buttons */
+.reader-mode button,
+.reader-mode .button {
+  border-radius: 0.25rem;
+  border-width: 1px;
+}
+
+/* Remove text shadows and drop shadows */
+.reader-mode [class*="drop-shadow"],
+.reader-mode [class*="text-shadow"] {
+  filter: none !important;
+  text-shadow: none !important;
+}
+
+/* Simplify card backgrounds */
+.reader-mode .bg-card {
+  background-color: hsl(var(--card));
+}
+
+/* Remove backdrop blur */
+.reader-mode .backdrop-blur-md,
+.reader-mode .backdrop-blur {
+  backdrop-filter: none !important;
+}
+
+/* Cleaner focus states */
+.reader-mode *:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+/* Simplify sphere dots in reader mode */
+.reader-mode .sphere-dot {
+  border-width: 1px;
+}
+
+/* Hide corner decorations */
+.reader-mode .absolute.\-top-1,
+.reader-mode .absolute.\-top-2 {
+  display: none;
+}
+
+/* Optimize for reading - max width and center */
+.reader-mode main {
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Increase font size slightly for readability */
+.reader-mode {
+  font-size: 16px;
+}
+
+.reader-mode h1 {
+  font-size: 2rem;
+}
+
+.reader-mode h2 {
+  font-size: 1.5rem;
+}
+
+.reader-mode h3 {
+  font-size: 1.25rem;
+}
+
+/* Better spacing for content */
+.reader-mode .prose p {
+  margin-top: 1.25em;
+  margin-bottom: 1.25em;
+}
+
+/* Cleaner lists */
+.reader-mode ul,
+.reader-mode ol {
+  margin-left: 1.5rem;
+}
+
+/* Remove ornamental fonts */
+.reader-mode .font-serif {
+  font-family: Georgia, 'Times New Roman', serif;
+}
+
+.reader-mode .font-mono {
+  font-family: 'Courier New', Courier, monospace;
+}

@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { Cinzel, Crimson_Text, IM_Fell_DW_Pica } from 'next/font/google'
 import { AuthProvider } from '@/components/auth/auth-provider'
 import { ThemeProvider } from '@/components/theme-provider'
+import { ReaderModeProvider } from '@/contexts/reader-mode-context'
 
 // IMPORTANT: Import styles/globals.css FIRST for color variables
 import '../styles/globals.css'
@@ -51,7 +52,11 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <AuthProvider>{children}</AuthProvider>
+          <ReaderModeProvider>
+            <AuthProvider>
+              {children}
+            </AuthProvider>
+          </ReaderModeProvider>
         </ThemeProvider>
       </body>
     </html>

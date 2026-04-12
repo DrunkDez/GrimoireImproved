@@ -45,115 +45,128 @@ export function HomePanel({ totalRotes, traditions, onNavigate }: HomePanelProps
   ]
 
   return (
-    <div className="animate-fade-in-up flex flex-col gap-8 p-6 md:p-10">
+    <div className="animate-fade-in-up flex flex-col gap-4 sm:gap-6 md:gap-8 p-3 sm:p-4 md:p-6 lg:p-10">
       {/* Hero area */}
       <div
-        className="relative bg-card border-4 border-double border-primary rounded-lg px-6 py-16 text-center
-          shadow-[inset_0_0_80px_rgba(139,71,38,0.1),0_10px_30px_rgba(0,0,0,0.2)]"
+        className="relative bg-card border-2 sm:border-3 md:border-4 border-double border-primary rounded-lg px-3 sm:px-4 md:px-6 py-8 sm:py-12 md:py-16 text-center
+          shadow-[inset_0_0_40px_rgba(139,71,38,0.1),0_8px_20px_rgba(0,0,0,0.2)]
+          md:shadow-[inset_0_0_80px_rgba(139,71,38,0.1),0_10px_30px_rgba(0,0,0,0.2)]"
       >
-        {/* Background star */}
-        <div className="absolute top-8 left-1/2 -translate-x-1/2 text-6xl text-primary opacity-15 font-serif" aria-hidden="true">
+        {/* Background star - smaller on mobile */}
+        <div className="absolute top-4 sm:top-6 md:top-8 left-1/2 -translate-x-1/2 text-3xl sm:text-4xl md:text-6xl text-primary opacity-15 font-serif" aria-hidden="true">
           ✦
         </div>
 
-        {/* Random Sphere Symbols - 2 random spheres with random gold/white versions */}
+        {/* Random Sphere Symbols */}
         <RandomSphereSymbols />
 
-        <h2 className="font-serif text-2xl md:text-3xl font-bold text-primary uppercase tracking-widest mb-6">
+        <h2 className="font-serif text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-primary uppercase tracking-widest mb-4 sm:mb-5 md:mb-6 px-2">
           {welcomeTitle}
         </h2>
 
-        <div className="max-w-2xl mx-auto">
-          <MarkdownRenderer content={welcomeText} className="text-base md:text-lg" />
+        <div className="max-w-2xl mx-auto px-2">
+          <MarkdownRenderer content={welcomeText} className="text-sm sm:text-base md:text-lg" />
         </div>
       </div>
 
       {/* How to Use section */}
-      <div className="bg-card border-[3px] border-primary border-l-[6px] border-l-accent rounded-md p-6 md:p-8
-        shadow-[inset_0_0_40px_rgba(139,71,38,0.05),5px_5px_15px_rgba(0,0,0,0.2)]">
-        <h3 className="font-serif text-xl font-bold text-primary uppercase tracking-[0.15em] mb-4 flex items-center gap-3">
-          <span className="text-ring" aria-hidden="true">✦</span>
-          How to Use The Wheel
-          <span className="ml-auto text-accent" aria-hidden="true">◈</span>
+      <div className="bg-card border-2 sm:border-[3px] border-primary border-l-[4px] sm:border-l-[6px] border-l-accent rounded-md p-4 sm:p-5 md:p-6 lg:p-8
+        shadow-[inset_0_0_20px_rgba(139,71,38,0.05),3px_3px_10px_rgba(0,0,0,0.2)]
+        md:shadow-[inset_0_0_40px_rgba(139,71,38,0.05),5px_5px_15px_rgba(0,0,0,0.2)]">
+        <h3 className="font-serif text-base sm:text-lg md:text-xl font-bold text-primary uppercase tracking-[0.1em] sm:tracking-[0.15em] mb-3 sm:mb-4 flex items-center gap-2 sm:gap-3">
+          <span className="text-ring text-sm sm:text-base" aria-hidden="true">✦</span>
+          <span className="flex-1 min-w-0">How to Use The Wheel</span>
+          <span className="ml-auto text-accent text-sm sm:text-base" aria-hidden="true">◈</span>
         </h3>
         
         {isLoading ? (
-          <div className="flex items-center gap-3 justify-center py-4">
-            <span className="text-xl text-accent animate-spin">⚙</span>
-            <p className="text-sm text-muted-foreground">Loading...</p>
+          <div className="flex items-center gap-2 sm:gap-3 justify-center py-3 sm:py-4">
+            <span className="text-lg sm:text-xl text-accent animate-spin">⚙</span>
+            <p className="text-xs sm:text-sm text-muted-foreground">Loading...</p>
           </div>
         ) : (
-          <MarkdownRenderer content={howToUse} />
+          <div className="prose prose-sm sm:prose-base dark:prose-invert max-w-none">
+            <MarkdownRenderer content={howToUse} />
+          </div>
         )}
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      {/* Stats - responsive grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
         {stats.map((stat) => (
           <div
             key={stat.label}
-            className="group relative bg-card border-[3px] border-double border-primary rounded-md p-6 text-center
-              shadow-[inset_0_0_20px_rgba(139,71,38,0.05),3px_3px_10px_rgba(0,0,0,0.15)]
+            className="group relative bg-card border-2 sm:border-[3px] border-double border-primary rounded-md p-4 sm:p-5 md:p-6 text-center
+              shadow-[inset_0_0_15px_rgba(139,71,38,0.05),2px_2px_8px_rgba(0,0,0,0.15)]
+              md:shadow-[inset_0_0_20px_rgba(139,71,38,0.05),3px_3px_10px_rgba(0,0,0,0.15)]
               transition-all duration-300
               hover:border-accent hover:-translate-y-1
               hover:shadow-[inset_0_0_20px_rgba(201,169,97,0.1),3px_3px_15px_rgba(0,0,0,0.2)]"
           >
-            <div className="absolute top-2 left-1/2 -translate-x-1/2 text-primary opacity-30 text-lg" aria-hidden="true">
+            <div className="absolute top-1 sm:top-2 left-1/2 -translate-x-1/2 text-primary opacity-30 text-sm sm:text-base md:text-lg" aria-hidden="true">
               ◈
             </div>
-            <div className="text-5xl font-serif text-primary leading-none mb-2 drop-shadow-[2px_2px_4px_rgba(0,0,0,0.2)]">
+            <div className="text-3xl sm:text-4xl md:text-5xl font-serif text-primary leading-none mb-1 sm:mb-2 drop-shadow-[2px_2px_4px_rgba(0,0,0,0.2)]">
               {stat.value}
             </div>
-            <div className="font-serif text-xs text-primary font-semibold uppercase tracking-[0.12em]">
+            <div className="font-serif text-[10px] sm:text-xs text-primary font-semibold uppercase tracking-[0.1em] sm:tracking-[0.12em]">
               {stat.label}
             </div>
           </div>
         ))}
       </div>
 
-      {/* Quick actions */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      {/* Quick actions - responsive */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
         <button
           type="button"
           onClick={() => onNavigate("browse")}
-          className="font-serif px-6 py-4 bg-primary text-primary-foreground border-2 border-accent rounded-sm
-            font-semibold text-sm uppercase tracking-[0.15em] cursor-pointer
+          className="font-serif px-4 sm:px-5 md:px-6 py-3 sm:py-4 bg-primary text-primary-foreground border-2 border-accent rounded-sm
+            font-semibold text-xs sm:text-sm uppercase tracking-[0.1em] sm:tracking-[0.15em] cursor-pointer
             transition-all duration-300
-            shadow-[0_4px_8px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.1)]
+            shadow-[0_3px_6px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.1)]
+            md:shadow-[0_4px_8px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.1)]
             hover:bg-muted-foreground hover:-translate-y-0.5
             hover:shadow-[0_6px_12px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.2),0_0_20px_rgba(201,169,97,0.3)]
-            active:translate-y-0 flex items-center justify-center gap-3"
+            active:translate-y-0 flex items-center justify-center gap-2 sm:gap-3 min-h-[44px]"
         >
-          <span aria-hidden="true">⟐</span>
-          Browse the Library
-          <span aria-hidden="true">⟐</span>
+          <span aria-hidden="true" className="text-sm sm:text-base">⟐</span>
+          <span className="hidden xs:inline">Browse the Library</span>
+          <span className="xs:hidden">Browse</span>
+          <span aria-hidden="true" className="text-sm sm:text-base">⟐</span>
         </button>
+        
         <button
           type="button"
           onClick={() => onNavigate("add")}
-          className="font-serif px-6 py-4 bg-secondary text-secondary-foreground border-2 border-primary rounded-sm
-            font-semibold text-sm uppercase tracking-[0.15em] cursor-pointer
+          className="font-serif px-4 sm:px-5 md:px-6 py-3 sm:py-4 bg-secondary text-secondary-foreground border-2 border-primary rounded-sm
+            font-semibold text-xs sm:text-sm uppercase tracking-[0.1em] sm:tracking-[0.15em] cursor-pointer
             transition-all duration-300
-            shadow-[0_4px_8px_rgba(0,0,0,0.15)]
+            shadow-[0_3px_6px_rgba(0,0,0,0.15)]
+            md:shadow-[0_4px_8px_rgba(0,0,0,0.15)]
             hover:bg-background hover:border-ring hover:-translate-y-0.5
-            active:translate-y-0 flex items-center justify-center gap-3"
+            active:translate-y-0 flex items-center justify-center gap-2 sm:gap-3 min-h-[44px]"
         >
-          <span aria-hidden="true">⟐</span>
-          Inscribe a Rote
-          <span aria-hidden="true">⟐</span>
+          <span aria-hidden="true" className="text-sm sm:text-base">⟐</span>
+          <span className="hidden xs:inline">Inscribe a Rote</span>
+          <span className="xs:hidden">Inscribe</span>
+          <span aria-hidden="true" className="text-sm sm:text-base">⟐</span>
         </button>
+        
         <Link
           href="/character-creation"
-          className="font-serif px-6 py-4 bg-secondary text-secondary-foreground border-2 border-primary rounded-sm
-            font-semibold text-sm uppercase tracking-[0.15em] cursor-pointer
+          className="font-serif px-4 sm:px-5 md:px-6 py-3 sm:py-4 bg-secondary text-secondary-foreground border-2 border-primary rounded-sm
+            font-semibold text-xs sm:text-sm uppercase tracking-[0.1em] sm:tracking-[0.15em] cursor-pointer
             transition-all duration-300
-            shadow-[0_4px_8px_rgba(0,0,0,0.15)]
+            shadow-[0_3px_6px_rgba(0,0,0,0.15)]
+            md:shadow-[0_4px_8px_rgba(0,0,0,0.15)]
             hover:bg-background hover:border-ring hover:-translate-y-0.5
-            active:translate-y-0 flex items-center justify-center gap-3"
+            active:translate-y-0 flex items-center justify-center gap-2 sm:gap-3 min-h-[44px]"
         >
-          <span aria-hidden="true">⟐</span>
-          Character Creation
-          <span aria-hidden="true">⟐</span>
+          <span aria-hidden="true" className="text-sm sm:text-base">⟐</span>
+          <span className="hidden sm:inline">Character Creation</span>
+          <span className="sm:hidden">Character</span>
+          <span aria-hidden="true" className="text-sm sm:text-base">⟐</span>
         </Link>
       </div>
     </div>
