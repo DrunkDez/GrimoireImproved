@@ -44,29 +44,55 @@ export default function WonderPageClient({ id }: WonderPageClientProps) {
   const [selectedCharacterId, setSelectedCharacterId] = useState<string>("")
   const [isAddingToCharacter, setIsAddingToCharacter] = useState(false)
 
-  // Fetch the wonder
+  // Fetch the wonder with AbortController and timeout
   useEffect(() => {
+    if (!id) return
+
+    const abortController = new AbortController()
+    const timeoutId = setTimeout(() => abortController.abort(), 10000)
+
     const fetchWonder = async () => {
       try {
-        const response = await fetch(`/api/wonders/${id}`)
+        const response = await fetch(`/api/wonders/${id}`, {
+          signal: abortController.signal,
+        })
+        clearTimeout(timeoutId)
+
         if (response.ok) {
           const data = await response.json()
           setWonder(data)
-        } else {
+        } else if (response.status === 404) {
           router.push('/wonders')
+        } else {
+          throw new Error(`API error: ${response.status}`)
         }
-      } catch (error) {
-        console.error('Error fetching wonder:', error)
+      } catch (error: any) {
+        if (error.name === 'AbortError') {
+          toast({
+            title: "Request timeout",
+            description: "The server took too long to respond. Redirecting...",
+            variant: "destructive",
+          })
+        } else {
+          toast({
+            title: "Loading failed",
+            description: "Could not load wonder. Redirecting...",
+            variant: "destructive",
+          })
+        }
         router.push('/wonders')
       } finally {
         setIsLoading(false)
       }
     }
 
-    if (id) {
-      fetchWonder()
+    fetchWonder()
+
+    return () => {
+      clearTimeout(timeoutId)
+      abortController.abort()
     }
-  }, [id, router])
+  }, [id, router, toast])
 
   // Fetch user's characters when logged in
   useEffect(() => {
@@ -83,7 +109,7 @@ export default function WonderPageClient({ id }: WonderPageClientProps) {
         setCharacters(data)
       }
     } catch (error) {
-      console.error('Error fetching characters:', error)
+      // Silent fail – no console log
     }
   }
 

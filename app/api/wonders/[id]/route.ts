@@ -6,11 +6,12 @@ import { authOptions } from '@/lib/auth'
 // GET /api/wonders/[id] - Get single wonder
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params
   try {
     const wonder = await prisma.wonder.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         user: {
           select: {
@@ -42,8 +43,9 @@ export async function GET(
 // PUT /api/wonders/[id] - Update wonder
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params
   try {
     const session = await getServerSession(authOptions)
     
@@ -56,7 +58,7 @@ export async function PUT(
 
     // Check ownership or admin
     const existingWonder = await prisma.wonder.findUnique({
-      where: { id: params.id }
+      where: { id }
     })
 
     if (!existingWonder) {
@@ -133,7 +135,7 @@ export async function PUT(
     }
 
     const wonder = await prisma.wonder.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         ...(name && { name }),
         ...(category && { category }),
@@ -168,8 +170,9 @@ export async function PUT(
 // DELETE /api/wonders/[id] - Delete wonder
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params
   try {
     const session = await getServerSession(authOptions)
     
@@ -182,7 +185,7 @@ export async function DELETE(
 
     // Check ownership or admin
     const existingWonder = await prisma.wonder.findUnique({
-      where: { id: params.id }
+      where: { id }
     })
 
     if (!existingWonder) {
@@ -207,7 +210,7 @@ export async function DELETE(
     }
 
     await prisma.wonder.delete({
-      where: { id: params.id }
+      where: { id }
     })
 
     return NextResponse.json({ message: 'Wonder deleted successfully' })

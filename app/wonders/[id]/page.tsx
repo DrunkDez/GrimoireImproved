@@ -2,7 +2,7 @@ import { Metadata } from 'next'
 import WonderPageClient from './client'
 
 interface PageProps {
-  params: { id: string }
+  params: Promise<{ id: string }>  // params is a Promise
 }
 
 // Helper to format spheres for display
@@ -16,6 +16,7 @@ function formatSpheresForMeta(spheres: any): string {
 
 // Generate metadata for SEO and social sharing
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { id } = await params  // Await params here too
   try {
     // Use different URLs for server-side fetching vs. public URLs
     const publicUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://the-paradox-wheel.com'
@@ -25,7 +26,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       ? `https://${process.env.VERCEL_URL}`
       : process.env.NEXTAUTH_URL || 'http://localhost:3000'
     
-    const response = await fetch(`${apiBaseUrl}/api/wonders/${params.id}`, {
+    const response = await fetch(`${apiBaseUrl}/api/wonders/${id}`, {
       cache: 'no-store',
     })
 
@@ -52,7 +53,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     const details = [wonder.category, areteText, bgCostText, spheresText].filter(Boolean).join(' • ')
     const ogDescription = `${details}\n\n${description}`
 
-    const url = `${publicUrl}/wonders/${params.id}`
+    const url = `${publicUrl}/wonders/${id}`
 
     return {
       title: `${wonder.name} | The Paradox Wheel`,
@@ -120,5 +121,6 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 // Server component that passes data to client component
 export default async function WonderPage({ params }: PageProps) {
-  return <WonderPageClient id={params.id} />
+  const { id } = await params  // Await params to get the actual id
+  return <WonderPageClient id={id} />
 }
