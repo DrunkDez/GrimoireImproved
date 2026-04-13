@@ -59,12 +59,16 @@ export function RoteCard({ rote, onClick, compact = false, matchingSpheres }: Ro
   const allCombinations = getAllCombinations(rote.spheres)
   const hasMultipleCombinations = allCombinations.length > 1
   
-  // If we have matching spheres from a search, show that combo first
-  const primaryCombo = matchingSpheres || formatSpheres(rote.spheres)
+  // Determine which combination to show as "primary" when collapsed
+  // Priority: matchingSpheres (if provided) → first combination in the list
+  const primaryCombo = matchingSpheres || (allCombinations.length > 0 ? allCombinations[0] : {})
   
-  // Filter to show only matching combo or all combos based on toggle
-  const displayCombinations = hasMultipleCombinations && matchingSpheres && !showAllCombos
-    ? [matchingSpheres]
+  // Decide which combinations to display:
+  // - If no multiple combos → just the single combo
+  // - If multiple combos and we want to show all → allCombinations
+  // - If multiple combos and we want to show only primary → [primaryCombo]
+  const displayCombinations = hasMultipleCombinations && !showAllCombos
+    ? [primaryCombo]
     : allCombinations
 
   // Compact view - just name and spheres
@@ -161,9 +165,9 @@ export function RoteCard({ rote, onClick, compact = false, matchingSpheres }: Ro
       {/* Sphere combinations */}
       {hasMultipleCombinations ? (
         <div className="space-y-2 mb-4">
-          {/* Show matching combo first (or all if no match/toggle is on) */}
           {displayCombinations.map((combo, index) => {
-            const isFirstCombo = index === 0 && matchingSpheres
+            // Determine if this combo is the "primary" (i.e., the one that matches the search or the first one)
+            const isPrimary = (matchingSpheres && combo === matchingSpheres) || (!matchingSpheres && index === 0)
             return (
               <div key={index} className={index === 0 ? "" : "pl-3"}>
                 {index > 0 && (
@@ -176,8 +180,8 @@ export function RoteCard({ rote, onClick, compact = false, matchingSpheres }: Ro
                       className={`flex items-center gap-1.5 px-2 py-1 border rounded-sm text-xs font-semibold uppercase tracking-wide font-serif
                         ${isTechnocracySphere(sphere)
                           ? "bg-foreground/5 border-foreground/40 text-foreground"
-                          : isFirstCombo
-                          ? "bg-accent/10 border-accent text-accent"  // Highlight matching combo
+                          : isPrimary
+                          ? "bg-accent/10 border-accent text-accent"  // Highlight primary/matching combo
                           : "bg-primary/10 border-primary text-primary"
                         }`}
                     >
