@@ -240,6 +240,14 @@ export function BrowsePanel({ rotes, onSelectRote, shouldRestoreState, onStateRe
   // Count active sphere filters (for showing mix&match toggle)
   const activeSphereCount = Object.values(selectedSpheres).filter(v => v > 0).length
 
+  // --- NEW: Exact filter combination for RoteCard matching (only in standard mode) ---
+  const exactFilterCombination = useMemo(() => {
+    if (mixAndMatch) return undefined
+    const active = Object.entries(selectedSpheres).filter(([_, lvl]) => lvl > 0)
+    if (active.length === 0) return undefined
+    return Object.fromEntries(active)
+  }, [selectedSpheres, mixAndMatch])
+
   // Generate dynamic example text for the Mix & Match info box
   const getExampleText = () => {
     const entries = Object.entries(selectedSpheres).filter(([_, level]) => level > 0)
@@ -503,6 +511,7 @@ export function BrowsePanel({ rotes, onSelectRote, shouldRestoreState, onStateRe
                 key={rote.id}
                 rote={rote}
                 onSelect={onSelectRote}
+                matchingSpheres={exactFilterCombination}  // <-- PASS HERE
               />
             ))}
           </div>
