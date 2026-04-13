@@ -2,10 +2,13 @@
 
 import { useState, useMemo, useEffect } from 'react'
 import { Rote } from '@/lib/mage-data'
+import { getLinkedSpheres } from '@/lib/mage-data'
 import { RoteCard } from './rote-card'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Label } from '@/components/ui/label'
 import { Search, X, ChevronDown } from 'lucide-react'
 
 interface BrowsePanelProps {
@@ -34,6 +37,7 @@ export function BrowsePanel({ rotes, onSelectRote, shouldRestoreState, onStateRe
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedTradition, setSelectedTradition] = useState<string>('All Factions')
   const [selectedSpheres, setSelectedSpheres] = useState<{ [key: string]: number }>({})
+  const [mixAndMatch, setMixAndMatch] = useState(false)
   const [randomSeed, setRandomSeed] = useState(Math.random())
   const [displayCount, setDisplayCount] = useState(ITEMS_PER_PAGE)
 
@@ -59,20 +63,85 @@ export function BrowsePanel({ rotes, onSelectRote, shouldRestoreState, onStateRe
     })
   }
 
-  // Check if rote matches sphere filters
+  // Helper: get rote sphere object (handles both array and direct object formats)
+  const getRoteSpheres = (rote: Rote): Record<string, number> => {
+    const spheresData = Array.isArray(rote.spheres) ? rote.spheres[0] : rote.spheres
+    return spheresData && typeof spheresData === 'object' ? spheresData : {}
+  }
+
+  // Check if rote matches sphere filters (standard OR mix&match)
   const matchesSphereFilter = (rote: Rote): boolean => {
-    if (Object.keys(selectedSpheres).length === 0) return true
+    const activeSphereFilters = Object.entries(selectedSpheres).filter(([_, level]) => level > 0)
+    if (activeSphereFilters.length === 0) return true
 
-    const roteSpheres = Array.isArray(rote.spheres) ? rote.spheres[0] : rote.spheres
-    if (!roteSpheres || typeof roteSpheres !== 'object') return false
+    const roteSpheres = getRoteSpheres(rote)
 
-    // Check if rote has ALL selected spheres at the required levels
-    for (const [sphere, requiredLevel] of Object.entries(selectedSpheres)) {
-      const roteLevel = roteSpheres[sphere] || 0
-      if (roteLevel < requiredLevel) return false
+    if (mixAndMatch) {
+      // Mix & Match mode: Rote must have at least ONE selected sphere (at or below chosen level)
+      // AND must NOT contain any sphere outside the selected ones (including linked equivalents)
+
+      // 1. Collect all selected sphere names (including linked ones)
+      const selectedSphereNames = new Set<string>()
+      for (const [sphere] of activeSphereFilters) {
+        const linked = getLinkedSpheres(sphere)
+        linked.forEach(s => selectedSphereNames.add(s.toLowerCase()))
+      }
+
+      // 2. Check if rote has at least one selected sphere at ≤ required level
+      let hasAtLeastOne = false
+      for (const [sphere, maxLevel] of activeSphereFilters) {
+        const linked = getLinkedSpheres(sphere)
+        for (const linkedSphere of linked) {
+          const roteLevel = roteSpheres[linkedSphere] || 0
+          if (roteLevel > 0 && roteLevel <= maxLevel) {
+            hasAtLeastOne = true
+            break
+          }
+        }
+        if (hasAtLeastOne) break
+      }
+      if (!hasAtLeastOne) return false
+
+      // 3. Ensure rote has no spheres outside the selected set
+      for (const [roteSphere, roteLevel] of Object.entries(roteSpheres)) {
+        if (roteLevel > 0 && !selectedSphereNames.has(roteSphere.toLowerCase())) {
+          return false
+        }
+      }
+      return true
+    } else {
+      // STANDARD MODE: EXACT level match for all selected spheres,
+      // AND no other spheres at all.
+      
+      // 1. Collect all selected sphere names (including linked equivalents)
+      const selectedSphereNames = new Set<string>()
+      for (const [sphere] of activeSphereFilters) {
+        const linked = getLinkedSpheres(sphere)
+        linked.forEach(s => selectedSphereNames.add(s.toLowerCase()))
+      }
+
+      // 2. For each selected sphere, rote must have EXACTLY that level (no more, no less)
+      for (const [sphere, exactLevel] of activeSphereFilters) {
+        const linkedSpheres = getLinkedSpheres(sphere)
+        let foundExact = false
+        for (const linked of linkedSpheres) {
+          const roteLevel = roteSpheres[linked] || 0
+          if (roteLevel === exactLevel) {
+            foundExact = true
+            break
+          }
+        }
+        if (!foundExact) return false
+      }
+
+      // 3. Ensure rote has NO spheres outside the selected set
+      for (const [roteSphere, roteLevel] of Object.entries(roteSpheres)) {
+        if (roteLevel > 0 && !selectedSphereNames.has(roteSphere.toLowerCase())) {
+          return false
+        }
+      }
+      return true
     }
-
-    return true
   }
 
   // Filter and randomize rotes
@@ -94,12 +163,12 @@ export function BrowsePanel({ rotes, onSelectRote, shouldRestoreState, onStateRe
       result = result.filter(rote => rote.tradition === selectedTradition)
     }
 
-    // Apply sphere filter
+    // Apply sphere filter (standard or mix&match)
     result = result.filter(matchesSphereFilter)
 
     // Always randomize
     return shuffleArray(result)
-  }, [rotes, searchQuery, selectedTradition, selectedSpheres, randomSeed])
+  }, [rotes, searchQuery, selectedTradition, selectedSpheres, mixAndMatch, randomSeed])
 
   // Get rotes to display (with pagination)
   const displayedRotes = useMemo(() => {
@@ -115,17 +184,17 @@ export function BrowsePanel({ rotes, onSelectRote, shouldRestoreState, onStateRe
     setDisplayCount(prev => prev + ITEMS_PER_PAGE)
   }
 
-  // Reset display count when filters change
+  // Reset display count when filters change (including mix&Match toggle)
   useEffect(() => {
     setDisplayCount(ITEMS_PER_PAGE)
-  }, [searchQuery, selectedTradition, selectedSpheres])
+  }, [searchQuery, selectedTradition, selectedSpheres, mixAndMatch])
 
   // Reset random seed when filters change
   useEffect(() => {
-    if (searchQuery || selectedTradition !== 'All Factions' || Object.keys(selectedSpheres).length > 0) {
+    if (searchQuery || selectedTradition !== 'All Factions' || Object.keys(selectedSpheres).length > 0 || mixAndMatch) {
       setRandomSeed(Math.random())
     }
-  }, [searchQuery, selectedTradition, selectedSpheres])
+  }, [searchQuery, selectedTradition, selectedSpheres, mixAndMatch])
 
   // Restore state if needed
   useEffect(() => {
@@ -134,11 +203,13 @@ export function BrowsePanel({ rotes, onSelectRote, shouldRestoreState, onStateRe
       const savedTradition = sessionStorage.getItem('browseTradition')
       const savedSpheres = sessionStorage.getItem('browseSpheres')
       const savedDisplayCount = sessionStorage.getItem('browseDisplayCount')
+      const savedMixAndMatch = sessionStorage.getItem('browseMixAndMatch')
 
       if (savedQuery) setSearchQuery(savedQuery)
       if (savedTradition) setSelectedTradition(savedTradition)
       if (savedSpheres) setSelectedSpheres(JSON.parse(savedSpheres))
       if (savedDisplayCount) setDisplayCount(parseInt(savedDisplayCount, 10))
+      if (savedMixAndMatch) setMixAndMatch(savedMixAndMatch === 'true')
 
       onStateRestored?.()
     }
@@ -150,7 +221,8 @@ export function BrowsePanel({ rotes, onSelectRote, shouldRestoreState, onStateRe
     sessionStorage.setItem('browseTradition', selectedTradition)
     sessionStorage.setItem('browseSpheres', JSON.stringify(selectedSpheres))
     sessionStorage.setItem('browseDisplayCount', displayCount.toString())
-  }, [searchQuery, selectedTradition, selectedSpheres, displayCount])
+    sessionStorage.setItem('browseMixAndMatch', mixAndMatch.toString())
+  }, [searchQuery, selectedTradition, selectedSpheres, displayCount, mixAndMatch])
 
   // Calculate if filters are active
   const hasActiveFilters = searchQuery || selectedTradition !== 'All Factions' || Object.keys(selectedSpheres).length > 0
@@ -160,8 +232,75 @@ export function BrowsePanel({ rotes, onSelectRote, shouldRestoreState, onStateRe
     setSearchQuery('')
     setSelectedTradition('All Factions')
     setSelectedSpheres({})
+    setMixAndMatch(false)
     setDisplayCount(ITEMS_PER_PAGE)
     setRandomSeed(Math.random()) // New random order
+  }
+
+  // Count active sphere filters (for showing mix&match toggle)
+  const activeSphereCount = Object.values(selectedSpheres).filter(v => v > 0).length
+
+  // --- NEW: Exact filter combination for RoteCard matching (only in standard mode) ---
+  const exactFilterCombination = useMemo(() => {
+    if (mixAndMatch) return undefined
+    const active = Object.entries(selectedSpheres).filter(([_, lvl]) => lvl > 0)
+    if (active.length === 0) return undefined
+    return Object.fromEntries(active)
+  }, [selectedSpheres, mixAndMatch])
+
+  // Generate dynamic example text for the Mix & Match info box
+  const getExampleText = () => {
+    const entries = Object.entries(selectedSpheres).filter(([_, level]) => level > 0)
+    if (entries.length === 0) return null
+
+    const formatSphere = (sphere: string, level: number) => `${sphere} ${level}`
+    const selectedList = entries.map(([s, l]) => formatSphere(s, l)).join(', ')
+
+    // Build combinations list
+    const lines: string[] = []
+    if (entries.length === 1) {
+      const [sphere, maxLevel] = entries[0]
+      lines.push(`• Just ${sphere} 1–${maxLevel} alone`)
+    } else {
+      // All combinations of each sphere with each other at various levels
+      for (let i = 0; i < entries.length; i++) {
+        const [sphereA, levelA] = entries[i]
+        for (let lvlA = 1; lvlA <= levelA; lvlA++) {
+          if (entries.length === 2) {
+            const [sphereB, levelB] = entries[1 - i]
+            for (let lvlB = 1; lvlB <= levelB; lvlB++) {
+              lines.push(`• ${sphereA} ${lvlA} + ${sphereB} ${lvlB}`)
+            }
+          } else {
+            // More than 2 spheres – simpler generic message
+            lines.push(`• ${sphereA} ${lvlA} + any combination of the others (at or below their levels)`)
+            break
+          }
+        }
+      }
+      // Add solo options
+      for (const [sphere, maxLevel] of entries) {
+        lines.push(`• Just ${sphere} 1–${maxLevel} alone`)
+      }
+    }
+
+    // Remove duplicates (simple dedupe)
+    const uniqueLines = [...new Set(lines)]
+
+    return (
+      <div className="mt-3 p-3 bg-accent/10 border border-accent/30 rounded text-xs font-mono text-foreground">
+        <span className="font-semibold">Example:</span> With {selectedList} selected, you'll see rotes with:
+        <ul className="mt-1 ml-4 space-y-0.5">
+          {uniqueLines.slice(0, 8).map((line, idx) => (
+            <li key={idx}>{line}</li>
+          ))}
+          {uniqueLines.length > 8 && <li>• ...and more combinations</li>}
+        </ul>
+        <p className="mt-2 text-muted-foreground italic">
+          Will NOT show rotes with other spheres (like Entropy, Forces, etc.)
+        </p>
+      </div>
+    )
   }
 
   // Render sphere dots
@@ -254,7 +393,7 @@ export function BrowsePanel({ rotes, onSelectRote, shouldRestoreState, onStateRe
             </h3>
           </div>
           <p className="text-xs md:text-sm text-muted-foreground italic mb-3 sm:mb-4">
-            Click dots to set minimum sphere level. Linked spheres (e.g. Data/Correspondence) match automatically.
+            Click dots to set exact sphere level. Linked spheres (e.g. Data/Correspondence) match automatically.
           </p>
 
           {/* Traditional Spheres */}
@@ -289,6 +428,38 @@ export function BrowsePanel({ rotes, onSelectRote, shouldRestoreState, onStateRe
             </div>
           </div>
         </div>
+
+        {/* Mix & Match Toggle (appears when at least one sphere is selected) */}
+        {activeSphereCount >= 1 && (
+          <div className="mb-4 sm:mb-6 border-2 border-accent/50 rounded-lg p-3 sm:p-4 bg-accent/5">
+            <div className="flex items-center space-x-3">
+              <Checkbox
+                id="mix-and-match"
+                checked={mixAndMatch}
+                onCheckedChange={(checked) => {
+                  setMixAndMatch(checked as boolean)
+                  setDisplayCount(ITEMS_PER_PAGE) // Reset pagination
+                }}
+              />
+              <div className="flex-1">
+                <Label 
+                  htmlFor="mix-and-match"
+                  className="font-serif text-base font-semibold text-primary cursor-pointer flex items-center gap-2"
+                >
+                  <span className="text-accent" aria-hidden="true">✦</span>
+                  Show me what I can do
+                </Label>
+                <p className="text-xs text-muted-foreground font-mono mt-1">
+                  {mixAndMatch 
+                    ? "Showing rotes with ONLY the selected spheres (at or below specified levels)" 
+                    : "Showing rotes with EXACTLY the selected spheres (at the specified levels)"}
+                </p>
+              </div>
+            </div>
+            
+            {mixAndMatch && getExampleText()}
+          </div>
+        )}
 
         {/* Reset Filters Button */}
         <div className="border-t-2 border-primary/20 pt-3 sm:pt-4">
@@ -340,6 +511,7 @@ export function BrowsePanel({ rotes, onSelectRote, shouldRestoreState, onStateRe
                 key={rote.id}
                 rote={rote}
                 onSelect={onSelectRote}
+                matchingSpheres={exactFilterCombination}  // <-- PASS HERE
               />
             ))}
           </div>
