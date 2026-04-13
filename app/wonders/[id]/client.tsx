@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import type { Wonder } from "@/lib/wonder-data"
@@ -46,38 +46,27 @@ export default function WonderPageClient({ id }: WonderPageClientProps) {
 
   // Fetch the wonder with AbortController and timeout
   useEffect(() => {
-    if (!id) {
-      console.error("No wonder ID provided")
-      return
-    }
+    if (!id) return
 
     const abortController = new AbortController()
-    const timeoutId = setTimeout(() => {
-      console.warn("Aborting fetch due to timeout (10s)")
-      abortController.abort()
-    }, 10000)
+    const timeoutId = setTimeout(() => abortController.abort(), 10000)
 
     const fetchWonder = async () => {
       try {
-        console.log(`Fetching wonder with ID: ${id}`)
         const response = await fetch(`/api/wonders/${id}`, {
           signal: abortController.signal,
         })
         clearTimeout(timeoutId)
 
-        console.log(`API response status: ${response.status}`)
         if (response.ok) {
           const data = await response.json()
-          console.log("Wonder data received:", data.name)
           setWonder(data)
         } else if (response.status === 404) {
-          console.warn("Wonder not found, redirecting")
           router.push('/wonders')
         } else {
           throw new Error(`API error: ${response.status}`)
         }
       } catch (error: any) {
-        console.error("Fetch error:", error)
         if (error.name === 'AbortError') {
           toast({
             title: "Request timeout",
@@ -120,7 +109,7 @@ export default function WonderPageClient({ id }: WonderPageClientProps) {
         setCharacters(data)
       }
     } catch (error) {
-      console.error('Error fetching characters:', error)
+      // Silent fail – no console log
     }
   }
 
