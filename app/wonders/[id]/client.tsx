@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import type { Wonder } from "@/lib/wonder-data"
@@ -44,19 +44,23 @@ export default function WonderPageClient({ id }: WonderPageClientProps) {
   const [selectedCharacterId, setSelectedCharacterId] = useState<string>("")
   const [isAddingToCharacter, setIsAddingToCharacter] = useState(false)
 
-  // Fetch the wonder with timeout and abort controller
+  // Fetch the wonder with a guaranteed timeout using Promise.race
   useEffect(() => {
     if (!id) return;
 
-    const abortController = new AbortController();
-    const timeoutId = setTimeout(() => abortController.abort(), 10000); // 10 seconds timeout
+    let isMounted = true;
 
-    const fetchWonder = async () => {
+    const fetchWithTimeout = async () => {
+      // Create a timeout promise that rejects after 10 seconds
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error("Request timeout")), 10000);
+      });
+
       try {
-        const response = await fetch(`/api/wonders/${id}`, {
-          signal: abortController.signal,
-        });
-        clearTimeout(timeoutId);
+        const fetchPromise = fetch(`/api/wonders/${id}`);
+        const response = await Promise.race([fetchPromise, timeoutPromise]) as Response;
+        
+        if (!isMounted) return;
 
         if (response.ok) {
           const data = await response.json();
@@ -68,19 +72,26 @@ export default function WonderPageClient({ id }: WonderPageClientProps) {
         }
       } catch (error) {
         console.error('Fetch error:', error);
-        router.push('/wonders'); // Redirect on timeout or any error
+        if (isMounted) {
+          // Show a toast to inform user
+          toast({
+            title: "Loading failed",
+            description: "Could not load wonder. Redirecting...",
+            variant: "destructive",
+          });
+          router.push('/wonders');
+        }
       } finally {
-        setIsLoading(false);
+        if (isMounted) setIsLoading(false);
       }
     };
 
-    fetchWonder();
+    fetchWithTimeout();
 
     return () => {
-      clearTimeout(timeoutId);
-      abortController.abort();
+      isMounted = false;
     };
-  }, [id, router]);
+  }, [id, router, toast]);
 
   // Fetch user's characters when logged in
   useEffect(() => {
