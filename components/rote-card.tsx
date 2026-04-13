@@ -66,10 +66,6 @@ export function RoteCard({ rote, onClick, compact = false, matchingSpheres }: Ro
   const displayCombinations = hasMultipleCombinations && matchingSpheres && !showAllCombos
     ? [matchingSpheres]
     : allCombinations
-  
-  const hiddenCombosCount = hasMultipleCombinations && matchingSpheres && !showAllCombos
-    ? allCombinations.length - 1
-    : 0
 
   // Compact view - just name and spheres
   if (compact) {
@@ -121,7 +117,7 @@ export function RoteCard({ rote, onClick, compact = false, matchingSpheres }: Ro
     )
   }
 
-  // Full card view (existing code)
+  // Full card view
   return (
     <button
       type="button"
@@ -194,12 +190,12 @@ export function RoteCard({ rote, onClick, compact = false, matchingSpheres }: Ro
             )
           })}
           
-          {/* Toggle button for other combos */}
-          {hiddenCombosCount > 0 && (
+          {/* Toggle button - always visible when multiple combos exist */}
+          {hasMultipleCombinations && (
             <button
               type="button"
               onClick={(e) => {
-                e.stopPropagation() // Prevent card click
+                e.stopPropagation()
                 setShowAllCombos(!showAllCombos)
               }}
               className="text-xs text-accent hover:text-accent/80 font-semibold flex items-center gap-1 mt-2 transition-colors"
@@ -207,7 +203,7 @@ export function RoteCard({ rote, onClick, compact = false, matchingSpheres }: Ro
               <span>{showAllCombos ? '▼' : '▶'}</span>
               {showAllCombos 
                 ? 'Hide other combinations' 
-                : `Show ${hiddenCombosCount} other combination${hiddenCombosCount > 1 ? 's' : ''}`
+                : `Show ${allCombinations.length - 1} other combination${allCombinations.length - 1 !== 1 ? 's' : ''}`
               }
             </button>
           )}
