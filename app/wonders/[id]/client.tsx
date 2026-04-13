@@ -44,29 +44,43 @@ export default function WonderPageClient({ id }: WonderPageClientProps) {
   const [selectedCharacterId, setSelectedCharacterId] = useState<string>("")
   const [isAddingToCharacter, setIsAddingToCharacter] = useState(false)
 
-  // Fetch the wonder
+  // Fetch the wonder with timeout and abort controller
   useEffect(() => {
+    if (!id) return;
+
+    const abortController = new AbortController();
+    const timeoutId = setTimeout(() => abortController.abort(), 10000); // 10 seconds timeout
+
     const fetchWonder = async () => {
       try {
-        const response = await fetch(`/api/wonders/${id}`)
+        const response = await fetch(`/api/wonders/${id}`, {
+          signal: abortController.signal,
+        });
+        clearTimeout(timeoutId);
+
         if (response.ok) {
-          const data = await response.json()
-          setWonder(data)
+          const data = await response.json();
+          setWonder(data);
+        } else if (response.status === 404) {
+          router.push('/wonders');
         } else {
-          router.push('/wonders')
+          throw new Error(`API error: ${response.status}`);
         }
       } catch (error) {
-        console.error('Error fetching wonder:', error)
-        router.push('/wonders')
+        console.error('Fetch error:', error);
+        router.push('/wonders'); // Redirect on timeout or any error
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
-    }
+    };
 
-    if (id) {
-      fetchWonder()
-    }
-  }, [id, router])
+    fetchWonder();
+
+    return () => {
+      clearTimeout(timeoutId);
+      abortController.abort();
+    };
+  }, [id, router]);
 
   // Fetch user's characters when logged in
   useEffect(() => {
