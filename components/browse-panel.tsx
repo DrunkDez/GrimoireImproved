@@ -77,17 +77,30 @@ export function BrowsePanel({ rotes, onSelectRote, shouldRestoreState, onStateRe
     const roteSpheres = getRoteSpheres(rote)
 
     if (mixAndMatch) {
-      // Mix & Match mode: Rote must have at least ONE selected sphere (at or below chosen level)
-      // AND must NOT contain any sphere outside the selected ones (including linked equivalents)
+      // Mix & Match mode: 
+      // 1. Rote must have at least ONE selected sphere at or below chosen level.
+      // 2. For ANY selected sphere that appears in the rote, its level must be ≤ chosen level.
+      // 3. Rote must NOT contain any sphere outside the selected set (including linked equivalents).
 
-      // 1. Collect all selected sphere names (including linked ones)
+      // 1. Collect all selected sphere names (including linked equivalents)
       const selectedSphereNames = new Set<string>()
       for (const [sphere] of activeSphereFilters) {
         const linked = getLinkedSpheres(sphere)
         linked.forEach(s => selectedSphereNames.add(s.toLowerCase()))
       }
 
-      // 2. Check if rote has at least one selected sphere at ≤ required level
+      // 2. Check that for every selected sphere that appears in the rote, its level ≤ max
+      for (const [sphere, maxLevel] of activeSphereFilters) {
+        const linked = getLinkedSpheres(sphere)
+        for (const linkedSphere of linked) {
+          const roteLevel = roteSpheres[linkedSphere] || 0
+          if (roteLevel > 0 && roteLevel > maxLevel) {
+            return false // Found a selected sphere at too high a level
+          }
+        }
+      }
+
+      // 3. Check if rote has at least one selected sphere at ≤ required level
       let hasAtLeastOne = false
       for (const [sphere, maxLevel] of activeSphereFilters) {
         const linked = getLinkedSpheres(sphere)
@@ -102,7 +115,7 @@ export function BrowsePanel({ rotes, onSelectRote, shouldRestoreState, onStateRe
       }
       if (!hasAtLeastOne) return false
 
-      // 3. Ensure rote has no spheres outside the selected set
+      // 4. Ensure rote has no spheres outside the selected set
       for (const [roteSphere, roteLevel] of Object.entries(roteSpheres)) {
         if (roteLevel > 0 && !selectedSphereNames.has(roteSphere.toLowerCase())) {
           return false
@@ -240,7 +253,7 @@ export function BrowsePanel({ rotes, onSelectRote, shouldRestoreState, onStateRe
   // Count active sphere filters (for showing mix&match toggle)
   const activeSphereCount = Object.values(selectedSpheres).filter(v => v > 0).length
 
-  // --- NEW: Exact filter combination for RoteCard matching (only in standard mode) ---
+  // Exact filter combination for RoteCard matching (only in standard mode)
   const exactFilterCombination = useMemo(() => {
     if (mixAndMatch) return undefined
     const active = Object.entries(selectedSpheres).filter(([_, lvl]) => lvl > 0)
@@ -438,7 +451,7 @@ export function BrowsePanel({ rotes, onSelectRote, shouldRestoreState, onStateRe
                 checked={mixAndMatch}
                 onCheckedChange={(checked) => {
                   setMixAndMatch(checked as boolean)
-                  setDisplayCount(ITEMS_PER_PAGE) // Reset pagination
+                  setDisplayCount(ITEMS_PER_PAGE)
                 }}
               />
               <div className="flex-1">
@@ -511,7 +524,7 @@ export function BrowsePanel({ rotes, onSelectRote, shouldRestoreState, onStateRe
                 key={rote.id}
                 rote={rote}
                 onSelect={onSelectRote}
-                matchingSpheres={exactFilterCombination}  // <-- PASS HERE
+                matchingSpheres={exactFilterCombination}
               />
             ))}
           </div>
