@@ -1,22 +1,26 @@
+// app/wonders/page.tsx
 "use client"
 
 import { useState, useCallback, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import { useSession } from "next-auth/react"
 import type { Wonder } from "@/lib/wonder-data"
 import { GrimoireHeader } from "@/components/grimoire-header"
 import { GrimoireFooter } from "@/components/grimoire-footer"
 import { BrowseWondersPanel } from "@/components/browse-wonders-panel"
 import { Button } from "@/components/ui/button"
-import { Home } from "lucide-react"
+import { Home, Plus } from "lucide-react"
 import { Toaster } from "@/components/ui/toaster"
 import Link from "next/link"
+import { AddWonderPanel } from "@/components/add-wonder-panel"
 
 export default function WondersPage() {
   const router = useRouter()
+  const { data: session } = useSession()
   const [wonders, setWonders] = useState<Wonder[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [showAddPanel, setShowAddPanel] = useState(false)
 
-  // Fetch wonders from API
   const fetchWonders = useCallback(async () => {
     try {
       const response = await fetch('/api/wonders')
@@ -34,6 +38,10 @@ export default function WondersPage() {
   useEffect(() => {
     fetchWonders()
   }, [fetchWonders])
+
+  const handleWonderAdded = () => {
+    fetchWonders()  // refresh list
+  }
 
   return (
     <>
@@ -61,14 +69,20 @@ export default function WondersPage() {
 
           <GrimoireHeader />
 
-          {/* Back to Home button */}
-          <div className="px-6 py-4 border-b-2 border-primary/20">
+          {/* Action Bar */}
+          <div className="px-6 py-4 border-b-2 border-primary/20 flex items-center justify-between">
             <Link href="/">
               <Button variant="outline" className="gap-2">
                 <Home className="w-4 h-4" />
                 Back to Home
               </Button>
             </Link>
+            {session && (
+              <Button onClick={() => setShowAddPanel(true)} className="gap-2">
+                <Plus className="w-4 h-4" />
+                Add Wonder
+              </Button>
+            )}
           </div>
 
           {/* Main content */}
@@ -94,6 +108,14 @@ export default function WondersPage() {
         </div>
       </div>
       <Toaster />
+
+      {/* Add Wonder Modal */}
+      {showAddPanel && (
+        <AddWonderPanel
+          onClose={() => setShowAddPanel(false)}
+          onWonderAdded={handleWonderAdded}
+        />
+      )}
     </>
   )
 }
