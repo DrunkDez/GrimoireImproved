@@ -44,54 +44,66 @@ export default function WonderPageClient({ id }: WonderPageClientProps) {
   const [selectedCharacterId, setSelectedCharacterId] = useState<string>("")
   const [isAddingToCharacter, setIsAddingToCharacter] = useState(false)
 
-  // Fetch the wonder with a guaranteed timeout using Promise.race
+  // Fetch the wonder with AbortController and timeout
   useEffect(() => {
-    if (!id) return;
+    if (!id) {
+      console.error("No wonder ID provided")
+      return
+    }
 
-    let isMounted = true;
+    const abortController = new AbortController()
+    const timeoutId = setTimeout(() => {
+      console.warn("Aborting fetch due to timeout (10s)")
+      abortController.abort()
+    }, 10000)
 
-    const fetchWithTimeout = async () => {
-      // Create a timeout promise that rejects after 10 seconds
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error("Request timeout")), 10000);
-      });
-
+    const fetchWonder = async () => {
       try {
-        const fetchPromise = fetch(`/api/wonders/${id}`);
-        const response = await Promise.race([fetchPromise, timeoutPromise]) as Response;
-        
-        if (!isMounted) return;
+        console.log(`Fetching wonder with ID: ${id}`)
+        const response = await fetch(`/api/wonders/${id}`, {
+          signal: abortController.signal,
+        })
+        clearTimeout(timeoutId)
 
+        console.log(`API response status: ${response.status}`)
         if (response.ok) {
-          const data = await response.json();
-          setWonder(data);
+          const data = await response.json()
+          console.log("Wonder data received:", data.name)
+          setWonder(data)
         } else if (response.status === 404) {
-          router.push('/wonders');
+          console.warn("Wonder not found, redirecting")
+          router.push('/wonders')
         } else {
-          throw new Error(`API error: ${response.status}`);
+          throw new Error(`API error: ${response.status}`)
         }
-      } catch (error) {
-        console.error('Fetch error:', error);
-        if (isMounted) {
-          // Show a toast to inform user
+      } catch (error: any) {
+        console.error("Fetch error:", error)
+        if (error.name === 'AbortError') {
+          toast({
+            title: "Request timeout",
+            description: "The server took too long to respond. Redirecting...",
+            variant: "destructive",
+          })
+        } else {
           toast({
             title: "Loading failed",
             description: "Could not load wonder. Redirecting...",
             variant: "destructive",
-          });
-          router.push('/wonders');
+          })
         }
+        router.push('/wonders')
       } finally {
-        if (isMounted) setIsLoading(false);
+        setIsLoading(false)
       }
-    };
+    }
 
-    fetchWithTimeout();
+    fetchWonder()
 
     return () => {
-      isMounted = false;
-    };
-  }, [id, router, toast]);
+      clearTimeout(timeoutId)
+      abortController.abort()
+    }
+  }, [id, router, toast])
 
   // Fetch user's characters when logged in
   useEffect(() => {
