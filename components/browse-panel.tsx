@@ -80,7 +80,7 @@ export function BrowsePanel({ rotes, onSelectRote, shouldRestoreState, onStateRe
       // Mix & Match mode: Rote must have at least ONE selected sphere (at or below chosen level)
       // AND must NOT contain any sphere outside the selected ones (including linked equivalents)
 
-      // 1. Collect all selected sphere names (including linked ones, e.g. Data ↔ Correspondence)
+      // 1. Collect all selected sphere names (including linked ones)
       const selectedSphereNames = new Set<string>()
       for (const [sphere] of activeSphereFilters) {
         const linked = getLinkedSpheres(sphere)
@@ -110,17 +110,35 @@ export function BrowsePanel({ rotes, onSelectRote, shouldRestoreState, onStateRe
       }
       return true
     } else {
-      // Standard mode: Rote must have ALL selected spheres at minimum level
-      for (const [sphere, minLevel] of activeSphereFilters) {
+      // STANDARD MODE: EXACT level match for all selected spheres,
+      // AND no other spheres at all.
+      
+      // 1. Collect all selected sphere names (including linked equivalents)
+      const selectedSphereNames = new Set<string>()
+      for (const [sphere] of activeSphereFilters) {
+        const linked = getLinkedSpheres(sphere)
+        linked.forEach(s => selectedSphereNames.add(s.toLowerCase()))
+      }
+
+      // 2. For each selected sphere, rote must have EXACTLY that level (no more, no less)
+      for (const [sphere, exactLevel] of activeSphereFilters) {
         const linkedSpheres = getLinkedSpheres(sphere)
-        let hasLevel = false
+        let foundExact = false
         for (const linked of linkedSpheres) {
-          if ((roteSpheres[linked] || 0) >= minLevel) {
-            hasLevel = true
+          const roteLevel = roteSpheres[linked] || 0
+          if (roteLevel === exactLevel) {
+            foundExact = true
             break
           }
         }
-        if (!hasLevel) return false
+        if (!foundExact) return false
+      }
+
+      // 3. Ensure rote has NO spheres outside the selected set
+      for (const [roteSphere, roteLevel] of Object.entries(roteSpheres)) {
+        if (roteLevel > 0 && !selectedSphereNames.has(roteSphere.toLowerCase())) {
+          return false
+        }
       }
       return true
     }
@@ -367,7 +385,7 @@ export function BrowsePanel({ rotes, onSelectRote, shouldRestoreState, onStateRe
             </h3>
           </div>
           <p className="text-xs md:text-sm text-muted-foreground italic mb-3 sm:mb-4">
-            Click dots to set minimum sphere level. Linked spheres (e.g. Data/Correspondence) match automatically.
+            Click dots to set exact sphere level. Linked spheres (e.g. Data/Correspondence) match automatically.
           </p>
 
           {/* Traditional Spheres */}
@@ -426,7 +444,7 @@ export function BrowsePanel({ rotes, onSelectRote, shouldRestoreState, onStateRe
                 <p className="text-xs text-muted-foreground font-mono mt-1">
                   {mixAndMatch 
                     ? "Showing rotes with ONLY the selected spheres (at or below specified levels)" 
-                    : "Showing rotes with ALL selected spheres (at or above specified levels)"}
+                    : "Showing rotes with EXACTLY the selected spheres (at the specified levels)"}
                 </p>
               </div>
             </div>
