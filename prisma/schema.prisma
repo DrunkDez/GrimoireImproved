@@ -64,8 +64,54 @@ model Character {
   createdAt    DateTime        @default(now())
   updatedAt    DateTime        @updatedAt
 
+  // === NEW: Experience Tracking ===
+  totalExperience     Int      @default(0)  // Total XP earned
+  spentExperience     Int      @default(0)  // XP spent on improvements
+  
+  // === NEW: Relations for post-creation additions ===
+  experienceLog       ExperienceLog[]
+  characterMerits     CharacterMerit[]
+  characterFlaws      CharacterFlaw[]
+  characterBackgrounds CharacterBackground[]
+
+  // Custom XP costs (optional per character)
+  useCustomXpCosts    Boolean  @default(false)
+  customXpCosts       Json?    // Custom cost overrides
+
   @@index([userId])
   @@index([faction])
+}
+
+model ExperienceLog {
+  id            String    @id @default(cuid())
+  characterId   String
+  character     Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  
+  // Transaction details
+  type          String    // "gain" or "spend"
+  amount        Int       // Positive for gains, negative for spending
+  
+  // What was it for?
+  category      String?   // "Attribute", "Ability", "Arete", "Willpower", "Merit", "Background", etc.
+  itemName      String?   // Specific item bought (e.g., "Strength", "Occult", "Resources")
+  fromRating    Int?      // Old rating (for improvements)
+  toRating      Int?      // New rating (for improvements)
+  
+  description   String    @db.Text  // Free text description
+  
+  // Cost tracking
+  officialCost  Int?      // What the official rules say
+  actualCost    Int?      // What was actually paid (could be custom)
+  usedCustom    Boolean   @default(false)  // Did player use custom cost?
+  
+  // Metadata
+  sessionDate   DateTime? // Game session date
+  createdAt     DateTime  @default(now())
+  createdBy     String?   // User who added it
+  
+  @@index([characterId])
+  @@index([type])
+  @@index([createdAt])
 }
 
 model CharacterRote {
@@ -102,6 +148,53 @@ model Rote {
   @@index([userId])
 }
 
+// ============================================
+// POST-CREATION MERITS
+// ============================================
+model CharacterMerit {
+  id          String    @id @default(cuid())
+  characterId String
+  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  meritId     String
+  merit       Merit     @relation(fields: [meritId], references: [id])
+  
+  // Purchase info
+  pointCost   Int       // How many points this merit costs
+  xpCost      Int?      // How much XP was spent to buy it
+  purchasedAt DateTime  @default(now())
+  
+  // Notes
+  notes       String?   @db.Text
+  
+  @@unique([characterId, meritId])
+  @@index([characterId])
+  @@index([meritId])
+}
+
+// ============================================
+// POST-CREATION FLAWS
+// ============================================
+model CharacterFlaw {
+  id          String    @id @default(cuid())
+  characterId String
+  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  flawId      String
+  flaw        Merit     @relation(fields: [flawId], references: [id])  // Changed from Flaw to Merit
+  
+  // Purchase info (buying off flaws costs XP)
+  pointValue  Int       // How many points this flaw was worth
+  xpCost      Int?      // How much XP to buy it off (if removed)
+  removedAt   DateTime? // When it was bought off
+  
+  // Notes
+  notes       String?   @db.Text
+  acquiredAt  DateTime  @default(now())
+  
+  @@unique([characterId, flawId])
+  @@index([characterId])
+  @@index([flawId])
+}
+
 model Merit {
   id          String   @id @default(cuid())
   name        String
@@ -113,6 +206,8 @@ model Merit {
   pageRef     String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  characterMerits CharacterMerit[]
+  characterFlaws CharacterFlaw[]
 
   @@index([category])
   @@index([type])
@@ -161,6 +256,32 @@ model CharacterWonder {
   @@index([wonderId])
 }
 
+// ============================================
+// OFFICIAL XP COSTS (Mage: The Ascension)
+// ============================================
+model ExperienceCost {
+  id          String  @id @default(cuid())
+  
+  // What is being improved
+  category    String  @unique  // "attribute", "ability", "arete", "sphere", "willpower", etc.
+  
+  // Cost formula
+  costType    String  // "multiplier" or "flat"
+  multiplier  Int?    // For "new rating x N" costs
+  flatCost    Int?    // For flat costs
+  
+  // Description
+  name        String  // Display name
+  formula     String  // Human-readable formula (e.g., "new rating × 4")
+  description String  @db.Text
+  
+  // Book reference
+  bookRef     String? // Page reference
+  
+  // System
+  isOfficial  Boolean @default(true)
+}
+
 model MageGroup {
   id                  String   @id @default(cuid())
   name                String   @unique
@@ -183,6 +304,33 @@ model MageGroup {
   @@index([slug])
 }
 
+// ============================================
+// POST-CREATION BACKGROUNDS
+// ============================================
+model CharacterBackground {
+  id            String     @id @default(cuid())
+  characterId   String
+  character     Character  @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  backgroundId  String
+  background    Background @relation(fields: [backgroundId], references: [id])
+  
+  // Rating info
+  currentRating Int        @default(1)  // Current dots (1-5)
+  startRating   Int        @default(0)  // What it was at character creation
+  
+  // XP tracking for each increase
+  xpSpent       Int        @default(0)  // Total XP spent on this background
+  purchaseLog   Json?      // Array of {from: 0, to: 1, xpCost: 3, date: "..."}
+  
+  // Metadata
+  acquiredAt    DateTime   @default(now())
+  notes         String?    @db.Text
+  
+  @@unique([characterId, backgroundId])
+  @@index([characterId])
+  @@index([backgroundId])
+}
+
 model Background {
   id          String   @id @default(cuid())
   name        String   @unique
@@ -193,6 +341,7 @@ model Background {
   pageRef     String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  characterBackgrounds CharacterBackground[]
 
   @@index([subtype])
 }
