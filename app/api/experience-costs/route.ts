@@ -1,7 +1,7 @@
 // app/api/experience-costs/route.ts
 
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { prisma } from '@/lib/db'
 
 // GET /api/experience-costs - Get all official XP costs
 export async function GET() {
