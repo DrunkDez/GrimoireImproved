@@ -26,7 +26,7 @@ import { XpCostsReference } from './xp-costs-reference'
 
 interface ExperienceTrackerProps {
   characterId: string
-  onUpdate?: () => void   // <-- NEW: callback to refresh character data
+  onUpdate?: () => void
 }
 
 interface ExperienceData {
@@ -54,10 +54,19 @@ interface ExperienceLogEntry {
   createdAt: string
 }
 
+interface OfficialCost {
+  category: string
+  costType: 'multiplier' | 'flat'
+  multiplier: number | null
+  flatCost: number | null
+  formula: string
+}
+
 export function ExperienceTracker({ characterId, onUpdate }: ExperienceTrackerProps) {
   const { toast } = useToast()
   const [data, setData] = useState<ExperienceData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [officialCosts, setOfficialCosts] = useState<OfficialCost[]>([])
   
   // Add XP dialog state
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
@@ -78,9 +87,28 @@ export function ExperienceTracker({ characterId, onUpdate }: ExperienceTrackerPr
   // Log dialog state
   const [isLogDialogOpen, setIsLogDialogOpen] = useState(false)
 
+  // Fetch official costs on mount
+  useEffect(() => {
+    fetchOfficialCosts()
+  }, [])
+
   useEffect(() => {
     fetchExperienceData()
   }, [characterId])
+
+  const fetchOfficialCosts = async () => {
+    try {
+      const response = await fetch('/api/experience-costs')
+      if (response.ok) {
+        const costs = await response.json()
+        setOfficialCosts(costs)
+      } else {
+        console.error('Failed to fetch official costs')
+      }
+    } catch (error) {
+      console.error('Error fetching official costs:', error)
+    }
+  }
 
   const fetchExperienceData = async () => {
     try {
@@ -107,6 +135,42 @@ export function ExperienceTracker({ characterId, onUpdate }: ExperienceTrackerPr
       setIsLoading(false)
     }
   }
+
+  // Calculate official XP cost based on category, new rating, and current rating
+  const calculateOfficialCost = (category: string, newRating: number, fromRating?: number): number | null => {
+    const costRule = officialCosts.find(c => c.category.toLowerCase() === category.toLowerCase())
+    if (!costRule) return null
+
+    // Flat cost (e.g., New Ability = 3, New Sphere = 10)
+    if (costRule.costType === 'flat') {
+      return costRule.flatCost || 0
+    }
+    
+    // Multiplier cost
+    if (costRule.costType === 'multiplier' && costRule.multiplier) {
+      // Arete uses current rating × 8 (not new rating)
+      if (category.toLowerCase() === 'arete' && fromRating !== undefined) {
+        return fromRating * costRule.multiplier
+      }
+      // Willpower uses current rating × 1
+      if (category.toLowerCase() === 'willpower' && fromRating !== undefined) {
+        return fromRating * costRule.multiplier
+      }
+      // Default: new rating × multiplier (Attributes, Abilities, Spheres, Backgrounds, etc.)
+      return newRating * costRule.multiplier
+    }
+    return null
+  }
+
+  // Auto-calculate when category or to-rating changes (and custom is unchecked)
+  useEffect(() => {
+    if (!useCustomCost && spendCategory && spendToRating && spendToRating > 0) {
+      const cost = calculateOfficialCost(spendCategory, spendToRating as number, spendFromRating as number | undefined)
+      if (cost !== null && cost !== spendAmount) {
+        setSpendAmount(cost)
+      }
+    }
+  }, [spendCategory, spendToRating, spendFromRating, useCustomCost, officialCosts])
 
   const handleAddXp = async () => {
     if (addAmount <= 0) {
@@ -150,7 +214,6 @@ export function ExperienceTracker({ characterId, onUpdate }: ExperienceTrackerPr
         setAddDescription('')
         setAddSessionDate('')
         fetchExperienceData()
-        // Also refresh main character data if callback exists
         if (onUpdate) onUpdate()
       } else {
         const error = await response.json()
@@ -214,7 +277,6 @@ export function ExperienceTracker({ characterId, onUpdate }: ExperienceTrackerPr
         setIsSpendDialogOpen(false)
         resetSpendForm()
         fetchExperienceData()
-        // Refresh main character data so stats update
         if (onUpdate) onUpdate()
       } else {
         const error = await response.json()
@@ -259,6 +321,28 @@ export function ExperienceTracker({ characterId, onUpdate }: ExperienceTrackerPr
     return null
   }
 
+  // Helper to show official cost hint with correct formula
+  const getOfficialCostHint = () => {
+    if (!spendCategory || !spendToRating) return null
+    const cost = calculateOfficialCost(spendCategory, spendToRating as number, spendFromRating as number | undefined)
+    if (cost === null) return null
+    
+    // Build a readable formula hint
+    if (spendCategory.toLowerCase() === 'arete') {
+      return `Official cost: current Arete (${spendFromRating || '?'}) × 8 = ${cost} XP`
+    }
+    if (spendCategory.toLowerCase() === 'willpower') {
+      return `Official cost: current Willpower (${spendFromRating || '?'}) × 1 = ${cost} XP`
+    }
+    if (spendCategory.toLowerCase() === 'new ability') {
+      return `Official cost: flat 3 XP`
+    }
+    if (spendCategory.toLowerCase() === 'new sphere') {
+      return `Official cost: flat 10 XP`
+    }
+    return `Official cost: ${cost} XP (${spendToRating} × ${officialCosts.find(c => c.category.toLowerCase() === spendCategory.toLowerCase())?.multiplier || '?'})`
+  }
+
   return (
     <div className="bg-card border-2 border-primary rounded-lg p-6 space-y-6">
       {/* XP Summary */}
@@ -281,6 +365,7 @@ export function ExperienceTracker({ characterId, onUpdate }: ExperienceTrackerPr
 
       {/* Actions */}
       <div className="flex flex-wrap gap-3">
+        {/* Add XP Dialog */}
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger asChild>
             <Button className="gap-2">
@@ -333,6 +418,7 @@ export function ExperienceTracker({ characterId, onUpdate }: ExperienceTrackerPr
           </DialogContent>
         </Dialog>
 
+        {/* Spend XP Dialog with auto-calculation */}
         <Dialog open={isSpendDialogOpen} onOpenChange={setIsSpendDialogOpen}>
           <DialogTrigger asChild>
             <Button variant="outline" className="gap-2">
@@ -363,6 +449,8 @@ export function ExperienceTracker({ characterId, onUpdate }: ExperienceTrackerPr
                     <SelectItem value="Background">Background</SelectItem>
                     <SelectItem value="Merit">Merit</SelectItem>
                     <SelectItem value="Flaw Removal">Remove Flaw</SelectItem>
+                    <SelectItem value="New Ability">New Ability</SelectItem>
+                    <SelectItem value="New Sphere">New Sphere</SelectItem>
                     <SelectItem value="Other">Other</SelectItem>
                   </SelectContent>
                 </Select>
@@ -380,7 +468,7 @@ export function ExperienceTracker({ characterId, onUpdate }: ExperienceTrackerPr
               
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="from-rating">From Rating</Label>
+                  <Label htmlFor="from-rating">From Rating (current)</Label>
                   <Input
                     id="from-rating"
                     type="number"
@@ -388,11 +476,11 @@ export function ExperienceTracker({ characterId, onUpdate }: ExperienceTrackerPr
                     max="5"
                     value={spendFromRating || ''}
                     onChange={(e) => setSpendFromRating(parseInt(e.target.value) || '')}
-                    placeholder="Current"
+                    placeholder="Current rating"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="to-rating">To Rating</Label>
+                  <Label htmlFor="to-rating">To Rating (new)</Label>
                   <Input
                     id="to-rating"
                     type="number"
@@ -400,7 +488,7 @@ export function ExperienceTracker({ characterId, onUpdate }: ExperienceTrackerPr
                     max="5"
                     value={spendToRating || ''}
                     onChange={(e) => setSpendToRating(parseInt(e.target.value) || '')}
-                    placeholder="New"
+                    placeholder="New rating"
                   />
                 </div>
               </div>
@@ -416,7 +504,7 @@ export function ExperienceTracker({ characterId, onUpdate }: ExperienceTrackerPr
                   placeholder="How much XP?"
                 />
                 <p className="text-xs text-muted-foreground mt-1">
-                  Official costs: Attribute (new×4), Ability (new×2), Arete (new×8), Sphere (new×7)
+                  {getOfficialCostHint() || "Select category and new rating to see official cost"}
                 </p>
               </div>
               
@@ -436,7 +524,14 @@ export function ExperienceTracker({ characterId, onUpdate }: ExperienceTrackerPr
                   type="checkbox"
                   id="use-custom"
                   checked={useCustomCost}
-                  onChange={(e) => setUseCustomCost(e.target.checked)}
+                  onChange={(e) => {
+                    setUseCustomCost(e.target.checked)
+                    if (!e.target.checked && spendCategory && spendToRating) {
+                      // Recalculate official cost when unchecking custom
+                      const cost = calculateOfficialCost(spendCategory, spendToRating as number, spendFromRating as number | undefined)
+                      if (cost !== null) setSpendAmount(cost)
+                    }
+                  }}
                   className="w-4 h-4"
                 />
                 <Label htmlFor="use-custom" className="text-sm cursor-pointer">
@@ -451,6 +546,7 @@ export function ExperienceTracker({ characterId, onUpdate }: ExperienceTrackerPr
           </DialogContent>
         </Dialog>
 
+        {/* View Log Dialog */}
         <Dialog open={isLogDialogOpen} onOpenChange={setIsLogDialogOpen}>
           <DialogTrigger asChild>
             <Button variant="outline" className="gap-2">
