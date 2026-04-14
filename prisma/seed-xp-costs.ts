@@ -111,7 +111,7 @@ async function main() {
   for (const cost of officialCosts) {
     await prisma.experienceCost.upsert({
       where: { category: cost.category },
-      update: cost, // Update if exists to ensure data is current
+      update: cost,
       create: cost,
     })
     console.log(`  ✓ ${cost.name}`)
