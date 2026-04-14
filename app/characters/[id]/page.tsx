@@ -282,7 +282,7 @@ export default function CharacterSheetPage() {
  
             {/* Character Sheet Tabs */}
             <Tabs defaultValue="stats" className="space-y-6">
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className="grid w-full grid-cols-5">
                 <TabsTrigger value="stats">Stats</TabsTrigger>
                 <TabsTrigger value="abilities">Abilities</TabsTrigger>
                 <TabsTrigger value="spheres">Spheres</TabsTrigger>
@@ -659,8 +659,10 @@ export default function CharacterSheetPage() {
                   </CardContent>
                 </Card>
               </TabsContent>
-               <TabsContent value="experience" className="space-y-4">
-                 <ExperienceTracker characterId={character.id} />
+
+              {/* Experience Tab - with onUpdate callback */}
+              <TabsContent value="experience" className="space-y-4">
+                <ExperienceTracker characterId={character.id} onUpdate={fetchCharacter} />
               </TabsContent>
             </Tabs>
           </div>
