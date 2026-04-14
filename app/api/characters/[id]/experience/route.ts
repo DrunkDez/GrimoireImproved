@@ -96,7 +96,16 @@ export async function POST(
 
     const character = await prisma.character.findUnique({
       where: { id },
-      select: { userId: true, totalExperience: true, spentExperience: true },
+      select: { 
+        userId: true, 
+        totalExperience: true, 
+        spentExperience: true,
+        attributes: true,
+        abilities: true,
+        spheres: true,
+        arete: true,
+        willpower: true,
+      },
     })
 
     if (!character) {
@@ -107,6 +116,7 @@ export async function POST(
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
+    // --- STAT UPDATE LOGIC (only for spend) ---
     if (type === 'spend') {
       const availableXp = character.totalExperience - character.spentExperience
       if (amount > availableXp) {
@@ -115,8 +125,46 @@ export async function POST(
           { status: 400 }
         )
       }
+
+      // Helper to update nested JSON fields (attributes, abilities, spheres)
+      const updateStatField = (current: any, fieldName: string, newValue: number) => {
+        const updated = { ...(current || {}) }
+        // Convert itemName to a key (lowercase, no spaces)
+        const key = fieldName?.toLowerCase().replace(/\s+/g, '')
+        if (key) {
+          updated[key] = newValue
+        }
+        return updated
+      }
+
+      let statUpdateData: any = {}
+
+      if (category === 'Attribute' && itemName && toRating) {
+        statUpdateData.attributes = updateStatField(character.attributes, itemName, toRating)
+      } 
+      else if (category === 'Ability' && itemName && toRating) {
+        statUpdateData.abilities = updateStatField(character.abilities, itemName, toRating)
+      }
+      else if (category === 'Sphere' && itemName && toRating) {
+        statUpdateData.spheres = updateStatField(character.spheres, itemName, toRating)
+      }
+      else if (category === 'Arete' && toRating) {
+        statUpdateData.arete = toRating
+      }
+      else if (category === 'Willpower' && toRating) {
+        statUpdateData.willpower = toRating
+      }
+      // For Backgrounds, Merits, Flaw Removal – you can extend later
+
+      if (Object.keys(statUpdateData).length > 0) {
+        await prisma.character.update({
+          where: { id },
+          data: statUpdateData,
+        })
+      }
     }
 
+    // Create experience log entry
     const logEntry = await prisma.experienceLog.create({
       data: {
         characterId: id,
@@ -135,16 +183,17 @@ export async function POST(
       },
     })
 
-    const updateData: any = {}
+    // Update XP totals
+    const xpUpdateData: any = {}
     if (type === 'gain') {
-      updateData.totalExperience = { increment: amount }
+      xpUpdateData.totalExperience = { increment: amount }
     } else {
-      updateData.spentExperience = { increment: amount }
+      xpUpdateData.spentExperience = { increment: amount }
     }
 
     await prisma.character.update({
       where: { id },
-      data: updateData,
+      data: xpUpdateData,
     })
 
     return NextResponse.json({
