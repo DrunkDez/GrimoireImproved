@@ -26,6 +26,7 @@ import { XpCostsReference } from './xp-costs-reference'
 
 interface ExperienceTrackerProps {
   characterId: string
+  onUpdate?: () => void   // <-- NEW: callback to refresh character data
 }
 
 interface ExperienceData {
@@ -53,7 +54,7 @@ interface ExperienceLogEntry {
   createdAt: string
 }
 
-export function ExperienceTracker({ characterId }: ExperienceTrackerProps) {
+export function ExperienceTracker({ characterId, onUpdate }: ExperienceTrackerProps) {
   const { toast } = useToast()
   const [data, setData] = useState<ExperienceData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -149,6 +150,8 @@ export function ExperienceTracker({ characterId }: ExperienceTrackerProps) {
         setAddDescription('')
         setAddSessionDate('')
         fetchExperienceData()
+        // Also refresh main character data if callback exists
+        if (onUpdate) onUpdate()
       } else {
         const error = await response.json()
         toast({
@@ -211,6 +214,8 @@ export function ExperienceTracker({ characterId }: ExperienceTrackerProps) {
         setIsSpendDialogOpen(false)
         resetSpendForm()
         fetchExperienceData()
+        // Refresh main character data so stats update
+        if (onUpdate) onUpdate()
       } else {
         const error = await response.json()
         toast({
