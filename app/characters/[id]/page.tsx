@@ -22,6 +22,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { GrimoireHeader } from "@/components/grimoire-header"
+import { ExperienceTracker } from '@/components/experience-tracker'
  
 export default function CharacterSheetPage() {
   // Use useParams instead of params prop
@@ -281,11 +282,12 @@ export default function CharacterSheetPage() {
  
             {/* Character Sheet Tabs */}
             <Tabs defaultValue="stats" className="space-y-6">
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className="grid w-full grid-cols-5">
                 <TabsTrigger value="stats">Stats</TabsTrigger>
                 <TabsTrigger value="abilities">Abilities</TabsTrigger>
                 <TabsTrigger value="spheres">Spheres</TabsTrigger>
                 <TabsTrigger value="rotes">Rotes ({character.rotes?.length || 0})</TabsTrigger>
+                <TabsTrigger value="experience">Experience</TabsTrigger>
               </TabsList>
  
               {/* Stats Tab */}
@@ -656,6 +658,11 @@ export default function CharacterSheetPage() {
                     )}
                   </CardContent>
                 </Card>
+              </TabsContent>
+
+              {/* Experience Tab - with onUpdate callback */}
+              <TabsContent value="experience" className="space-y-4">
+                <ExperienceTracker characterId={character.id} onUpdate={fetchCharacter} />
               </TabsContent>
             </Tabs>
           </div>
