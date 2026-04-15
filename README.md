@@ -1,79 +1,125 @@
-# Grimoire 2.0 - Mage: The Ascension Rote Library
+# 🎡 The Paradox Wheel
 
-A beautiful digital grimoire for managing Mage: The Ascension rotes with full database persistence and admin panel.
+**A comprehensive digital grimoire for Mage: The Ascension**  
+Browse rotes, track characters, manage experience, and explore the Spheres.
 
-## 🎯 Features
+> *"Where Reality Bends • Navigate the Spheres"*
 
-- ✨ **Browse & Search** - Find rotes by tradition, sphere, or keyword
-- ➕ **Add Rotes** - Contribute your own mystical knowledge
-- 🔐 **Admin Panel** - Manage all rotes with password protection
-- 💾 **Database Persistence** - All rotes saved server-side
-- 🎨 **Beautiful UI** - Grimoire-themed interface with parchment aesthetics
+---
 
-## 🚀 Setup Instructions
+## ✨ Features
 
-### 1. Install Dependencies
+### **📚 Rote Library**
+- **Browse & Search** - 1000+ rotes with advanced filtering
+- **Sphere Filtering** - Visual dot interface for precise sphere requirements
+- **Random Discovery** - Explore 20 rotes at a time in random order
+- **Multiple Combinations** - Support for rotes with alternative sphere paths
+- **Share Rotes** - Direct links to individual rotes
+- **Add Your Own** - Contribute your mystical discoveries
+
+### **🎭 Character Management**
+- **Guided Character Creation** - Step-by-step wizard for new mages
+- **Full Character Sheets** - Store attributes, abilities, spheres, backgrounds
+- **Merits & Flaws** - Complete database with filtering and search
+- **Experience Tracking** - Gain XP, spend on improvements
+- **Official XP Costs** - Built-in M:tA 20th Anniversary rules
+- **Custom XP Costs** - House rules support per character
+- **Post-Creation Growth** - Add merits, backgrounds, and flaws with XP
+- **Character Rotes** - Assign rotes to your characters
+
+### **⚙ Wonders & Artifacts**
+- **Wonder Database** - Artifacts, talismans, fetishes, grimoires
+- **7 Wonder Categories** - Complete classification system
+- **Character Wonders** - Track who has which wonders
+- **Search & Filter** - Find wonders by category or requirements
+
+### **📖 Resources & References**
+- **Recommended Resources** - Curated books, podcasts, websites, tools
+- **Official XP Costs** - Quick reference table with examples
+- **Mage Groups** - Detailed information on Traditions and Conventions
+- **Reader Mode** - Simplified, distraction-free reading interface
+
+### **🔐 User System**
+- **Account Creation** - Sign up with email/password
+- **Secure Authentication** - NextAuth.js with bcrypt
+- **Personal Dashboard** - View your characters and progress
+- **Admin Roles** - Special permissions for site administrators
+
+### **⚡ Admin Panel**
+- **Site Updates & Changelog** - Announce new features
+- **Book Releases** - Manage upcoming Mage publications
+- **Content Management** - Edit welcome text, about page, footer
+- **Rote Management** - CRUD operations on all rotes
+- **Merit/Flaw Database** - Manage complete lists
+- **Resource Curation** - Feature recommended content
+- **User Management** - View and manage accounts
+- **Character Creation Guide** - Customize creation wizard text
+
+---
+
+## 🎨 Design Features
+
+- **Grimoire Aesthetic** - Parchment textures, ornamental borders
+- **Dark/Light Themes** - Toggle between modes
+- **Reader Mode** - Simplified grayscale view for extended reading
+- **Mobile Responsive** - Works on all screen sizes
+- **Custom Fonts** - Cinzel, Crimson Text, decorative symbols
+- **Markdown Support** - Rich text in descriptions
+
+---
+
+## 🚀 Quick Start
+
+### **1. Install Dependencies**
 
 ```bash
 npm install
-# or
-pnpm install
-# or
-yarn install
 ```
 
-### 2. Setup Database
+### **2. Setup Database**
 
-You have several options for the database:
-
-#### Option A: Local PostgreSQL
+#### Option A: Vercel Postgres (Recommended)
 ```bash
-# Install PostgreSQL locally
-# Then create a database
-createdb grimoire
-
-# Create .env file
-cp .env.example .env
-
-# Edit .env and set:
-DATABASE_URL="postgresql://user:password@localhost:5432/grimoire"
+# Connect to Vercel, add Postgres
+vercel link
+vercel env pull .env.local
 ```
 
-#### Option B: Vercel Postgres (Recommended for deployment)
-1. Create a Vercel account
-2. Add Vercel Postgres to your project
-3. Copy the DATABASE_URL from Vercel dashboard to .env
-
-#### Option C: Supabase
-1. Create a Supabase project
-2. Get your connection string from Supabase dashboard
-3. Add to .env:
-```
-DATABASE_URL="postgresql://postgres:[YOUR-PASSWORD]@db.[YOUR-PROJECT-REF].supabase.co:5432/postgres"
+#### Option B: Local PostgreSQL
+```bash
+createdb paradox_wheel
 ```
 
-### 3. Initialize Database
+Create `.env`:
+```env
+DATABASE_URL="postgresql://user:password@localhost:5432/paradox_wheel"
+NEXTAUTH_SECRET="generate-with-openssl-rand-base64-32"
+NEXTAUTH_URL="http://localhost:3000"
+```
+
+### **3. Initialize Database**
 
 ```bash
+# Push schema to database
+npx prisma db push
+
+# Seed XP costs (optional but recommended)
+npx tsx prisma/seed-xp-costs.ts
+
 # Generate Prisma Client
-npm run db:generate
-
-# Push schema to database (for development)
-npm run db:push
-
-# OR create a migration (for production)
-npm run db:migrate
+npx prisma generate
 ```
 
-### 4. Seed Database (Optional)
+### **4. Create Admin User**
 
-You can seed the database with sample rotes using the Admin Panel:
-1. Start the dev server
-2. Click the shield icon in the top-right corner
-3. Enter password: `TruthUntilParadox`
-4. Click "Seed Sample Rotes"
+```bash
+# Open Prisma Studio
+npx prisma studio
 
-### 5. Run Development Server
+# Create user with isAdmin = true
+```
+
+### **5. Run Development Server**
 
 ```bash
 npm run dev
@@ -81,98 +127,298 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000)
 
-## 🔐 Admin Panel
+---
 
-Access the admin panel by clicking the shield icon in the top-right corner.
+## 🗄️ Database Schema
 
-**Password:** `TruthUntilParadox`
+### **Core Models**
+- **Rote** - Magical procedures with sphere requirements
+- **Merit/Flaw** - Character advantages and disadvantages
+- **Background** - Character resources and connections
+- **Wonder** - Magical artifacts and devices
+- **Resource** - External links and references
+- **MageGroup** - Traditions and Technocracy conventions
 
-### Admin Features:
-- 🗑️ **Delete All Rotes** - Clear the entire database
-- 🗑️ **Delete Individual Rotes** - Remove specific entries
-- 🌱 **Seed Sample Rotes** - Add 12 example rotes
-- 📊 **View Statistics** - See total rote count
+### **Character System**
+- **User** - Authentication and account management
+- **Character** - Player character data
+- **CharacterRote** - Rotes assigned to characters
+- **CharacterWonder** - Wonders owned by characters
+- **CharacterMerit/Flaw** - Post-creation merits/flaws
+- **CharacterBackground** - Post-creation backgrounds
 
-## 📝 Database Schema
+### **Experience System**
+- **ExperienceLog** - XP transactions (gains and spending)
+- **ExperienceCost** - Official M:tA XP cost formulas
+- **CharacterMerit/Flaw/Background** - XP tracking per purchase
 
-```prisma
-model Rote {
-  id          String   @id @default(cuid())
-  name        String
-  tradition   String
-  description String   @db.Text
-  spheres     Json
-  level       String
-  pageRef     String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
-```
-
-## 🛠️ Available Scripts
-
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run start` - Start production server
-- `npm run db:generate` - Generate Prisma Client
-- `npm run db:push` - Push schema changes to database
-- `npm run db:migrate` - Create and run migrations
-- `npm run db:studio` - Open Prisma Studio (database GUI)
-
-## 🌐 Deployment
-
-### Vercel (Recommended)
-
-1. Push your code to GitHub
-2. Import project to Vercel
-3. Add Vercel Postgres
-4. Deploy!
-
-Vercel will automatically:
-- Install dependencies
-- Run `prisma generate`
-- Build the Next.js app
-
-### Environment Variables for Production
-
-Make sure to set in your hosting platform:
-```
-DATABASE_URL=your_production_database_url
-```
-
-## 🎨 Tech Stack
-
-- **Framework:** Next.js 16 + React 19
-- **Database:** PostgreSQL + Prisma ORM
-- **Styling:** Tailwind CSS
-- **UI Components:** shadcn/ui
-- **Fonts:** Cinzel, Crimson Text, IM Fell DW Pica
-
-## 📚 API Routes
-
-- `GET /api/rotes` - Get all rotes
-- `POST /api/rotes` - Create a new rote
-- `GET /api/rotes/[id]` - Get single rote
-- `PUT /api/rotes/[id]` - Update a rote
-- `DELETE /api/rotes/[id]` - Delete a rote
-- `POST /api/admin/auth` - Verify admin password
-- `DELETE /api/admin/delete-all` - Delete all rotes (requires password)
-- `POST /api/admin/seed` - Seed sample rotes (requires password)
-
-## 🔒 Security Notes
-
-⚠️ **IMPORTANT:** The admin password is currently hardcoded. For production:
-1. Move password to environment variable
-2. Hash the password
-3. Consider using proper authentication (NextAuth.js)
-
-## 📖 Usage
-
-1. **Browse Rotes** - View all rotes organized by tradition
-2. **Search** - Find specific rotes using filters
-3. **Add New Rote** - Contribute your own magical knowledge
-4. **Admin Panel** - Manage the grimoire (password protected)
+### **Site Management**
+- **SiteSettings** - Homepage, about page, footer content
+- **SiteUpdate** - Changelog entries
+- **BookRelease** - Upcoming Mage publications
+- **CharacterCreationContent** - Wizard step descriptions
 
 ---
 
-*May your paradox be minimal and your Arete be strong!* ✨
+## 🛠️ Tech Stack
+
+- **Framework:** Next.js 15 (App Router)
+- **React:** 19
+- **Database:** PostgreSQL
+- **ORM:** Prisma
+- **Auth:** NextAuth.js v4
+- **Styling:** Tailwind CSS
+- **UI Components:** shadcn/ui + Radix UI
+- **Markdown:** react-markdown
+- **Fonts:** Cinzel (serif), Crimson Text (body), Inter (UI)
+
+---
+
+## 📝 Scripts
+
+```bash
+npm run dev          # Development server
+npm run build        # Production build
+npm run start        # Production server
+npm run lint         # ESLint
+
+# Database
+npx prisma studio    # Database GUI
+npx prisma db push   # Push schema changes
+npx prisma migrate   # Create migration
+npx prisma generate  # Generate client
+
+# Seeding
+npx tsx prisma/seed-xp-costs.ts  # Seed official XP costs
+```
+---
+
+## 🎯 Key Features Explained
+
+### **Experience System**
+
+Track character progression with official Mage: The Ascension rules:
+
+```
+Attribute: new rating × 4
+Ability: new rating × 2
+Arete: new rating × 8
+Sphere: new rating × 7
+Willpower: current rating × 1
+Background: new rating × 3
+Merit: merit cost × 2
+Remove Flaw: flaw value × 2
+```
+
+**Features:**
+- Award XP after sessions
+- Spend on improvements
+- Complete transaction log
+- Custom costs per character
+- Automatic calculations
+
+### **Character Creation**
+
+5-step guided wizard:
+1. **Concept** - Name, tradition, nature, demeanor, essence
+2. **Attributes** - Physical, Social, Mental (7/5/3)
+3. **Abilities** - Talents, Skills, Knowledges (13/9/5)
+4. **Spheres** - Affinity + 6 dots, backgrounds
+5. **Finishing** - Freebie points, merits/flaws, Arete, Willpower
+
+### **Rote Browsing**
+
+Advanced filtering system:
+- **Visual Sphere Dots** - Click to set minimum requirements
+- **Tradition Filter** - Select from 20+ groups
+- **Search** - Name, description, tradition
+- **Random Order** - Discover 20 at a time
+- **Load More** - Progressive loading
+
+### **Reader Mode**
+
+Simplified reading experience:
+- Grayscale color scheme
+- Remove decorative elements
+- Increase line spacing
+- System fonts
+- Better contrast
+- Max 900px width
+
+---
+
+## 🌐 Deployment
+
+### **Vercel (Recommended)**
+
+1. Push to GitHub
+2. Import to Vercel
+3. Add Vercel Postgres
+4. Set environment variables:
+   ```
+   DATABASE_URL=(provided by Vercel)
+   NEXTAUTH_SECRET=(generate with: openssl rand -base64 32)
+   NEXTAUTH_URL=https://your-domain.vercel.app
+   ```
+5. Deploy!
+
+### **Other Platforms**
+
+Works on any platform with PostgreSQL and Node.js support:
+- Railway
+- Render
+- Fly.io
+- DigitalOcean App Platform
+
+---
+
+## 🔒 Security
+
+- **Password Hashing** - bcrypt for user passwords
+- **Session Management** - NextAuth.js JWT tokens
+- **Protected Routes** - Middleware guards authenticated pages
+- **Admin Checks** - Role-based access control
+- **SQL Injection** - Prevented by Prisma ORM
+- **Input Validation** - Zod-style validation on API routes
+- **CORS** - Next.js built-in protections
+
+### **Admin Access**
+
+Admin panel requires `isAdmin: true` in user database record.
+
+---
+
+## 📚 Content Management
+
+### **Site Updates**
+
+Announce changes with:
+- Title and description (Markdown)
+- Category (Feature, Bug Fix, Content, Improvement, Announcement)
+- Priority (higher shows first)
+- Publish/draft status
+- Dismissible homepage banner
+
+### **Book Releases**
+
+Promote upcoming books with:
+- Title, publisher, description
+- Release date and status
+- Cover image URL
+- Purchase and announcement links
+- Homepage widget display
+
+---
+
+## 🎨 Customization
+
+### **Themes**
+
+Modify `app/globals.css`:
+```css
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --primary: 300 45% 30%;
+    --accent: 42 42% 59%;
+    /* ... */
+  }
+}
+```
+
+### **Fonts**
+
+Update `next.config.js` and import fonts in `app/layout.tsx`
+
+### **Content**
+
+All text content editable via Admin Panel → Content tab
+
+---
+
+## 🤝 Contributing
+
+This is a personal project, but ideas are welcome!
+
+### **Reporting Bugs**
+
+Open an issue with:
+- Description of the problem
+- Steps to reproduce
+- Expected vs actual behavior
+- Screenshots if applicable
+
+---
+
+## 📖 Credits
+
+### **Game System**
+- Mage: The Ascension © White Wolf Publishing / Paradox Interactive
+- This is an unofficial fan project
+
+### **Resources**
+- [Mage: The Ascension 20th Anniversary](https://www.drivethrurpg.com/product/149562/Mage-The-Ascension-20th-Anniversary-Edition)
+- [World of Darkness Wiki](https://whitewolf.fandom.com/wiki/Mage:_The_Ascension)
+
+### **Technologies**
+- Next.js, React, Tailwind CSS
+- Prisma, PostgreSQL
+- shadcn/ui components
+- NextAuth.js
+
+---
+
+## 📄 License
+
+This project is for personal and educational use. Mage: The Ascension is trademarked by Paradox Interactive AB.
+
+---
+
+## 🗺️ Roadmap
+
+### **Planned Features**
+- [ ] Character sheet PDF export
+- [ ] Dice roller integration
+- [ ] Chronicle management (multiple characters)
+- [ ] Paradox tracking system
+- [ ] Resonance and quintessence pools
+- [ ] Collaborative character creation
+- [ ] Mobile app (React Native)
+- [ ] API for third-party integrations
+
+### **Under Consideration**
+- [ ] AI-powered rote suggestions
+- [ ] Character portrait generator
+- [ ] Session note-taking
+- [ ] Initiative tracker
+- [ ] NPC database
+- [ ] Cabal (group) management
+
+---
+
+## 💬 Support
+
+For questions or issues:
+1. Check the [installation guide](docs/installation.md)
+2. Search existing issues
+3. Create a new issue with details
+
+---
+
+## 🙏 Acknowledgments
+
+Thanks to:
+- The Mage: The Ascension community
+- Onyx Path Publishing for continuing the line
+- White Wolf for creating this amazing game
+- Everyone who has contributed rotes and feedback
+
+---
+
+*"Reality is what you make of it. Make it wisely."* ✨
+
+---
+
+**Version:** 2.0  
+**Last Updated:** April 2026  
+**Maintained by:** Nicolás Castrege
