@@ -238,7 +238,7 @@ export function RoteCard({ rote, onClick, compact = false, matchingSpheres }: Ro
         </div>
         {rote.user && (
           <div className="text-xs text-muted-foreground font-mono italic">
-            Created by {rote.user.name || rote.user.email}
+            Inscribed by {rote.user.name || rote.user.email}
           </div>
         )}
         {/* Share button */}
