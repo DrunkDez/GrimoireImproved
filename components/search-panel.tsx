@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import type { Rote } from "@/lib/mage-data"
 import { getLinkedSpheres } from "@/lib/mage-data"
 import { RoteCard } from "./rote-card"
@@ -10,13 +10,75 @@ import { TraditionComboboxSimple } from "./tradition-combobox"
 interface SearchPanelProps {
   rotes: Rote[]
   onSelectRote: (rote: Rote) => void
+  shouldRestoreState?: boolean
+  onStateRestored?: () => void
 }
 
-export function SearchPanel({ rotes, onSelectRote }: SearchPanelProps) {
-  const [query, setQuery] = useState("")
-  const [traditionFilter, setTraditionFilter] = useState("")
-  const [sphereFilters, setSphereFilters] = useState<Record<string, number>>({})
-  const [showSphereFilter, setShowSphereFilter] = useState(false)
+export function SearchPanel({ rotes, onSelectRote, shouldRestoreState, onStateRestored }: SearchPanelProps) {
+  // Initialize state from sessionStorage if restoring
+  const [query, setQuery] = useState(() => {
+    if (typeof window !== 'undefined' && shouldRestoreState) {
+      return sessionStorage.getItem('searchPanelQuery') || ""
+    }
+    return ""
+  })
+  
+  const [traditionFilter, setTraditionFilter] = useState(() => {
+    if (typeof window !== 'undefined' && shouldRestoreState) {
+      return sessionStorage.getItem('searchPanelTradition') || ""
+    }
+    return ""
+  })
+  
+  const [sphereFilters, setSphereFilters] = useState<Record<string, number>>(() => {
+    if (typeof window !== 'undefined' && shouldRestoreState) {
+      const saved = sessionStorage.getItem('searchPanelSpheres')
+      if (saved) {
+        try {
+          return JSON.parse(saved)
+        } catch {
+          return {}
+        }
+      }
+    }
+    return {}
+  })
+  
+  const [showSphereFilter, setShowSphereFilter] = useState(() => {
+    if (typeof window !== 'undefined' && shouldRestoreState) {
+      return sessionStorage.getItem('searchPanelShowSphereFilter') === 'true'
+    }
+    return false
+  })
+
+  // Restore effect (runs once on mount if shouldRestoreState)
+  useEffect(() => {
+    if (shouldRestoreState) {
+      const savedQuery = sessionStorage.getItem('searchPanelQuery')
+      const savedTradition = sessionStorage.getItem('searchPanelTradition')
+      const savedSpheres = sessionStorage.getItem('searchPanelSpheres')
+      const savedShowSphere = sessionStorage.getItem('searchPanelShowSphereFilter')
+
+      if (savedQuery !== null) setQuery(savedQuery)
+      if (savedTradition !== null) setTraditionFilter(savedTradition)
+      if (savedSpheres !== null) {
+        try {
+          setSphereFilters(JSON.parse(savedSpheres))
+        } catch {}
+      }
+      if (savedShowSphere !== null) setShowSphereFilter(savedShowSphere === 'true')
+      
+      onStateRestored?.()
+    }
+  }, [shouldRestoreState, onStateRestored])
+
+  // Save state whenever it changes
+  useEffect(() => {
+    sessionStorage.setItem('searchPanelQuery', query)
+    sessionStorage.setItem('searchPanelTradition', traditionFilter)
+    sessionStorage.setItem('searchPanelSpheres', JSON.stringify(sphereFilters))
+    sessionStorage.setItem('searchPanelShowSphereFilter', showSphereFilter.toString())
+  }, [query, traditionFilter, sphereFilters, showSphereFilter])
 
   const handleSphereChange = (sphere: string, level: number) => {
     setSphereFilters((prev) => {
