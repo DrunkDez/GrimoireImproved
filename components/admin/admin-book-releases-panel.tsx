@@ -69,10 +69,15 @@ export function AdminBookReleasesPanel() {
   const fetchReleases = async () => {
     try {
       setIsLoading(true)
-      const response = await fetch('/api/admin/book-releases')
+      const response = await fetch('/api/admin/book-releases', {
+        credentials: 'include', // ✅ Send session cookie
+      })
       if (response.ok) {
         const data = await response.json()
         setReleases(data)
+      } else if (response.status === 401) {
+        // Redirect to login if session expired
+        window.location.href = '/auth/signin'
       }
     } catch (error) {
       console.error('Error fetching releases:', error)
@@ -135,6 +140,7 @@ export function AdminBookReleasesPanel() {
       const response = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include', // ✅ Send session cookie
         body: JSON.stringify({
           title,
           publisher: publisher || null,
@@ -156,6 +162,8 @@ export function AdminBookReleasesPanel() {
         })
         setIsDialogOpen(false)
         fetchReleases()
+      } else if (response.status === 401) {
+        window.location.href = '/auth/signin'
       } else {
         throw new Error('Failed to save release')
       }
@@ -175,6 +183,7 @@ export function AdminBookReleasesPanel() {
     try {
       const response = await fetch(`/api/admin/book-releases/${id}`, {
         method: 'DELETE',
+        credentials: 'include', // ✅ Send session cookie
       })
 
       if (response.ok) {
@@ -183,6 +192,8 @@ export function AdminBookReleasesPanel() {
           description: "Book release has been deleted",
         })
         fetchReleases()
+      } else if (response.status === 401) {
+        window.location.href = '/auth/signin'
       }
     } catch (error) {
       console.error('Error deleting release:', error)
@@ -199,6 +210,7 @@ export function AdminBookReleasesPanel() {
       const response = await fetch(`/api/admin/book-releases/${release.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include', // ✅ Send session cookie
         body: JSON.stringify({
           published: !release.published,
         }),
@@ -212,6 +224,8 @@ export function AdminBookReleasesPanel() {
             : "Release is now visible to users",
         })
         fetchReleases()
+      } else if (response.status === 401) {
+        window.location.href = '/auth/signin'
       }
     } catch (error) {
       console.error('Error toggling published:', error)
