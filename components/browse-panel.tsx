@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import { Rote } from '@/lib/mage-data'
 import { getLinkedSpheres } from '@/lib/mage-data'
 import { RoteCard } from './rote-card'
@@ -40,6 +40,9 @@ export function BrowsePanel({ rotes, onSelectRote, shouldRestoreState, onStateRe
   const [mixAndMatch, setMixAndMatch] = useState(false)
   const [randomSeed, setRandomSeed] = useState(Math.random())
   const [displayCount, setDisplayCount] = useState(ITEMS_PER_PAGE)
+
+  // Flag to prevent resetting displayCount during restoration
+  const isRestoring = useRef(false)
 
   // Get unique traditions
   const traditions = useMemo(() => {
@@ -197,9 +200,14 @@ export function BrowsePanel({ rotes, onSelectRote, shouldRestoreState, onStateRe
     setDisplayCount(prev => prev + ITEMS_PER_PAGE)
   }
 
-  // Reset display count when filters change (including mix&Match toggle)
+  // Reset display count when filters change (but skip during restoration)
   useEffect(() => {
-    setDisplayCount(ITEMS_PER_PAGE)
+    if (!isRestoring.current) {
+      setDisplayCount(ITEMS_PER_PAGE)
+    } else {
+      // After restoration is done, clear the flag
+      isRestoring.current = false
+    }
   }, [searchQuery, selectedTradition, selectedSpheres, mixAndMatch])
 
   // Reset random seed when filters change
@@ -212,6 +220,8 @@ export function BrowsePanel({ rotes, onSelectRote, shouldRestoreState, onStateRe
   // Restore state if needed
   useEffect(() => {
     if (shouldRestoreState) {
+      isRestoring.current = true
+      
       const savedQuery = sessionStorage.getItem('browseSearchQuery')
       const savedTradition = sessionStorage.getItem('browseTradition')
       const savedSpheres = sessionStorage.getItem('browseSpheres')
