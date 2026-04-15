@@ -114,7 +114,7 @@ export function RoteCard({ rote, onClick, compact = false, matchingSpheres }: Ro
         {/* Creator badge */}
         {rote.user && (
           <div className="text-xs text-muted-foreground font-mono mt-1">
-            by {rote.user.name || rote.user.email}
+           Inscribed by {rote.user.name || rote.user.email}
           </div>
         )}
       </button>
