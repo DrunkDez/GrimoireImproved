@@ -411,3 +411,45 @@ model GuideExpandedContent {
   updatedAt   DateTime @updatedAt
 }
 
+// ============================================
+// SITE UPDATES & ANNOUNCEMENTS
+// ============================================
+model SiteUpdate {
+  id          String    @id @default(cuid())
+  title       String    // e.g., "Added Experience Tracker"
+  description String    @db.Text  // Markdown supported
+  category    String    // "Feature", "Bug Fix", "Content", "Improvement", "Announcement"
+  published   Boolean   @default(false)
+  priority    Int       @default(0)  // Higher = shows first
+  date        DateTime  @default(now())  // Update date
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  @@index([published])
+  @@index([date])
+  @@index([priority])
+}
+
+// ============================================
+// UPCOMING BOOK RELEASES
+// ============================================
+model BookRelease {
+  id              String    @id @default(cuid())
+  title           String    // Book title
+  publisher       String?   // "Onyx Path", "White Wolf", etc.
+  description     String    @db.Text  // Markdown supported
+  releaseDate     DateTime? // Expected or actual release date
+  status          String    // "Announced", "Pre-order", "Released", "Delayed"
+  coverImageUrl   String?   // Cover art URL
+  purchaseUrl     String?   // Where to buy
+  announcementUrl String?   // Official announcement link
+  published       Boolean   @default(false)
+  priority        Int       @default(0)  // Higher = shows first
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  @@index([published])
+  @@index([status])
+  @@index([releaseDate])
+  @@index([priority])
+}

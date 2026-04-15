@@ -5,6 +5,8 @@ import Link from "next/link"
 import type { Rote } from "@/lib/mage-data"
 import { MarkdownRenderer } from "@/components/ui/markdown-renderer"
 import { RandomSphereSymbols } from "@/components/random-sphere-symbols"
+import { LatestUpdateBanner } from "@/components/latest-update-banner"  // NEW
+import { UpcomingBookReleases } from "@/components/upcoming-book-releases"  // NEW
 
 interface HomePanelProps {
   totalRotes: number
@@ -46,6 +48,9 @@ export function HomePanel({ totalRotes, traditions, onNavigate }: HomePanelProps
 
   return (
     <div className="animate-fade-in-up flex flex-col gap-4 sm:gap-6 md:gap-8 p-3 sm:p-4 md:p-6 lg:p-10">
+      {/* NEW: Latest Update Banner */}
+      <LatestUpdateBanner />
+
       {/* Hero area */}
       <div
         className="relative bg-card border-2 sm:border-3 md:border-4 border-double border-primary rounded-lg px-3 sm:px-4 md:px-6 py-8 sm:py-12 md:py-16 text-center
@@ -68,6 +73,9 @@ export function HomePanel({ totalRotes, traditions, onNavigate }: HomePanelProps
           <MarkdownRenderer content={welcomeText} className="text-sm sm:text-base md:text-lg" />
         </div>
       </div>
+
+      {/* NEW: Upcoming Book Releases */}
+      <UpcomingBookReleases />
 
       {/* How to Use section */}
       <div className="bg-card border-2 sm:border-[3px] border-primary border-l-[4px] sm:border-l-[6px] border-l-accent rounded-md p-4 sm:p-5 md:p-6 lg:p-8

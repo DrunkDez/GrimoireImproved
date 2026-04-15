@@ -10,7 +10,9 @@ import { MageGroupsManager } from "./admin/mage-groups-manager"
 import { ContentManager } from "./admin/content-manager"
 import { CharacterCreationManager } from "./admin/character-creation-manager"
 import { ExpandableStepsManager } from "./admin/expandable-steps-manager"
-import { ShieldAlert, Lock, X, BookOpen, Star, Library, FileText, Users } from "lucide-react"
+import { AdminSiteUpdatesPanel } from "./admin/admin-site-updates-panel"
+import { AdminBookReleasesPanel } from "./admin/admin-book-releases-panel"
+import { ShieldAlert, Lock, X, BookOpen, Star, Library, FileText, Users, Megaphone, Book } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { AdminRotesPanel } from "@/components/admin/admin-rotes-panel"
 import { AdminMeritsPanel } from "@/components/admin/admin-merits-panel"
@@ -140,10 +142,18 @@ export function AdminPanel({ rotes, onRotesChange, onClose }: AdminPanelProps) {
       </div>
 
       <Tabs defaultValue="content" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-8 max-w-4xl">
+        <TabsList className="grid w-full grid-cols-10 max-w-5xl">
           <TabsTrigger value="content" className="gap-2">
             <FileText className="w-4 h-4" />
             Content
+          </TabsTrigger>
+          <TabsTrigger value="updates" className="gap-2">
+            <Megaphone className="w-4 h-4" />
+            Updates
+          </TabsTrigger>
+          <TabsTrigger value="books" className="gap-2">
+            <Book className="w-4 h-4" />
+            Books
           </TabsTrigger>
           <TabsTrigger value="rotes" className="gap-2">
             <BookOpen className="w-4 h-4" />
@@ -163,7 +173,7 @@ export function AdminPanel({ rotes, onRotesChange, onClose }: AdminPanelProps) {
           </TabsTrigger>
           <TabsTrigger value="overview" className="gap-2">
             <BookOpen className="w-4 h-4" />
-            Overview Steps
+            Overview
           </TabsTrigger>
           <TabsTrigger value="guide" className="gap-2">
             <BookOpen className="w-4 h-4" />
@@ -177,6 +187,14 @@ export function AdminPanel({ rotes, onRotesChange, onClose }: AdminPanelProps) {
 
         <TabsContent value="content">
           <ContentManager />
+        </TabsContent>
+
+        <TabsContent value="updates">
+          <AdminSiteUpdatesPanel />
+        </TabsContent>
+
+        <TabsContent value="books">
+          <AdminBookReleasesPanel />
         </TabsContent>
 
         <TabsContent value="rotes">
