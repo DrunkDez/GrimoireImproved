@@ -49,6 +49,15 @@ export function LatestUpdateBanner() {
     }
   }
 
+  // Helper: format ISO date string to DD/MM/YY
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString)
+    const day = date.getDate().toString().padStart(2, '0')
+    const month = (date.getMonth() + 1).toString().padStart(2, '0')
+    const year = date.getFullYear().toString().slice(-2) // last two digits
+    return `${day}/${month}/${year}`
+  }
+
   if (isLoading || !update || isDismissed) {
     return null
   }
@@ -86,7 +95,7 @@ export function LatestUpdateBanner() {
             {update.category}
           </span>
           <span className="text-xs text-muted-foreground ml-auto">
-            {new Date(update.date).toLocaleDateString()}
+            {formatDate(update.date)}
           </span>
         </div>
 
