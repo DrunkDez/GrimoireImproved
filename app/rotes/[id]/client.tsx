@@ -378,7 +378,7 @@ export default function RotePageClient({ id }: RotePageClientProps) {
                 {rote.user && (
                   <div className="mt-6 pt-6 border-t-2 border-primary/30">
                     <p className="text-sm text-muted-foreground font-mono italic">
-                      Created by {rote.user.name || rote.user.email}
+                      Inscribed by {rote.user.name || rote.user.email}
                     </p>
                   </div>
                 )}
