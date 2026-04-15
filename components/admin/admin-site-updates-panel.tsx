@@ -61,10 +61,15 @@ export function AdminSiteUpdatesPanel() {
   const fetchUpdates = async () => {
     try {
       setIsLoading(true)
-      const response = await fetch('/api/admin/site-updates')
+      const response = await fetch('/api/admin/site-updates', {
+        credentials: 'include', // ✅ Send session cookie
+      })
       if (response.ok) {
         const data = await response.json()
         setUpdates(data)
+      } else if (response.status === 401) {
+        // Redirect to login if session expired
+        window.location.href = '/auth/signin'
       }
     } catch (error) {
       console.error('Error fetching updates:', error)
@@ -119,6 +124,7 @@ export function AdminSiteUpdatesPanel() {
       const response = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include', // ✅ Send session cookie
         body: JSON.stringify({
           title,
           description,
@@ -136,6 +142,8 @@ export function AdminSiteUpdatesPanel() {
         })
         setIsDialogOpen(false)
         fetchUpdates()
+      } else if (response.status === 401) {
+        window.location.href = '/auth/signin'
       } else {
         throw new Error('Failed to save update')
       }
@@ -155,6 +163,7 @@ export function AdminSiteUpdatesPanel() {
     try {
       const response = await fetch(`/api/admin/site-updates/${id}`, {
         method: 'DELETE',
+        credentials: 'include', // ✅ Send session cookie
       })
 
       if (response.ok) {
@@ -163,6 +172,8 @@ export function AdminSiteUpdatesPanel() {
           description: "Site update has been deleted",
         })
         fetchUpdates()
+      } else if (response.status === 401) {
+        window.location.href = '/auth/signin'
       }
     } catch (error) {
       console.error('Error deleting update:', error)
@@ -179,6 +190,7 @@ export function AdminSiteUpdatesPanel() {
       const response = await fetch(`/api/admin/site-updates/${update.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include', // ✅ Send session cookie
         body: JSON.stringify({
           published: !update.published,
         }),
@@ -192,6 +204,8 @@ export function AdminSiteUpdatesPanel() {
             : "Update is now visible to users",
         })
         fetchUpdates()
+      } else if (response.status === 401) {
+        window.location.href = '/auth/signin'
       }
     } catch (error) {
       console.error('Error toggling published:', error)
