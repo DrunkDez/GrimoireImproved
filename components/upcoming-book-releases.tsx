@@ -101,9 +101,10 @@ export function UpcomingBookReleases() {
 
                 {release.releaseDate && (
                   <p className="text-xs text-muted-foreground mb-2">
-                    Expected: {new Date(release.releaseDate).toLocaleDateString('en-US', { 
-                      month: 'long', 
-                      year: 'numeric' 
+                    Expected: {new Date(release.releaseDate).toLocaleDateString('en-GB', {
+                      day: 'numeric',
+                      month: 'long',
+                      year: 'numeric'
                     })}
                   </p>
                 )}
