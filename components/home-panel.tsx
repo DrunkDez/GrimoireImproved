@@ -7,6 +7,8 @@ import { MarkdownRenderer } from "@/components/ui/markdown-renderer"
 import { RandomSphereSymbols } from "@/components/random-sphere-symbols"
 import { LatestUpdateBanner } from "@/components/latest-update-banner"  // NEW
 import { UpcomingBookReleases } from "@/components/upcoming-book-releases"  // NEW
+import { LatestSiteUpdates } from "@/components/latest-site-updates"
+
 
 interface HomePanelProps {
   totalRotes: number
@@ -74,6 +76,9 @@ export function HomePanel({ totalRotes, traditions, onNavigate }: HomePanelProps
         </div>
       </div>
 
+      {/* Latest News */}
+      <LatestSiteUpdates />
+      
       {/* NEW: Upcoming Book Releases */}
       <UpcomingBookReleases />
 
