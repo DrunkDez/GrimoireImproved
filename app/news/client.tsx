@@ -23,7 +23,6 @@ export default function NewsPageClient() {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    // Fetch all published updates (no limit param = default 10, but we can request a large limit)
     fetch('/api/site-updates?limit=100')
       .then(res => res.json())
       .then(data => {
