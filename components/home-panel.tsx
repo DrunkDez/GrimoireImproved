@@ -1,3 +1,6 @@
+// components/home-panel.tsx - VERSION WITH HERO + NEWS FEED
+// Replace your home-panel.tsx with this version
+
 "use client"
 
 import { useEffect, useState } from "react"
@@ -5,8 +8,9 @@ import Link from "next/link"
 import type { Rote } from "@/lib/mage-data"
 import { MarkdownRenderer } from "@/components/ui/markdown-renderer"
 import { RandomSphereSymbols } from "@/components/random-sphere-symbols"
-import { LatestUpdateBanner } from "@/components/latest-update-banner"  // NEW
-import { UpcomingBookReleases } from "@/components/upcoming-book-releases"  // NEW
+import { SiteUpdateHero } from "@/components/site-update-hero"  // NEW - Hero banner
+import { NewsFeed } from "@/components/news-feed"  // NEW - News feed
+import { UpcomingBookReleases } from "@/components/upcoming-book-releases"
 
 interface HomePanelProps {
   totalRotes: number
@@ -48,8 +52,8 @@ export function HomePanel({ totalRotes, traditions, onNavigate }: HomePanelProps
 
   return (
     <div className="animate-fade-in-up flex flex-col gap-4 sm:gap-6 md:gap-8 p-3 sm:p-4 md:p-6 lg:p-10">
-      {/* NEW: Latest Update Banner */}
-      <LatestUpdateBanner />
+      {/* NEW: Site Update Hero Banner (non-dismissible) */}
+      <SiteUpdateHero />
 
       {/* Hero area */}
       <div
@@ -74,8 +78,11 @@ export function HomePanel({ totalRotes, traditions, onNavigate }: HomePanelProps
         </div>
       </div>
 
-      {/* NEW: Upcoming Book Releases */}
-      <UpcomingBookReleases />
+      {/* NEW: News Feed AND Upcoming Releases - Side by Side on Desktop */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+        <NewsFeed />
+        <UpcomingBookReleases />
+      </div>
 
       {/* How to Use section */}
       <div className="bg-card border-2 sm:border-[3px] border-primary border-l-[4px] sm:border-l-[6px] border-l-accent rounded-md p-4 sm:p-5 md:p-6 lg:p-8
