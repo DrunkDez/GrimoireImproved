@@ -333,7 +333,7 @@ export default function DashboardPage() {
                             </CardDescription>
                           </div>
                           <div className="flex gap-2">
-                            <Link href={`/?tab=browse&rote=${rote.id}`}>
+                            <Link href={`/rotes/${rote.id}`}>
                               <Button variant="outline" size="sm" className="gap-2">
                                 <BookOpen className="w-4 h-4" />
                                 View
