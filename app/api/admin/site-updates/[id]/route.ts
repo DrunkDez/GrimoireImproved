@@ -1,24 +1,30 @@
-// app/api/admin/site-updates/[id]/route.ts
-
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/db'
 
+// Helper to get params (Next.js 15+)
+async function getParams(request: NextRequest, context: any) {
+  const params = await context.params
+  return params
+}
+
 // GET /api/admin/site-updates/[id]
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> | { id: string } }
 ) {
   try {
     const session = await getServerSession(authOptions)
-    
     if (!session?.user?.isAdmin) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const params = await context.params
+    const id = params.id
+
     const update = await prisma.siteUpdate.findUnique({
-      where: { id: params.id },
+      where: { id },
     })
 
     if (!update) {
@@ -38,14 +44,16 @@ export async function GET(
 // PUT /api/admin/site-updates/[id]
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> | { id: string } }
 ) {
   try {
     const session = await getServerSession(authOptions)
-    
     if (!session?.user?.isAdmin) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    const params = await context.params
+    const id = params.id
 
     const body = await request.json()
     const { title, description, category, published, priority, date } = body
@@ -62,7 +70,7 @@ export async function PUT(
     }
 
     const update = await prisma.siteUpdate.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         ...(title !== undefined && { title: title.trim() }),
         ...(description !== undefined && { description: description.trim() }),
@@ -86,17 +94,19 @@ export async function PUT(
 // DELETE /api/admin/site-updates/[id]
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> | { id: string } }
 ) {
   try {
     const session = await getServerSession(authOptions)
-    
     if (!session?.user?.isAdmin) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const params = await context.params
+    const id = params.id
+
     await prisma.siteUpdate.delete({
-      where: { id: params.id },
+      where: { id },
     })
 
     return NextResponse.json({ success: true })

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { MarkdownRenderer } from '@/components/ui/markdown-renderer'
 import { Megaphone, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import Link from 'next/link'
 
 interface SiteUpdate {
   id: string
@@ -12,6 +13,9 @@ interface SiteUpdate {
   category: string
   date: string
 }
+
+// Only show these categories in the banner
+const BANNER_CATEGORIES = ['Announcement', 'Feature', 'Improvement']
 
 export function LatestUpdateBanner() {
   const [update, setUpdate] = useState<SiteUpdate | null>(null)
@@ -24,15 +28,22 @@ export function LatestUpdateBanner() {
 
   const fetchLatestUpdate = async () => {
     try {
-      const response = await fetch('/api/site-updates?latest=true')
+      // Fetch the latest banner-worthy update (limit to 1, filter by category)
+      const response = await fetch('/api/site-updates?limit=5')
       if (response.ok) {
-        const data = await response.json()
-        setUpdate(data)
+        const updates = await response.json()
+        // Find the first published update that belongs to allowed banner categories
+        const bannerUpdate = (Array.isArray(updates) ? updates : []).find(
+          (u: SiteUpdate) => BANNER_CATEGORIES.includes(u.category)
+        )
+        setUpdate(bannerUpdate || null)
         
         // Check if user has dismissed this update
-        const dismissedId = localStorage.getItem('dismissedUpdate')
-        if (dismissedId === data.id) {
-          setIsDismissed(true)
+        if (bannerUpdate) {
+          const dismissedId = localStorage.getItem('dismissedUpdate')
+          if (dismissedId === bannerUpdate.id) {
+            setIsDismissed(true)
+          }
         }
       }
     } catch (error) {
@@ -49,13 +60,27 @@ export function LatestUpdateBanner() {
     }
   }
 
-  // Helper: format ISO date string to DD/MM/YY
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
     const day = date.getDate().toString().padStart(2, '0')
     const month = (date.getMonth() + 1).toString().padStart(2, '0')
-    const year = date.getFullYear().toString().slice(-2) // last two digits
+    const year = date.getFullYear().toString().slice(-2)
     return `${day}/${month}/${year}`
+  }
+
+  // Strip HTML/markdown and get plain text preview
+  const getPlainTextPreview = (markdown: string, maxLength = 150) => {
+    // Very simple stripping – remove markdown links and images
+    let text = markdown
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // links become text
+      .replace(/!\[[^\]]*\]\([^)]+\)/g, '') // images removed
+      .replace(/[#*_`~>]/g, '') // basic markdown chars
+      .replace(/\s+/g, ' ') // normalize whitespace
+      .trim()
+    if (text.length > maxLength) {
+      text = text.slice(0, maxLength) + '...'
+    }
+    return text
   }
 
   if (isLoading || !update || isDismissed) {
@@ -73,6 +98,8 @@ export function LatestUpdateBanner() {
     }
   }
 
+  const previewText = getPlainTextPreview(update.description)
+
   return (
     <div className="bg-accent/10 border-2 border-accent rounded-lg p-4 sm:p-6 mb-6 relative">
       <Button
@@ -86,7 +113,7 @@ export function LatestUpdateBanner() {
       </Button>
 
       <div className="pr-8">
-        <div className="flex items-center gap-2 mb-3">
+        <div className="flex items-center gap-2 mb-3 flex-wrap">
           <Megaphone className="w-5 h-5 text-accent" />
           <h3 className="font-serif font-bold text-primary uppercase tracking-wider">
             Latest Update
@@ -101,9 +128,14 @@ export function LatestUpdateBanner() {
 
         <h4 className="font-semibold text-foreground mb-2">{update.title}</h4>
         
-        <div className="prose prose-sm dark:prose-invert max-w-none">
-          <MarkdownRenderer content={update.description} />
-        </div>
+        <p className="text-sm text-muted-foreground">{previewText}</p>
+        
+        <Link 
+          href="/news" 
+          className="inline-block mt-3 text-sm text-accent hover:text-accent/80 transition-colors"
+        >
+          Read full announcement →
+        </Link>
       </div>
     </div>
   )
