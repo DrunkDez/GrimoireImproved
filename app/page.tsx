@@ -8,7 +8,7 @@ import { GrimoireNav, type TabId } from "@/components/grimoire-nav"
 import { GrimoireFooter } from "@/components/grimoire-footer"
 import { HomePanel } from "@/components/home-panel"
 import { AddRotePanel } from "@/components/add-rote-panel"
-import RoteDetail from "@/components/rote-detail"        // ← default export
+import RoteDetail from "@/components/rote-detail"
 import { AdminPanel } from "@/components/admin-panel"
 import { Button } from "@/components/ui/button"
 import { ShieldAlert } from "lucide-react"
@@ -63,16 +63,44 @@ export default function Page() {
 
   const handleNavigate = useCallback((tab: TabId) => {
     setSelectedRote(null)
-    // Route to separate pages
-    if (tab === "browse")    { router.push("/browse");              return }
-    if (tab === "merits")    { router.push("/merits-flaws");        return }
-    if (tab === "resources") { router.push("/recommended");         return }
-    if (tab === "character") { router.push("/character-creation");  return }
+    if (tab === "browse")    { router.push("/browse");             return }
+    if (tab === "merits")    { router.push("/merits-flaws");       return }
+    if (tab === "resources") { router.push("/recommended");        return }
+    if (tab === "character") { router.push("/character-creation"); return }
     setActiveTab(tab)
   }, [router])
 
   const uniqueTraditions = new Set(rotes.map(r => r.tradition)).size
 
+  // ── Admin panel renders STANDALONE — no header, no nav ──
+  if (showAdminPanel) {
+    return (
+      <>
+        <div className="min-h-screen relative z-[1] py-5 px-3 md:py-7 md:px-4">
+          <div
+            className="max-w-[1400px] mx-auto bg-background rounded-xl overflow-hidden relative"
+            style={{
+              border:    "1px solid hsl(var(--primary) / 0.32)",
+              boxShadow: `
+                inset 0 1px 0 hsl(var(--primary) / 0.12),
+                0 20px 60px hsl(var(--background) / 0.8),
+                0 4px 24px rgba(0, 0, 0, 0.45)
+              `,
+            }}
+          >
+            <AdminPanel
+              rotes={rotes}
+              onRotesChange={fetchRotes}
+              onClose={() => setShowAdminPanel(false)}
+            />
+          </div>
+        </div>
+        <Toaster />
+      </>
+    )
+  }
+
+  // ── Normal page shell ──
   return (
     <>
       <div className="min-h-screen relative z-[1] py-5 px-3 md:py-7 md:px-4">
@@ -97,7 +125,7 @@ export default function Page() {
             >◈</div>
           ))}
 
-          {/* Admin button */}
+          {/* Admin button — hidden until hover */}
           <Button
             variant="ghost"
             size="sm"
@@ -127,9 +155,7 @@ export default function Page() {
               backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M40 0L0 0 0 40' fill='none' stroke='%237b5ea7' stroke-width='0.35' opacity='0.06'/%3E%3C/svg%3E")`,
             }}
           >
-            {showAdminPanel ? (
-              <AdminPanel rotes={rotes} onRotesChange={fetchRotes} onClose={() => setShowAdminPanel(false)} />
-            ) : isLoading ? (
+            {isLoading ? (
               <div className="flex flex-col items-center justify-center min-h-[500px] gap-4">
                 <span
                   className="text-accent text-4xl"
@@ -163,5 +189,7 @@ export default function Page() {
       </div>
       <Toaster />
     </>
+  )
+}
   )
 }
