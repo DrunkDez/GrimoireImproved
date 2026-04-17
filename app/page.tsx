@@ -7,9 +7,8 @@ import { GrimoireHeader } from "@/components/grimoire-header"
 import { GrimoireNav, type TabId } from "@/components/grimoire-nav"
 import { GrimoireFooter } from "@/components/grimoire-footer"
 import { HomePanel } from "@/components/home-panel"
-import { BrowsePanel } from "@/components/browse-panel"
 import { AddRotePanel } from "@/components/add-rote-panel"
-import RoteDetail from "@/components/rote-detail"   // ← default export, not named
+import RoteDetail from "@/components/rote-detail"        // ← default export
 import { AdminPanel } from "@/components/admin-panel"
 import { Button } from "@/components/ui/button"
 import { ShieldAlert } from "lucide-react"
@@ -64,9 +63,11 @@ export default function Page() {
 
   const handleNavigate = useCallback((tab: TabId) => {
     setSelectedRote(null)
-    if (tab === "browse")    { router.push("/browse");       return }
-    if (tab === "merits")    { router.push("/merits-flaws"); return }
-    if (tab === "resources") { router.push("/recommended");  return }
+    // Route to separate pages
+    if (tab === "browse")    { router.push("/browse");              return }
+    if (tab === "merits")    { router.push("/merits-flaws");        return }
+    if (tab === "resources") { router.push("/recommended");         return }
+    if (tab === "character") { router.push("/character-creation");  return }
     setActiveTab(tab)
   }, [router])
 
@@ -86,16 +87,14 @@ export default function Page() {
             `,
           }}
         >
-          {/* Purple diamond corner accents */}
+          {/* Corner accents */}
           {["-top-[6px] -left-[6px]", "-top-[6px] -right-[6px]"].map((pos, i) => (
             <div
               key={i}
               className={`absolute ${pos} text-primary z-10 text-xl pointer-events-none`}
               style={{ filter: "drop-shadow(0 0 6px hsl(var(--primary) / 0.6))" }}
               aria-hidden="true"
-            >
-              ◈
-            </div>
+            >◈</div>
           ))}
 
           {/* Admin button */}
@@ -136,9 +135,7 @@ export default function Page() {
                   className="text-accent text-4xl"
                   style={{ animation: "spin 3s linear infinite", display: "inline-block" }}
                   aria-hidden="true"
-                >
-                  ⚙
-                </span>
+                >⚙</span>
                 <p className="font-serif text-[11px] uppercase tracking-[0.28em] text-muted-foreground">
                   Turning the Wheel…
                 </p>
