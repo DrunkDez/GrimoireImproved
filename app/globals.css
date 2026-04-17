@@ -2,66 +2,44 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ============================================
-   MODERN BASE STYLES
-   ============================================ */
+/* ============================================================
+   NO font-family override anywhere in this file.
+   Cinzel → font-serif, Crimson Text → font-sans (body),
+   IM Fell → font-mono  — all set via tailwind.config.ts.
+   ============================================================ */
 
 @layer base {
-  /* Modern font rendering */
+  /* Font rendering only — no font-family reset */
   * {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
-  
-  /* System font stack */
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
-    font-feature-settings: 'kern' 1, 'liga' 1;
-  }
-  
-  /* Smooth scrolling */
+
   html {
     scroll-behavior: smooth;
   }
-  
-  /* Better selection */
+
   ::selection {
-    background-color: hsl(var(--accent) / 0.3);
+    background-color: hsl(var(--primary) / 0.22);
     color: hsl(var(--foreground));
   }
-  
-  /* Custom golden scrollbar */
-  ::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
+
+  .dark ::selection {
+    background-color: hsl(var(--primary) / 0.35);
+    color: hsl(var(--foreground));
   }
-  
-  ::-webkit-scrollbar-track {
-    background: hsl(var(--muted));
-  }
-  
-  ::-webkit-scrollbar-thumb {
-    background: hsl(var(--accent) / 0.5);
-    border-radius: 5px;
-    transition: background 0.2s;
-  }
-  
-  ::-webkit-scrollbar-thumb:hover {
-    background: hsl(var(--accent));
-  }
-  
-  /* Enhanced typography */
+
+  /* ── Wide tracking on headings — Cinzel needs space ── */
   h1, h2, h3, h4, h5, h6 {
     font-weight: 700;
     line-height: 1.2;
-    letter-spacing: -0.02em;
+    letter-spacing: 0.06em;   /* was -0.02em — fights Cinzel */
   }
-  
+
   p {
-    line-height: 1.7;
+    line-height: 1.75;
   }
-  
-  /* Better focus states */
+
   *:focus-visible {
     outline: none;
     box-shadow: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(var(--ring));
@@ -69,25 +47,15 @@
 }
 
 /* ============================================
-   MAGE: THE ASCENSION - DOT FILLING ANIMATIONS
+   MAGE: THE ASCENSION — DOT ANIMATIONS
    ============================================ */
 
-/* Main dot fill animation */
 @keyframes dot-fill {
-  0% {
-    transform: scale(0.3);
-    opacity: 0;
-  }
-  50% {
-    transform: scale(1.2);
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
+  0%   { transform: scale(0.3); opacity: 0; }
+  50%  { transform: scale(1.2); }
+  100% { transform: scale(1);   opacity: 1; }
 }
 
-/* Pulse effect for filled dots */
 @keyframes dot-pulse {
   0%, 100% {
     transform: scale(1);
@@ -99,155 +67,73 @@
   }
 }
 
-/* Mystical glow animation */
 @keyframes mystical-glow {
   0%, 100% {
-    box-shadow: 
-      0 0 8px rgba(139, 71, 38, 0.6),
-      inset 0 0 4px rgba(139, 71, 38, 0.4);
+    box-shadow: 0 0 8px rgba(139, 71, 38, 0.6), inset 0 0 4px rgba(139, 71, 38, 0.4);
   }
   50% {
-    box-shadow: 
-      0 0 16px rgba(139, 71, 38, 0.9),
-      inset 0 0 8px rgba(139, 71, 38, 0.6);
+    box-shadow: 0 0 16px rgba(139, 71, 38, 0.9), inset 0 0 8px rgba(139, 71, 38, 0.6);
   }
 }
 
-/* Sphere-specific glow (purple) */
 @keyframes sphere-glow {
   0%, 100% {
-    box-shadow: 
-      0 0 8px rgba(107, 45, 107, 0.7),
-      inset 0 0 4px rgba(107, 45, 107, 0.5);
+    box-shadow: 0 0 8px rgba(107, 45, 200, 0.7), inset 0 0 4px rgba(107, 45, 200, 0.5);
   }
   50% {
-    box-shadow: 
-      0 0 16px rgba(107, 45, 107, 1),
-      inset 0 0 8px rgba(107, 45, 107, 0.7);
+    box-shadow: 0 0 16px rgba(107, 45, 200, 1),   inset 0 0 8px rgba(107, 45, 200, 0.7);
   }
 }
 
-/* Arete special glow (gold) */
 @keyframes arete-glow {
   0%, 100% {
-    box-shadow: 
-      0 0 12px rgba(218, 165, 32, 0.8),
-      inset 0 0 6px rgba(218, 165, 32, 0.6);
+    box-shadow: 0 0 12px rgba(218, 165, 32, 0.8), inset 0 0 6px rgba(218, 165, 32, 0.6);
   }
   50% {
-    box-shadow: 
-      0 0 20px rgba(218, 165, 32, 1),
-      inset 0 0 10px rgba(218, 165, 32, 0.8);
+    box-shadow: 0 0 20px rgba(218, 165, 32, 1),   inset 0 0 10px rgba(218, 165, 32, 0.8);
   }
 }
 
-/* Shimmer effect on hover */
 @keyframes shimmer {
-  0% {
-    background-position: -100% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
+  0%   { background-position: -100% 0; }
+  100% { background-position:  200% 0; }
 }
 
-/* Pop animation when clicking */
 @keyframes pop {
-  0% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.3);
-  }
-  100% {
-    transform: scale(1);
-  }
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.3); }
+  100% { transform: scale(1); }
 }
 
-/* Fade in from nothing */
 @keyframes fade-in-scale {
-  from {
-    opacity: 0;
-    transform: scale(0);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+  from { opacity: 0; transform: scale(0); }
+  to   { opacity: 1; transform: scale(1); }
 }
 
-/* Ripple effect */
 @keyframes ripple {
-  0% {
-    box-shadow: 0 0 0 0 rgba(139, 71, 38, 0.7);
-  }
-  100% {
-    box-shadow: 0 0 0 8px rgba(139, 71, 38, 0);
-  }
+  0%   { box-shadow: 0 0 0 0 rgba(107, 45, 200, 0.7); }
+  100% { box-shadow: 0 0 0 8px rgba(107, 45, 200, 0); }
 }
 
-/* ============================================
-   UTILITY CLASSES
-   ============================================ */
+/* ── Dot utility classes ── */
+.animate-dot-fill       { animation: dot-fill       0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+.animate-dot-pulse      { animation: dot-pulse       2s ease-in-out infinite; }
+.animate-mystical-glow  { animation: mystical-glow   2s ease-in-out infinite; }
+.animate-sphere-glow    { animation: sphere-glow     2s ease-in-out infinite; }
+.animate-arete-glow     { animation: arete-glow      2s ease-in-out infinite; }
+.animate-pop            { animation: pop             0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.animate-fade-in-scale  { animation: fade-in-scale   0.4s ease-out forwards; }
+.animate-ripple         { animation: ripple          0.6s ease-out; }
 
-/* Apply fill animation */
-.animate-dot-fill {
-  animation: dot-fill 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-}
-
-/* Continuous pulse */
-.animate-dot-pulse {
-  animation: dot-pulse 2s ease-in-out infinite;
-}
-
-/* Mystical glow */
-.animate-mystical-glow {
-  animation: mystical-glow 2s ease-in-out infinite;
-}
-
-/* Sphere glow */
-.animate-sphere-glow {
-  animation: sphere-glow 2s ease-in-out infinite;
-}
-
-/* Arete glow */
-.animate-arete-glow {
-  animation: arete-glow 2s ease-in-out infinite;
-}
-
-/* Shimmer on hover */
 .animate-shimmer {
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.3) 50%,
-    transparent 100%
-  );
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%);
   background-size: 200% 100%;
   animation: shimmer 2s linear infinite;
 }
 
-/* Pop effect */
-.animate-pop {
-  animation: pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-/* Fade in scale */
-.animate-fade-in-scale {
-  animation: fade-in-scale 0.4s ease-out forwards;
-}
-
-/* Ripple effect */
-.animate-ripple {
-  animation: ripple 0.6s ease-out;
-}
-
-/* ============================================
-   STAGGERED ANIMATION DELAYS
-   ============================================ */
-
-.animation-delay-0 { animation-delay: 0ms; }
-.animation-delay-50 { animation-delay: 50ms; }
+/* ── Staggered delays ── */
+.animation-delay-0   { animation-delay: 0ms; }
+.animation-delay-50  { animation-delay: 50ms; }
 .animation-delay-100 { animation-delay: 100ms; }
 .animation-delay-150 { animation-delay: 150ms; }
 .animation-delay-200 { animation-delay: 200ms; }
@@ -257,16 +143,8 @@
 .animation-delay-400 { animation-delay: 400ms; }
 .animation-delay-450 { animation-delay: 450ms; }
 
-/* ============================================
-   ENHANCED DOT STYLES
-   ============================================ */
-
-/* Filled dot with glow */
-.dot-filled {
-  position: relative;
-  overflow: visible;
-}
-
+/* ── Dot styles ── */
+.dot-filled { position: relative; overflow: visible; }
 .dot-filled::before {
   content: '';
   position: absolute;
@@ -278,411 +156,159 @@
   z-index: -1;
 }
 
-/* Empty dot */
-.dot-empty {
-  background: transparent;
-  position: relative;
-}
-
+.dot-empty { background: transparent; position: relative; }
 .dot-empty::after {
   content: '';
   position: absolute;
   inset: 2px;
   border-radius: 50%;
-  background: radial-gradient(
-    circle at 30% 30%,
-    rgba(255, 255, 255, 0.1),
-    transparent
-  );
+  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.1), transparent);
 }
 
-/* Hover state */
-.dot-hover {
-  transform: scale(1.1);
-  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
+.dot-hover { transform: scale(1.1); transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); }
 
-/* ============================================
-   SPECIALIZED VARIANTS
-   ============================================ */
-
-/* Attribute dots (brown/primary) */
+/* Dot colour variants — updated to purple */
 .dot-attribute-filled {
-  background: hsl(22 42% 40%);
-  border-color: hsl(22 42% 40%);
-  box-shadow: 
-    0 0 8px rgba(139, 71, 38, 0.6),
-    inset 0 0 4px rgba(255, 255, 255, 0.2);
+  background: hsl(280 50% 35%);
+  border-color: hsl(280 50% 35%);
+  box-shadow: 0 0 8px rgba(107, 45, 180, 0.6), inset 0 0 4px rgba(255,255,255,0.2);
 }
-
-/* Ability dots (gold/accent) */
 .dot-ability-filled {
-  background: hsl(42 42% 59%);
-  border-color: hsl(42 42% 59%);
-  box-shadow: 
-    0 0 8px rgba(218, 165, 32, 0.6),
-    inset 0 0 4px rgba(255, 255, 255, 0.3);
+  background: hsl(42 85% 52%);
+  border-color: hsl(42 85% 52%);
+  box-shadow: 0 0 8px rgba(218, 165, 32, 0.6), inset 0 0 4px rgba(255,255,255,0.3);
 }
-
-/* Sphere dots (purple/ring) */
 .dot-sphere-filled {
-  background: hsl(300 45% 30%);
-  border-color: hsl(300 45% 30%);
-  box-shadow: 
-    0 0 8px rgba(107, 45, 107, 0.7),
-    inset 0 0 4px rgba(255, 255, 255, 0.2);
+  background: hsl(280 60% 40%);
+  border-color: hsl(280 60% 40%);
+  box-shadow: 0 0 8px rgba(107, 45, 200, 0.7), inset 0 0 4px rgba(255,255,255,0.2);
 }
-
-/* Arete dots (gradient) */
 .dot-arete-filled {
-  background: linear-gradient(135deg, 
-    hsl(22 42% 40%) 0%, 
-    hsl(42 42% 59%) 50%, 
-    hsl(300 45% 30%) 100%
-  );
-  border-color: hsl(42 42% 59%);
-  box-shadow: 
-    0 0 12px rgba(218, 165, 32, 0.8),
-    inset 0 0 6px rgba(255, 255, 255, 0.3);
+  background: linear-gradient(135deg, hsl(280 50% 35%) 0%, hsl(42 85% 52%) 50%, hsl(280 60% 45%) 100%);
+  border-color: hsl(42 85% 52%);
+  box-shadow: 0 0 12px rgba(218, 165, 32, 0.8), inset 0 0 6px rgba(255,255,255,0.3);
 }
 
-/* ============================================
-   INTERACTIVE STATES
-   ============================================ */
-
-/* Focus visible for accessibility */
-.dot-interactive:focus-visible {
-  outline: 2px solid hsl(300 45% 30%);
-  outline-offset: 2px;
-}
-
-/* Active state (clicking) */
-.dot-interactive:active {
-  transform: scale(0.9);
-}
-
-/* Disabled state */
-.dot-disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  filter: grayscale(0.5);
-}
-
-/* ============================================
-   RESPONSIVE ADJUSTMENTS
-   ============================================ */
+.dot-interactive:focus-visible { outline: 2px solid hsl(280 60% 45%); outline-offset: 2px; }
+.dot-interactive:active        { transform: scale(0.9); }
+.dot-disabled                  { opacity: 0.5; cursor: not-allowed; filter: grayscale(0.5); }
 
 @media (max-width: 640px) {
-  /* Slightly smaller dots on mobile */
-  .dot-responsive {
-    width: 1.25rem;
-    height: 1.25rem;
-  }
+  .dot-responsive { width: 1.25rem; height: 1.25rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  /* Respect reduced motion preferences */
-  .animate-dot-fill,
-  .animate-dot-pulse,
-  .animate-mystical-glow,
-  .animate-sphere-glow,
-  .animate-arete-glow,
-  .animate-shimmer,
-  .animate-pop,
-  .animate-fade-in-scale,
-  .animate-ripple {
-    animation: none;
-  }
-  
-  .dot-hover {
-    transition: none;
-  }
+  .animate-dot-fill, .animate-dot-pulse, .animate-mystical-glow,
+  .animate-sphere-glow, .animate-arete-glow, .animate-shimmer,
+  .animate-pop, .animate-fade-in-scale, .animate-ripple { animation: none; }
+  .dot-hover { transition: none; }
 }
+
+/* Dark mode dot adjustments */
+.dark .dot-attribute-filled { box-shadow: 0 0 12px rgba(107, 45, 180, 0.8),  inset 0 0 6px rgba(255,255,255,0.1); }
+.dark .dot-ability-filled   { box-shadow: 0 0 12px rgba(218, 165, 32, 0.8),  inset 0 0 6px rgba(255,255,255,0.15); }
+.dark .dot-sphere-filled    { box-shadow: 0 0 12px rgba(107, 45, 200, 0.9),  inset 0 0 6px rgba(255,255,255,0.1); }
+.dark .dot-arete-filled     { box-shadow: 0 0 16px rgba(218, 165, 32, 1),    inset 0 0 8px rgba(255,255,255,0.15); }
 
 /* ============================================
-   DARK MODE ADJUSTMENTS
+   CHARACTER CREATION ANIMATIONS
    ============================================ */
 
-.dark .dot-attribute-filled {
-  box-shadow: 
-    0 0 12px rgba(139, 71, 38, 0.8),
-    inset 0 0 6px rgba(255, 255, 255, 0.1);
-}
-
-.dark .dot-ability-filled {
-  box-shadow: 
-    0 0 12px rgba(218, 165, 32, 0.8),
-    inset 0 0 6px rgba(255, 255, 255, 0.15);
-}
-
-.dark .dot-sphere-filled {
-  box-shadow: 
-    0 0 12px rgba(107, 45, 107, 0.9),
-    inset 0 0 6px rgba(255, 255, 255, 0.1);
-}
-
-.dark .dot-arete-filled {
-  box-shadow: 
-    0 0 16px rgba(218, 165, 32, 1),
-    inset 0 0 8px rgba(255, 255, 255, 0.15);
-}
-/* ============================================
-   GUIDED CHARACTER CREATION ANIMATIONS
-   ============================================ */
-
-/* Bounce horizontal (pointing arrow) */
 @keyframes bounce-horizontal {
-  0%, 100% {
-    transform: translateX(0) translateY(-50%);
-  }
-  50% {
-    transform: translateX(-8px) translateY(-50%);
-  }
+  0%, 100% { transform: translateX(0) translateY(-50%); }
+  50%       { transform: translateX(-8px) translateY(-50%); }
 }
-
-/* Slide in from right (tutorial card) */
 @keyframes slide-in-right {
-  from {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
+  from { transform: translateX(100%); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
 }
-
-/* Slide out to right */
 @keyframes slide-out-right {
-  from {
-    transform: translateX(0);
-    opacity: 1;
-  }
-  to {
-    transform: translateX(100%);
-    opacity: 0;
-  }
+  from { transform: translateX(0);    opacity: 1; }
+  to   { transform: translateX(100%); opacity: 0; }
 }
-
-/* Pulse once (when dot is clicked) */
 @keyframes dot-pulse-once {
-  0% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.3);
-  }
-  100% {
-    transform: scale(1);
-  }
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.3); }
+  100% { transform: scale(1); }
 }
-
-/* Fade in */
 @keyframes fade-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
-
-/* Highlight pulse (for focused sections) */
 @keyframes highlight-pulse {
-  0%, 100% {
-    box-shadow: 0 0 0 0 rgba(218, 165, 32, 0);
-  }
-  50% {
-    box-shadow: 0 0 0 8px rgba(218, 165, 32, 0.3);
-  }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(218, 165, 32, 0); }
+  50%       { box-shadow: 0 0 0 8px rgba(218, 165, 32, 0.3); }
 }
-
-/* Gentle shake (to draw attention) */
 @keyframes gentle-shake {
-  0%, 100% {
-    transform: translateX(0);
-  }
-  25% {
-    transform: translateX(-4px);
-  }
-  75% {
-    transform: translateX(4px);
-  }
+  0%, 100% { transform: translateX(0); }
+  25%       { transform: translateX(-4px); }
+  75%       { transform: translateX(4px); }
 }
-
-/* Glow intensify */
 @keyframes glow-intensify {
-  0% {
-    filter: drop-shadow(0 0 4px rgba(218, 165, 32, 0.4));
-  }
-  50% {
-    filter: drop-shadow(0 0 12px rgba(218, 165, 32, 0.8));
-  }
-  100% {
-    filter: drop-shadow(0 0 4px rgba(218, 165, 32, 0.4));
-  }
+  0%   { filter: drop-shadow(0 0 4px rgba(218, 165, 32, 0.4)); }
+  50%  { filter: drop-shadow(0 0 12px rgba(218, 165, 32, 0.8)); }
+  100% { filter: drop-shadow(0 0 4px rgba(218, 165, 32, 0.4)); }
 }
-
-/* Progress fill */
-@keyframes progress-fill {
-  from {
-    width: 0%;
-  }
-  to {
-    width: 100%;
-  }
+@keyframes progress-fill   { from { width: 0%; }   to { width: 100%; } }
+@keyframes tooltip-appear  {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
-
-/* Tooltip appear */
-@keyframes tooltip-appear {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+@keyframes checkmark-draw  { 0% { stroke-dashoffset: 100; } 100% { stroke-dashoffset: 0; } }
+@keyframes confetti-burst  {
+  0%   { transform: translateY(0) scale(0) rotate(0deg);   opacity: 1; }
+  100% { transform: translateY(-100px) scale(1) rotate(720deg); opacity: 0; }
 }
-
-/* Success checkmark */
-@keyframes checkmark-draw {
-  0% {
-    stroke-dashoffset: 100;
-  }
-  100% {
-    stroke-dashoffset: 0;
-  }
-}
-
-/* Confetti burst (celebration) */
-@keyframes confetti-burst {
-  0% {
-    transform: translateY(0) scale(0) rotate(0deg);
-    opacity: 1;
-  }
-  100% {
-    transform: translateY(-100px) scale(1) rotate(720deg);
-    opacity: 0;
-  }
-}
-
-/* Spotlight effect */
 @keyframes spotlight {
   0%, 100% {
-    box-shadow: 
-      0 0 0 0 rgba(218, 165, 32, 0),
-      inset 0 0 20px rgba(218, 165, 32, 0.1);
+    box-shadow: 0 0 0 0 rgba(218, 165, 32, 0), inset 0 0 20px rgba(218, 165, 32, 0.1);
   }
   50% {
-    box-shadow: 
-      0 0 40px rgba(218, 165, 32, 0.4),
-      inset 0 0 40px rgba(218, 165, 32, 0.2);
+    box-shadow: 0 0 40px rgba(218, 165, 32, 0.4), inset 0 0 40px rgba(218, 165, 32, 0.2);
   }
 }
 
-/* ============================================
-   UTILITY CLASSES FOR TUTORIAL
-   ============================================ */
-
-.animate-bounce-horizontal {
-  animation: bounce-horizontal 2s ease-in-out infinite;
-}
-
-.animate-slide-in-right {
-  animation: slide-in-right 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-}
-
-.animate-slide-out-right {
-  animation: slide-out-right 0.3s ease-out forwards;
-}
-
-.animate-dot-pulse-once {
-  animation: dot-pulse-once 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.animate-fade-in {
-  animation: fade-in 0.3s ease-out;
-}
-
-.animate-highlight-pulse {
-  animation: highlight-pulse 2s ease-in-out infinite;
-}
-
-.animate-gentle-shake {
-  animation: gentle-shake 0.5s ease-in-out;
-}
-
-.animate-glow-intensify {
-  animation: glow-intensify 2s ease-in-out infinite;
-}
-
-.animate-progress-fill {
-  animation: progress-fill 0.5s ease-out forwards;
-}
-
-.animate-tooltip-appear {
-  animation: tooltip-appear 0.3s ease-out;
-}
-
-.animate-checkmark-draw {
+.animate-bounce-horizontal { animation: bounce-horizontal 2s ease-in-out infinite; }
+.animate-slide-in-right     { animation: slide-in-right 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+.animate-slide-out-right    { animation: slide-out-right 0.3s ease-out forwards; }
+.animate-dot-pulse-once     { animation: dot-pulse-once 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.animate-fade-in            { animation: fade-in 0.3s ease-out; }
+.animate-highlight-pulse    { animation: highlight-pulse 2s ease-in-out infinite; }
+.animate-gentle-shake       { animation: gentle-shake 0.5s ease-in-out; }
+.animate-glow-intensify     { animation: glow-intensify 2s ease-in-out infinite; }
+.animate-progress-fill      { animation: progress-fill 0.5s ease-out forwards; }
+.animate-tooltip-appear     { animation: tooltip-appear 0.3s ease-out; }
+.animate-checkmark-draw     {
   animation: checkmark-draw 0.5s ease-out forwards;
   stroke-dasharray: 100;
   stroke-dashoffset: 100;
 }
+.animate-confetti-burst     { animation: confetti-burst 1s ease-out forwards; }
+.animate-spotlight          { animation: spotlight 3s ease-in-out infinite; }
 
-.animate-confetti-burst {
-  animation: confetti-burst 1s ease-out forwards;
-}
-
-.animate-spotlight {
-  animation: spotlight 3s ease-in-out infinite;
-}
-
-/* ============================================
-   INTERACTIVE TUTORIAL STATES
-   ============================================ */
-
-/* Highlight current step */
-.tutorial-active {
-  position: relative;
-  z-index: 10;
-}
-
+/* Tutorial states */
+.tutorial-active { position: relative; z-index: 10; }
 .tutorial-active::before {
   content: '';
   position: absolute;
   inset: -8px;
-  border: 2px solid hsl(42 42% 59%);
+  border: 2px solid hsl(42 85% 52%);
   border-radius: 8px;
   pointer-events: none;
   animation: highlight-pulse 2s ease-in-out infinite;
 }
-
-/* Dim inactive sections */
-.tutorial-inactive {
-  opacity: 0.4;
-  pointer-events: none;
-  filter: grayscale(0.3);
-  transition: all 0.3s ease;
-}
-
-/* Pointer/arrow for tutorial */
+.tutorial-inactive  { opacity: 0.4; pointer-events: none; filter: grayscale(0.3); transition: all 0.3s ease; }
 .tutorial-pointer {
   position: absolute;
-  left: -40px;
-  top: 50%;
+  left: -40px; top: 50%;
   transform: translateY(-50%);
-  width: 0;
-  height: 0;
+  width: 0; height: 0;
   border-top: 10px solid transparent;
   border-bottom: 10px solid transparent;
-  border-right: 15px solid hsl(42 42% 59%);
+  border-right: 15px solid hsl(42 85% 52%);
   animation: bounce-horizontal 2s ease-in-out infinite;
   filter: drop-shadow(0 0 8px rgba(218, 165, 32, 0.6));
 }
-
-/* Progress indicator */
 .tutorial-progress {
   position: relative;
   height: 4px;
@@ -690,140 +316,79 @@
   border-radius: 2px;
   overflow: hidden;
 }
-
-.tutorial-progress::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  height: 100%;
-  background: linear-gradient(90deg, 
-    hsl(42 42% 59%), 
-    hsl(42 42% 70%)
-  );
-  border-radius: 2px;
-  animation: progress-fill 0.5s ease-out forwards;
-}
-
-/* Step completion checkmark */
-.step-complete {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: hsl(142 76% 36%);
-  color: white;
-}
-
-.step-complete svg {
-  width: 12px;
-  height: 12px;
-  animation: checkmark-draw 0.5s ease-out forwards;
-}
-
-/* Tooltip */
 .tutorial-tooltip {
   position: absolute;
-  bottom: 100%;
-  left: 50%;
+  bottom: 100%; left: 50%;
   transform: translateX(-50%);
   margin-bottom: 8px;
   padding: 8px 12px;
-  background: hsl(42 42% 59%);
-  color: hsl(42 42% 10%);
+  background: hsl(42 85% 52%);
+  color: hsl(280 45% 10%);
   font-size: 0.75rem;
   font-weight: 600;
   border-radius: 6px;
   white-space: nowrap;
   pointer-events: none;
   animation: tooltip-appear 0.3s ease-out;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
-
 .tutorial-tooltip::after {
   content: '';
   position: absolute;
-  top: 100%;
-  left: 50%;
+  top: 100%; left: 50%;
   transform: translateX(-50%);
-  width: 0;
-  height: 0;
+  width: 0; height: 0;
   border-left: 6px solid transparent;
   border-right: 6px solid transparent;
-  border-top: 6px solid hsl(42 42% 59%);
+  border-top: 6px solid hsl(42 85% 52%);
 }
-
-/* Success celebration */
 .tutorial-success {
-  position: fixed;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(0, 0, 0, 0.8);
+  position: fixed; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(0,0,0,0.8);
   z-index: 100;
   animation: fade-in 0.3s ease-out;
 }
-
 .tutorial-success-content {
   background: hsl(var(--card));
-  border: 3px solid hsl(42 42% 59%);
+  border: 3px solid hsl(42 85% 52%);
   border-radius: 12px;
   padding: 48px;
   text-align: center;
   max-width: 500px;
   animation: slide-in-right 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-
-/* ============================================
-   RESPONSIVE ADJUSTMENTS
-   ============================================ */
+.step-complete {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: hsl(142 76% 36%);
+  color: white;
+}
+.step-complete svg { width: 12px; height: 12px; animation: checkmark-draw 0.5s ease-out forwards; }
 
 @media (max-width: 768px) {
-  .tutorial-pointer {
-    left: -30px;
-    border-right-width: 12px;
-  }
-
-  .tutorial-tooltip {
-    font-size: 0.65rem;
-    padding: 6px 10px;
-  }
-
-  .animate-bounce-horizontal {
-    animation: bounce-horizontal 1.5s ease-in-out infinite;
-  }
+  .tutorial-pointer  { left: -30px; border-right-width: 12px; }
+  .tutorial-tooltip  { font-size: 0.65rem; padding: 6px 10px; }
+  .animate-bounce-horizontal { animation-duration: 1.5s; }
 }
-
-/* ============================================
-   ACCESSIBILITY
-   ============================================ */
 
 @media (prefers-reduced-motion: reduce) {
-  .animate-bounce-horizontal,
-  .animate-highlight-pulse,
-  .animate-gentle-shake,
-  .animate-glow-intensify,
-  .animate-spotlight,
-  .tutorial-pointer {
-    animation: none !important;
-  }
-
-  .tutorial-active::before {
-    animation: none !important;
-    opacity: 1;
-  }
+  .animate-bounce-horizontal, .animate-highlight-pulse, .animate-gentle-shake,
+  .animate-glow-intensify, .animate-spotlight, .tutorial-pointer { animation: none !important; }
+  .tutorial-active::before { animation: none !important; opacity: 1; }
 }
 
-/* Focus visible for keyboard navigation */
 .tutorial-focus-visible:focus-visible {
-  outline: 3px solid hsl(42 42% 59%);
+  outline: 3px solid hsl(42 85% 52%);
   outline-offset: 4px;
   border-radius: 4px;
 }
-/* Mage Bats Font - Mage: The Ascension symbols */
+
+/* ============================================
+   MAGE BATS FONT
+   ============================================ */
+
 @font-face {
   font-family: 'Mage Bats';
   src: url('/fonts/Mage_Bats.ttf') format('truetype');
@@ -833,39 +398,39 @@
 }
 
 @layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
-  
-  .font-magebats {
-    font-family: 'Mage Bats', sans-serif;
-  }
+  .text-balance { text-wrap: balance; }
+  .font-magebats { font-family: 'Mage Bats', sans-serif; }
 }
+
+/* ============================================
+   PALETTE — PURPLE + PARCHMENT
+   (mirrors styles/globals.css for components
+   that only load this file)
+   ============================================ */
 
 @layer base {
   :root {
-    /* Modern Light Mode - Darker Warm Mystical Parchment */
-    --background: 35 20% 88%;        /* Darker beige - was 94% */
-    --foreground: 280 45% 12%;
-    --card: 40 25% 92%;              /* Darker cards - was 97% */
+    --background:      38 30% 91%;
+    --foreground:      280 45% 12%;
+    --card:            40 25% 96%;
     --card-foreground: 280 45% 12%;
-    --popover: 40 25% 93%;           /* Darker popover - was 98% */
+    --popover:         40 25% 96%;
     --popover-foreground: 280 45% 12%;
-    --primary: 280 60% 35%;
-    --primary-foreground: 40 35% 98%;
-    --secondary: 38 25% 80%;         /* Darker secondary - was 85% */
-    --secondary-foreground: 280 60% 25%;
-    --muted: 38 20% 83%;             /* Darker muted - was 88% */
-    --muted-foreground: 280 30% 45%;
-    --accent: 42 85% 55%;
-    --accent-foreground: 280 45% 12%;
-    --destructive: 0 72% 51%;
+    --primary:         280 60% 32%;
+    --primary-foreground: 40 35% 97%;
+    --secondary:       36 22% 83%;
+    --secondary-foreground: 280 45% 18%;
+    --muted:           36 20% 86%;
+    --muted-foreground: 280 20% 42%;
+    --accent:          42 85% 52%;
+    --accent-foreground: 280 45% 10%;
+    --destructive:     0 72% 51%;
     --destructive-foreground: 0 0% 98%;
-    --border: 280 25% 70%;           /* Darker border - was 75% */
-    --input: 280 20% 75%;            /* Darker input - was 80% */
-    --ring: 280 60% 45%;
+    --border:          280 20% 72%;
+    --input:           280 18% 76%;
+    --ring:            280 60% 45%;
     --chart-1: 280 60% 35%;
-    --chart-2: 42 85% 55%;
+    --chart-2: 42 85% 52%;
     --chart-3: 25 50% 55%;
     --chart-4: 280 40% 50%;
     --chart-5: 0 72% 51%;
@@ -873,28 +438,27 @@
   }
 
   .dark {
-    /* Modern Dark Mode - Deep Cosmic Mystery */
-    --background: 270 40% 6%;
-    --foreground: 40 60% 92%;
-    --card: 270 35% 10%;
-    --card-foreground: 40 60% 92%;
-    --popover: 270 40% 8%;
-    --popover-foreground: 40 60% 92%;
-    --primary: 280 70% 65%;
+    --background:      270 40% 6%;
+    --foreground:      40 55% 90%;
+    --card:            270 35% 10%;
+    --card-foreground: 40 55% 90%;
+    --popover:         270 40% 8%;
+    --popover-foreground: 40 55% 90%;
+    --primary:         280 70% 65%;
     --primary-foreground: 270 40% 6%;
-    --secondary: 270 25% 18%;
-    --secondary-foreground: 40 60% 92%;
-    --muted: 270 25% 14%;
-    --muted-foreground: 40 35% 68%;
-    --accent: 42 90% 68%;
+    --secondary:       270 25% 16%;
+    --secondary-foreground: 40 55% 88%;
+    --muted:           270 22% 14%;
+    --muted-foreground: 280 20% 60%;
+    --accent:          42 90% 62%;
     --accent-foreground: 270 40% 6%;
-    --destructive: 0 72% 51%;
+    --destructive:     0 65% 48%;
     --destructive-foreground: 0 0% 98%;
-    --border: 270 30% 22%;
-    --input: 270 25% 20%;
-    --ring: 280 70% 65%;
+    --border:          270 28% 20%;
+    --input:           270 24% 18%;
+    --ring:            280 70% 60%;
     --chart-1: 280 70% 65%;
-    --chart-2: 42 90% 68%;
+    --chart-2: 42 90% 62%;
     --chart-3: 200 65% 60%;
     --chart-4: 280 55% 55%;
     --chart-5: 0 72% 51%;
@@ -902,191 +466,129 @@
 }
 
 @layer base {
-  * {
-    @apply border-border;
-  }
-  
+  * { @apply border-border; }
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
 
-/* Mystical animated background */
+/* ── Atmospheric page background — purple radial orbs ── */
 body::before {
   content: '';
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
   pointer-events: none;
   z-index: 0;
-  opacity: 0.6;
-  background-image: 
-    radial-gradient(circle at 15% 25%, rgba(180, 120, 200, 0.12) 0%, transparent 40%),
-    radial-gradient(circle at 85% 70%, rgba(200, 150, 100, 0.1) 0%, transparent 40%),
-    radial-gradient(circle at 50% 50%, rgba(150, 100, 200, 0.08) 0%, transparent 60%);
+  opacity: 0.5;
+  background-image:
+    radial-gradient(circle at 15% 25%, rgba(140, 80, 200, 0.1)  0%, transparent 40%),
+    radial-gradient(circle at 85% 70%, rgba(100, 60, 180, 0.08) 0%, transparent 40%),
+    radial-gradient(circle at 50% 50%, rgba(120, 70, 200, 0.06) 0%, transparent 60%);
   animation: mystical-drift 30s ease-in-out infinite;
 }
 
 .dark body::before {
   opacity: 0.4;
-  background-image: 
-    radial-gradient(circle at 15% 25%, rgba(180, 120, 200, 0.15) 0%, transparent 40%),
-    radial-gradient(circle at 85% 70%, rgba(42, 80, 200, 0.12) 0%, transparent 40%),
-    radial-gradient(circle at 50% 50%, rgba(200, 100, 150, 0.1) 0%, transparent 60%);
+  background-image:
+    radial-gradient(circle at 15% 25%, rgba(140, 80, 200, 0.14) 0%, transparent 40%),
+    radial-gradient(circle at 85% 70%, rgba(100, 60, 180, 0.1)  0%, transparent 40%),
+    radial-gradient(circle at 50% 50%, rgba(120, 70, 200, 0.08) 0%, transparent 60%);
 }
 
-/* Enhanced noise texture */
+/* Noise texture overlay */
 body::after {
   content: '';
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
   pointer-events: none;
   z-index: 0;
   opacity: 0.04;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
   mix-blend-mode: overlay;
 }
+.dark body::after { opacity: 0.06; }
 
-.dark body::after {
-  opacity: 0.06;
-}
-
-/* Mystical particle effect */
-@keyframes float-particle {
-  0%, 100% {
-    transform: translate(0, 0) rotate(0deg);
-    opacity: 0;
-  }
-  10% {
-    opacity: 0.5;
-  }
-  90% {
-    opacity: 0.5;
-  }
-  50% {
-    transform: translate(100px, -300px) rotate(180deg);
-  }
-}
-
-/* Modern custom scrollbar with glow */
-::-webkit-scrollbar {
-  width: 14px;
-}
-
-::-webkit-scrollbar-track {
-  @apply bg-secondary;
-  border-radius: 8px;
+/* Scrollbar */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { @apply bg-secondary; border-radius: 6px; }
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--primary) / 0.4);
+  border-radius: 6px;
   border: 2px solid transparent;
   background-clip: padding-box;
 }
-
-::-webkit-scrollbar-thumb {
-  @apply bg-primary;
-  border-radius: 8px;
-  border: 3px solid transparent;
-  background-clip: padding-box;
-  transition: all 0.3s ease;
-  box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
-}
-
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, hsl(var(--primary)), hsl(var(--accent)));
-  box-shadow: 
-    inset 0 0 6px rgba(0,0,0,0.3),
-    0 0 8px hsl(var(--primary) / 0.5);
+  background: hsl(var(--primary) / 0.7);
 }
 
-.dark ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, hsl(280 70% 65%), hsl(280 70% 55%));
-  box-shadow: 
-    inset 0 0 6px rgba(0,0,0,0.5),
-    0 0 10px hsl(280 70% 65% / 0.3);
-}
+/* ============================================
+   PAGE TRANSITION — GRIMOIRE EMERGENCE
+   Upgraded: blur + scale + translate
+   ============================================ */
 
-.dark ::-webkit-scrollbar-thumb:hover {
-  box-shadow: 
-    inset 0 0 6px rgba(0,0,0,0.5),
-    0 0 15px hsl(280 70% 65% / 0.6);
-}
-
-::selection {
-  @apply bg-primary/30 text-foreground;
-}
-
-.dark ::selection {
-  background: rgba(180, 120, 200, 0.4);
-}
-
-/* Enhanced animations */
-@keyframes mystical-pulse {
-  0%, 100% {
-    opacity: 0.7;
-    transform: scale(1);
-    filter: drop-shadow(0 0 8px hsl(var(--primary) / 0.4));
+@keyframes grimoire-emerge {
+  0% {
+    opacity: 0;
+    transform: translateY(24px) scale(0.975);
+    filter: blur(5px);
   }
-  50% {
+  60% { filter: blur(0px); }
+  100% {
     opacity: 1;
-    transform: scale(1.05);
-    filter: drop-shadow(0 0 16px hsl(var(--primary) / 0.8));
+    transform: translateY(0) scale(1);
+    filter: blur(0px);
   }
 }
 
+/* Override the plain translate version */
 @keyframes fade-in-up {
   from {
     opacity: 0;
-    transform: translateY(30px);
+    transform: translateY(24px) scale(0.975);
+    filter: blur(4px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
+    filter: blur(0px);
   }
 }
 
-@keyframes slow-rotate {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+.animate-fade-in-up {
+  animation: grimoire-emerge 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-@keyframes shimmer {
-  0% {
-    background-position: -1000px 0;
-  }
-  100% {
-    background-position: 1000px 0;
-  }
-}
+/* ============================================
+   ADDITIONAL ANIMATIONS
+   ============================================ */
 
-@keyframes glow-pulse {
+@keyframes mystical-pulse {
   0%, 100% {
-    box-shadow: 
-      0 0 20px hsl(var(--primary) / 0.3),
-      inset 0 0 20px hsl(var(--primary) / 0.1);
+    opacity: 0.7; transform: scale(1);
+    filter: drop-shadow(0 0 8px hsl(var(--primary) / 0.4));
   }
   50% {
-    box-shadow: 
-      0 0 40px hsl(var(--primary) / 0.6),
-      inset 0 0 30px hsl(var(--primary) / 0.2);
+    opacity: 1; transform: scale(1.05);
+    filter: drop-shadow(0 0 16px hsl(var(--primary) / 0.8));
   }
 }
-
-@keyframes mystical-drift {
+@keyframes slow-rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes glow-pulse {
   0%, 100% {
-    transform: translate(0, 0) scale(1);
+    box-shadow: 0 0 20px hsl(var(--primary) / 0.3), inset 0 0 20px hsl(var(--primary) / 0.1);
   }
-  33% {
-    transform: translate(20px, -20px) scale(1.1);
-  }
-  66% {
-    transform: translate(-20px, 20px) scale(0.9);
+  50% {
+    box-shadow: 0 0 40px hsl(var(--primary) / 0.6), inset 0 0 30px hsl(var(--primary) / 0.2);
   }
 }
-
+@keyframes mystical-drift {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%       { transform: translate(20px, -20px) scale(1.1); }
+  66%       { transform: translate(-20px, 20px) scale(0.9); }
+}
 @keyframes border-dance {
   0%, 100% {
     border-color: hsl(var(--primary) / 0.5);
@@ -1097,572 +599,115 @@ body::after {
     box-shadow: 0 0 20px hsl(var(--accent) / 0.5);
   }
 }
-
 @keyframes text-shimmer {
-  0% {
-    background-position: -500%;
-  }
-  100% {
-    background-position: 500%;
-  }
+  0%   { background-position: -500%; }
+  100% { background-position:  500%; }
+}
+@keyframes float-particle {
+  0%, 100% { transform: translate(0,0) rotate(0deg); opacity: 0; }
+  10%       { opacity: 0.5; }
+  90%       { opacity: 0.5; }
+  50%       { transform: translate(100px,-300px) rotate(180deg); }
 }
 
-.animate-mystical-pulse {
-  animation: mystical-pulse 4s ease-in-out infinite;
-}
+.animate-mystical-pulse { animation: mystical-pulse 4s ease-in-out infinite; }
+.animate-slow-rotate    { animation: slow-rotate    20s linear infinite; }
+.animate-glow-pulse     { animation: glow-pulse     3s ease-in-out infinite; }
+.animate-border-dance   { animation: border-dance   4s ease-in-out infinite; }
 
-.animate-fade-in-up {
-  animation: fade-in-up 0.6s ease forwards;
-}
+/* ============================================
+   COMPONENT UTILITIES
+   ============================================ */
 
-.animate-slow-rotate {
-  animation: slow-rotate 20s linear infinite;
-}
-
-.animate-shimmer {
-  animation: shimmer 3s linear infinite;
-}
-
-.animate-glow-pulse {
-  animation: glow-pulse 3s ease-in-out infinite;
-}
-
-.animate-border-dance {
-  animation: border-dance 4s ease-in-out infinite;
-}
-
-/* Mystical glass morphism with enhanced effects */
 .glass {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.15) 0%,
-    rgba(255, 255, 255, 0.05) 100%
-  );
+  background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 100%);
   backdrop-filter: blur(12px) saturate(150%);
   -webkit-backdrop-filter: blur(12px) saturate(150%);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  box-shadow: 
-    0 8px 32px 0 rgba(31, 38, 135, 0.15),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(255,255,255,0.2);
+  box-shadow: 0 8px 32px 0 rgba(31,38,135,0.15), inset 0 1px 0 0 rgba(255,255,255,0.3);
 }
-
 .dark .glass {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.08) 0%,
-    rgba(255, 255, 255, 0.02) 100%
-  );
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  box-shadow: 
-    0 8px 32px 0 rgba(0, 0, 0, 0.5),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+  background: linear-gradient(135deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.02) 100%);
+  border: 1px solid rgba(255,255,255,0.12);
+  box-shadow: 0 8px 32px 0 rgba(0,0,0,0.5), inset 0 1px 0 0 rgba(255,255,255,0.08);
 }
 
-/* Enhanced card with mystical border */
 .mystical-card {
   position: relative;
   background: hsl(var(--card));
-  border: 2px solid hsl(var(--primary) / 0.3);
+  border: 1px solid hsl(var(--primary) / 0.25);
   border-radius: var(--radius);
   overflow: hidden;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.4s cubic-bezier(0.4,0,0.2,1);
 }
-
 .mystical-card::before {
   content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  padding: 2px;
-  background: linear-gradient(
-    135deg,
-    hsl(var(--primary) / 0.5),
-    hsl(var(--accent) / 0.5),
-    hsl(var(--primary) / 0.5)
-  );
+  position: absolute; inset: 0;
+  border-radius: inherit; padding: 2px;
+  background: linear-gradient(135deg, hsl(var(--primary)/0.5), hsl(var(--accent)/0.5), hsl(var(--primary)/0.5));
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   opacity: 0;
   transition: opacity 0.4s ease;
 }
-
-.mystical-card:hover::before {
-  opacity: 1;
-}
-
+.mystical-card:hover::before { opacity: 1; }
 .mystical-card:hover {
   transform: translateY(-4px);
-  box-shadow: 
-    0 20px 40px hsl(var(--primary) / 0.2),
-    0 0 20px hsl(var(--primary) / 0.1);
+  box-shadow: 0 20px 40px hsl(var(--primary)/0.2), 0 0 20px hsl(var(--primary)/0.1);
 }
 
-/* Grimoire text effect */
 .grimoire-text {
-  background: linear-gradient(
-    135deg,
-    hsl(var(--primary)),
-    hsl(var(--accent)),
-    hsl(var(--primary))
-  );
+  background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)), hsl(var(--primary)));
   background-size: 200% 200%;
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
   animation: text-shimmer 8s ease-in-out infinite;
   font-weight: 700;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
 }
 
-/* Enhanced button effects */
-.mystical-button {
-  position: relative;
-  overflow: hidden;
-  background: linear-gradient(
-    135deg,
-    hsl(var(--primary)),
-    hsl(var(--primary) / 0.8)
-  );
-  border: 2px solid hsl(var(--accent) / 0.5);
-  transition: all 0.3s ease;
+/* Grimoire atmospheric background utility */
+.grimoire-bg {
+  background-image:
+    radial-gradient(ellipse 70% 50% at 50% 0%,   hsl(280 55% 14% / 0.5) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 40% at 80% 100%,  hsl(42 60% 12% / 0.3) 0%, transparent 60%);
 }
 
-.mystical-button::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0;
-  height: 0;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.3);
-  transform: translate(-50%, -50%);
-  transition: width 0.6s, height 0.6s;
-}
-
-.mystical-button:hover::before {
-  width: 300px;
-  height: 300px;
-}
-
-.mystical-button:hover {
-  transform: translateY(-2px);
-  border-color: hsl(var(--accent));
-  box-shadow: 
-    0 10px 30px hsl(var(--primary) / 0.4),
-    0 0 20px hsl(var(--accent) / 0.3);
-}
-
-/* Mystical input with glow */
-.mystical-input {
-  background: hsl(var(--background) / 0.6);
-  border: 2px solid hsl(var(--border));
-  transition: all 0.3s ease;
-  position: relative;
-}
-
-.mystical-input:focus {
-  outline: none;
-  border-color: hsl(var(--primary));
-  background: hsl(var(--background) / 0.9);
-  box-shadow: 
-    0 0 0 3px hsl(var(--primary) / 0.1),
-    0 0 20px hsl(var(--primary) / 0.2),
-    inset 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-/* Rune decorations */
-.rune-corner {
-  position: relative;
-}
-
-.rune-corner::before,
-.rune-corner::after {
-  content: '';
-  position: absolute;
-  width: 20px;
-  height: 20px;
-  border: 2px solid hsl(var(--primary) / 0.3);
-  transition: all 0.3s ease;
-}
-
-.rune-corner::before {
-  top: -2px;
-  left: -2px;
-  border-right: none;
-  border-bottom: none;
-}
-
-.rune-corner::after {
-  bottom: -2px;
-  right: -2px;
-  border-left: none;
-  border-top: none;
-}
-
-.rune-corner:hover::before,
-.rune-corner:hover::after {
-  border-color: hsl(var(--accent));
-  width: 30px;
-  height: 30px;
-}
-
-/* Floating particles effect */
-.particle-bg {
-  position: relative;
-  overflow: hidden;
-}
-
-.particle-bg::before {
-  content: '✦';
-  position: absolute;
-  font-family: 'Mage Bats', sans-serif;
-  font-size: 20px;
-  color: hsl(var(--primary) / 0.2);
-  animation: float-particle 15s ease-in-out infinite;
-  animation-delay: 0s;
-}
-
-.particle-bg::after {
-  content: '✧';
-  position: absolute;
-  font-family: 'Mage Bats', sans-serif;
-  font-size: 16px;
-  color: hsl(var(--accent) / 0.2);
-  animation: float-particle 20s ease-in-out infinite;
-  animation-delay: 7s;
-}
-
-/* Enhanced shadows */
-.shadow-mystical {
-  box-shadow: 
-    0 4px 6px rgba(0, 0, 0, 0.1),
-    0 2px 4px rgba(0, 0, 0, 0.06),
-    0 0 20px hsl(var(--primary) / 0.1);
-}
-
-.dark .shadow-mystical {
-  box-shadow: 
-    0 4px 6px rgba(0, 0, 0, 0.4),
-    0 2px 4px rgba(0, 0, 0, 0.3),
-    0 0 30px hsl(var(--primary) / 0.2);
-}
-
-.shadow-mystical-lg {
-  box-shadow: 
-    0 10px 25px rgba(0, 0, 0, 0.15),
-    0 5px 10px rgba(0, 0, 0, 0.1),
-    0 0 40px hsl(var(--primary) / 0.15);
-}
-
-.dark .shadow-mystical-lg {
-  box-shadow: 
-    0 10px 25px rgba(0, 0, 0, 0.6),
-    0 5px 10px rgba(0, 0, 0, 0.4),
-    0 0 50px hsl(var(--primary) / 0.3);
-}
-
-/* Smooth focus states */
-*:focus-visible {
-  @apply outline-none ring-2 ring-primary ring-offset-2 ring-offset-background;
-  transition: all 0.2s ease;
-}
-
-/* Enhanced card hover effects */
-.card-hover {
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.card-hover:hover {
-  transform: translateY(-6px) scale(1.02);
-  box-shadow: 
-    0 20px 40px rgba(0, 0, 0, 0.15),
-    0 10px 20px rgba(0, 0, 0, 0.1),
-    0 0 30px hsl(var(--primary) / 0.2);
-}
-
-.dark .card-hover:hover {
-  box-shadow: 
-    0 20px 40px rgba(0, 0, 0, 0.6),
-    0 10px 20px rgba(0, 0, 0, 0.4),
-    0 0 40px hsl(var(--primary) / 0.4);
-}
-
-/* Mystical border animation */
-.border-glow {
-  position: relative;
-  border: 2px solid hsl(var(--primary) / 0.3);
-}
-
-.border-glow::before {
-  content: '';
-  position: absolute;
-  inset: -2px;
-  background: linear-gradient(
-    45deg,
-    hsl(var(--primary)),
-    hsl(var(--accent)),
-    hsl(var(--primary))
-  );
-  border-radius: inherit;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  z-index: -1;
-  background-size: 200% 200%;
-  animation: text-shimmer 3s ease infinite;
-}
-
-.border-glow:hover::before {
-  opacity: 1;
-}
-
-/* Arcane divider */
-.arcane-divider {
-  height: 2px;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    hsl(var(--primary) / 0.5) 20%,
-    hsl(var(--accent) / 0.5) 50%,
-    hsl(var(--primary) / 0.5) 80%,
-    transparent
-  );
-  position: relative;
-}
-
-.arcane-divider::before {
-  content: '✦';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-family: 'Mage Bats', sans-serif;
-  font-size: 24px;
-  color: hsl(var(--primary));
-  background: hsl(var(--background));
-  padding: 0 12px;
-}
-
-/* Smooth transitions for all interactive elements */
 button, a, input, select, textarea {
   transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform;
   transition-duration: 300ms;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Enhanced typography */
-h1, h2, h3, h4, h5, h6 {
-  letter-spacing: 0.02em;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
 .dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 {
-  text-shadow: 
-    0 2px 8px rgba(0, 0, 0, 0.5),
-    0 0 20px hsl(var(--primary) / 0.2);
-}
-/* Reader Mode Styles - Add to globals.css */
-
-/* Reader Mode Variables - Simplified Colors */
-.reader-mode {
-  /* Light mode reader colors */
-  --background: 0 0% 98%;
-  --foreground: 0 0% 10%;
-  --card: 0 0% 100%;
-  --card-foreground: 0 0% 10%;
-  --primary: 0 0% 20%;
-  --primary-foreground: 0 0% 98%;
-  --secondary: 0 0% 95%;
-  --secondary-foreground: 0 0% 20%;
-  --muted: 0 0% 95%;
-  --muted-foreground: 0 0% 40%;
-  --accent: 0 0% 90%;
-  --accent-foreground: 0 0% 20%;
-  --border: 0 0% 90%;
-  --ring: 0 0% 60%;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.4), 0 0 20px hsl(var(--primary) / 0.15);
 }
 
-/* Dark mode reader colors */
-.dark.reader-mode {
-  --background: 0 0% 12%;
-  --foreground: 0 0% 95%;
-  --card: 0 0% 15%;
-  --card-foreground: 0 0% 95%;
-  --primary: 0 0% 85%;
-  --primary-foreground: 0 0% 15%;
-  --secondary: 0 0% 18%;
-  --secondary-foreground: 0 0% 90%;
-  --muted: 0 0% 18%;
-  --muted-foreground: 0 0% 60%;
-  --accent: 0 0% 22%;
-  --accent-foreground: 0 0% 90%;
-  --border: 0 0% 25%;
-  --ring: 0 0% 50%;
+/* Arcane divider */
+.arcane-divider {
+  height: 2px;
+  background: linear-gradient(90deg, transparent, hsl(var(--primary)/0.5) 20%, hsl(var(--accent)/0.4) 50%, hsl(var(--primary)/0.5) 80%, transparent);
+  position: relative;
+}
+.arcane-divider::before {
+  content: '✦';
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 20px;
+  color: hsl(var(--primary));
+  background: hsl(var(--background));
+  padding: 0 10px;
 }
 
-/* Reader Mode Adjustments */
-.reader-mode {
-  /* Simplified typography */
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
-}
-
-/* Hide decorative elements in reader mode */
-.reader-mode .reader-hide {
-  display: none !important;
-}
-
-/* Simplify borders */
-.reader-mode .border-primary,
-.reader-mode .border-accent,
-.reader-mode .border-ring {
-  border-color: hsl(var(--border)) !important;
-}
-
-.reader-mode .border-double {
-  border-style: solid !important;
-}
-
-.reader-mode .border-\[3px\],
-.reader-mode .border-\[4px\] {
-  border-width: 1px !important;
-}
-
-/* Simplify shadows */
-.reader-mode [class*="shadow-"] {
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
-}
-
-/* Remove background patterns */
-.reader-mode [style*="backgroundImage"] {
-  background-image: none !important;
-}
-
-/* Simplify gradients */
-.reader-mode [style*="linear-gradient"] {
-  background: transparent !important;
-}
-
-/* Hide decorative symbols */
-.reader-mode [aria-hidden="true"] {
-  opacity: 0.3;
-}
-
-/* Remove animations */
-.reader-mode .animate-spin,
-.reader-mode .animate-spin-slow {
-  animation: none !important;
-}
-
-/* Simplify header in reader mode */
-.reader-mode header {
-  padding-top: 1rem;
-  padding-bottom: 1rem;
-}
-
-.reader-mode h1,
-.reader-mode h2,
-.reader-mode h3 {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-  letter-spacing: normal;
-  text-transform: none;
-}
-
-/* Better line height for reading */
-.reader-mode p,
-.reader-mode .prose {
-  line-height: 1.75;
-}
-
-/* Increase contrast for text */
-.reader-mode .text-muted-foreground {
-  color: hsl(var(--foreground)) !important;
-  opacity: 0.8;
-}
-
-/* Simplify buttons */
-.reader-mode button,
-.reader-mode .button {
-  border-radius: 0.25rem;
-  border-width: 1px;
-}
-
-/* Remove text shadows and drop shadows */
-.reader-mode [class*="drop-shadow"],
-.reader-mode [class*="text-shadow"] {
-  filter: none !important;
-  text-shadow: none !important;
-}
-
-/* Simplify card backgrounds */
-.reader-mode .bg-card {
-  background-color: hsl(var(--card));
-}
-
-/* Remove backdrop blur */
-.reader-mode .backdrop-blur-md,
-.reader-mode .backdrop-blur {
-  backdrop-filter: none !important;
-}
-
-/* Cleaner focus states */
-.reader-mode *:focus-visible {
-  outline: 2px solid hsl(var(--ring));
-  outline-offset: 2px;
-}
-
-/* Simplify sphere dots in reader mode */
-.reader-mode .sphere-dot {
-  border-width: 1px;
-}
-
-/* Hide corner decorations */
-.reader-mode .absolute.\-top-1,
-.reader-mode .absolute.\-top-2 {
-  display: none;
-}
-
-/* Optimize for reading - max width and center */
-.reader-mode main {
-  max-width: 900px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-/* Increase font size slightly for readability */
-.reader-mode {
-  font-size: 16px;
-}
-
-.reader-mode h1 {
-  font-size: 2rem;
-}
-
-.reader-mode h2 {
-  font-size: 1.5rem;
-}
-
-.reader-mode h3 {
-  font-size: 1.25rem;
-}
-
-/* Better spacing for content */
-.reader-mode .prose p {
-  margin-top: 1.25em;
-  margin-bottom: 1.25em;
-}
-
-/* Cleaner lists */
-.reader-mode ul,
-.reader-mode ol {
-  margin-left: 1.5rem;
-}
-
-/* Remove ornamental fonts */
-.reader-mode .font-serif {
-  font-family: Georgia, 'Times New Roman', serif;
-}
-
-.reader-mode .font-mono {
-  font-family: 'Courier New', Courier, monospace;
+/* ── Reduced motion (global) ── */
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in-up,
+  .animate-mystical-pulse,
+  .animate-slow-rotate,
+  .animate-glow-pulse,
+  .animate-border-dance {
+    animation: none;
+  }
 }

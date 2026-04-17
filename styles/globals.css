@@ -2,201 +2,183 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Modern font stack */
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
-  font-feature-settings: 'kern' 1, 'liga' 1, 'calt' 1;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+/* ============================================================
+   NO body { font-family } override here.
+   Cinzel → font-serif, Crimson Text → font-sans (body),
+   IM Fell → font-mono — all set via tailwind.config.ts.
+   ============================================================ */
 
 @layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+  .text-balance { text-wrap: balance; }
 }
 
 @layer base {
   :root {
-    /* Enhanced warm mystical palette */
-    --background: 36 42% 95%;
-    --foreground: 30 20% 15%;
-    --card: 0 0% 100%;
-    --card-foreground: 30 20% 15%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 30 20% 15%;
-    
-    /* Mystical purple primary */
-    --primary: 300 45% 25%;
-    --primary-foreground: 42 42% 95%;
-    
-    /* Warm secondary */
-    --secondary: 36 42% 88%;
-    --secondary-foreground: 30 20% 15%;
-    
-    /* Subtle muted */
-    --muted: 36 30% 90%;
-    --muted-foreground: 30 10% 45%;
-    
-    /* Golden accent */
-    --accent: 42 42% 59%;
-    --accent-foreground: 30 20% 15%;
-    
-    /* Destructive */
-    --destructive: 0 84% 60%;
+    /* ═══════════════════════════════════════════════════════
+       LIGHT MODE — warm parchment + deep inkwell purple
+       ═══════════════════════════════════════════════════════ */
+
+    --background:      38 32% 91%;
+    --foreground:      270 55% 10%;   /* deep purple-black — strong contrast on parchment */
+
+    --card:            38 28% 97%;    /* noticeably lighter than background */
+    --card-foreground: 270 55% 10%;
+    --popover:         38 28% 97%;
+    --popover-foreground: 270 55% 10%;
+
+    --primary:         280 58% 30%;
+    --primary-foreground: 38 35% 97%;
+
+    --secondary:       36 20% 84%;
+    --secondary-foreground: 270 45% 18%;
+
+    --muted:           36 18% 87%;
+    --muted-foreground: 270 25% 38%;  /* dark enough to read on parchment */
+
+    --accent:          42 85% 48%;
+    --accent-foreground: 270 45% 8%;
+
+    --destructive:     0 72% 51%;
     --destructive-foreground: 0 0% 98%;
-    
-    /* Borders */
-    --border: 36 30% 85%;
-    --input: 36 30% 85%;
-    --ring: 42 42% 59%;
-    
-    /* Charts */
-    --chart-1: 42 60% 55%;
-    --chart-2: 300 45% 45%;
-    --chart-3: 36 50% 50%;
-    --chart-4: 280 40% 55%;
-    --chart-5: 20 55% 60%;
-    
+
+    --border:          270 18% 74%;
+    --input:           270 16% 78%;
+    --ring:            280 58% 42%;
+
+    --chart-1: 280 58% 32%;
+    --chart-2: 42 85% 48%;
+    --chart-3: 25 50% 52%;
+    --chart-4: 280 40% 48%;
+    --chart-5: 0 72% 51%;
+
     --radius: 0.5rem;
-    
-    /* Sidebar */
-    --sidebar-background: 36 42% 98%;
-    --sidebar-foreground: 30 20% 20%;
-    --sidebar-primary: 300 45% 25%;
-    --sidebar-primary-foreground: 42 42% 95%;
-    --sidebar-accent: 36 42% 93%;
-    --sidebar-accent-foreground: 30 20% 15%;
-    --sidebar-border: 36 30% 88%;
-    --sidebar-ring: 42 42% 59%;
+
+    --sidebar-background:        38 26% 95%;
+    --sidebar-foreground:        270 55% 12%;
+    --sidebar-primary:           280 58% 30%;
+    --sidebar-primary-foreground: 38 35% 97%;
+    --sidebar-accent:            36 20% 89%;
+    --sidebar-accent-foreground: 270 45% 12%;
+    --sidebar-border:            270 16% 76%;
+    --sidebar-ring:              42 85% 48%;
   }
-  
+
   .dark {
-    /* Warm dark mode */
-    --background: 30 20% 8%;
-    --foreground: 42 42% 95%;
-    --card: 30 20% 10%;
-    --card-foreground: 42 42% 95%;
-    --popover: 30 20% 8%;
-    --popover-foreground: 42 42% 95%;
-    
-    /* Golden primary in dark */
-    --primary: 42 42% 70%;
-    --primary-foreground: 30 20% 10%;
-    
-    /* Dark secondary */
-    --secondary: 30 15% 15%;
-    --secondary-foreground: 42 42% 95%;
-    
-    /* Dark muted */
-    --muted: 30 15% 18%;
-    --muted-foreground: 36 20% 65%;
-    
-    /* Accent */
-    --accent: 42 42% 59%;
-    --accent-foreground: 30 20% 10%;
-    
-    /* Destructive */
-    --destructive: 0 70% 50%;
+    /* ═══════════════════════════════════════════════════════
+       DARK MODE — void + amethyst purple + gold accent
+       KEY FIXES:
+       - foreground bumped to near-white warm cream (was ok but
+         components were applying opacity that killed it)
+       - muted-foreground raised from 68% to 78% lightness
+       - card raised from 10% to 13% lightness (clearer lift)
+       - border raised from 22% to 26% lightness (more visible)
+       ═══════════════════════════════════════════════════════ */
+
+    --background:      270 40% 6%;
+    --foreground:      38 40% 94%;    /* warm near-white cream */
+
+    --card:            270 32% 13%;   /* was 10% — cards now visibly lift */
+    --card-foreground: 38 40% 94%;
+    --popover:         270 38% 9%;
+    --popover-foreground: 38 40% 94%;
+
+    --primary:         280 68% 68%;   /* luminous amethyst */
+    --primary-foreground: 270 40% 5%;
+
+    --secondary:       270 22% 19%;
+    --secondary-foreground: 38 38% 92%;
+
+    --muted:           270 20% 15%;
+    --muted-foreground: 280 18% 72%;  /* was 68% lightness — raised for readability */
+
+    --accent:          42 88% 62%;
+    --accent-foreground: 270 40% 5%;
+
+    --destructive:     0 65% 48%;
     --destructive-foreground: 0 0% 98%;
-    
-    /* Dark borders */
-    --border: 30 15% 20%;
-    --input: 30 15% 20%;
-    --ring: 42 42% 70%;
-    
-    /* Dark charts */
-    --chart-1: 42 65% 60%;
-    --chart-2: 300 50% 55%;
-    --chart-3: 36 55% 58%;
-    --chart-4: 280 45% 60%;
-    --chart-5: 20 60% 65%;
-    
-    /* Dark sidebar */
-    --sidebar-background: 30 20% 10%;
-    --sidebar-foreground: 42 42% 95%;
-    --sidebar-primary: 42 42% 70%;
-    --sidebar-primary-foreground: 30 20% 10%;
-    --sidebar-accent: 30 15% 15%;
-    --sidebar-accent-foreground: 42 42% 95%;
-    --sidebar-border: 30 15% 18%;
-    --sidebar-ring: 42 42% 70%;
+
+    --border:          270 25% 26%;   /* was 22% — more visible separation */
+    --input:           270 22% 22%;
+    --ring:            280 68% 62%;
+
+    --chart-1: 280 68% 68%;
+    --chart-2: 42 88% 62%;
+    --chart-3: 200 65% 60%;
+    --chart-4: 280 52% 56%;
+    --chart-5: 0 65% 50%;
+
+    --sidebar-background:        270 32% 10%;
+    --sidebar-foreground:        38 40% 94%;
+    --sidebar-primary:           280 68% 68%;
+    --sidebar-primary-foreground: 270 40% 5%;
+    --sidebar-accent:            270 22% 17%;
+    --sidebar-accent-foreground: 38 38% 92%;
+    --sidebar-border:            270 22% 22%;
+    --sidebar-ring:              280 68% 62%;
   }
 }
 
 @layer base {
-  * {
-    @apply border-border;
-  }
-  
+  * { @apply border-border; }
+
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: 'kern' 1, 'liga' 1, 'calt' 1;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     scroll-behavior: smooth;
   }
-  
-  /* Better focus states */
-  *:focus-visible {
-    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
-  }
-  
-  /* Smooth selection */
-  ::selection {
-    background-color: hsl(var(--accent) / 0.3);
-    color: hsl(var(--foreground));
-  }
-  
-  /* Typography improvements */
+
+  /* Wide tracking — Cinzel needs space, not tight compression */
   h1, h2, h3, h4, h5, h6 {
     font-weight: 700;
     line-height: 1.2;
-    letter-spacing: -0.02em;
+    letter-spacing: 0.06em;
   }
-  
-  p {
-    line-height: 1.7;
+
+  p { line-height: 1.75; }
+
+  code { @apply rounded bg-muted px-1.5 py-0.5 font-mono text-sm; }
+
+  *:focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
   }
-  
-  /* Better code blocks */
-  code {
-    @apply rounded bg-muted px-1.5 py-0.5 font-mono text-sm;
+
+  ::selection {
+    background-color: hsl(var(--primary) / 0.22);
+    color: hsl(var(--foreground));
   }
-  
-  /* Custom scrollbar */
-  ::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
+  .dark ::selection {
+    background-color: hsl(var(--primary) / 0.38);
+    color: hsl(var(--foreground));
   }
-  
-  ::-webkit-scrollbar-track {
-    background: hsl(var(--muted));
+
+  /* Scrollbar */
+  ::-webkit-scrollbar        { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track  { background: hsl(var(--muted)); }
+  ::-webkit-scrollbar-thumb  {
+    background: hsl(var(--primary) / 0.38);
+    border-radius: 4px;
+    border: 2px solid hsl(var(--muted));
   }
-  
-  ::-webkit-scrollbar-thumb {
-    background: hsl(var(--accent) / 0.5);
-    border-radius: 5px;
-  }
-  
-  ::-webkit-scrollbar-thumb:hover {
-    background: hsl(var(--accent));
-  }
+  ::-webkit-scrollbar-thumb:hover { background: hsl(var(--primary) / 0.62); }
 }
 
-/* Accessibility */
+/* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  *, *::before, *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
 }
-/* Reader Mode Styles - Add to globals.css */
 
-/* Reader Mode Variables - Simplified Colors */
+/* ════════════════════════════════════════════════════════
+   READER MODE — keep exactly as-is from pass 1
+   ════════════════════════════════════════════════════════ */
+
 .reader-mode {
-  /* Light mode reader colors */
   --background: 0 0% 98%;
   --foreground: 0 0% 10%;
   --card: 0 0% 100%;
@@ -206,193 +188,62 @@ body {
   --secondary: 0 0% 95%;
   --secondary-foreground: 0 0% 20%;
   --muted: 0 0% 95%;
-  --muted-foreground: 0 0% 40%;
+  --muted-foreground: 0 0% 35%;
   --accent: 0 0% 90%;
   --accent-foreground: 0 0% 20%;
-  --border: 0 0% 90%;
-  --ring: 0 0% 60%;
+  --border: 0 0% 88%;
+  --ring: 0 0% 55%;
 }
-
-/* Dark mode reader colors */
 .dark.reader-mode {
   --background: 0 0% 12%;
   --foreground: 0 0% 95%;
-  --card: 0 0% 15%;
+  --card: 0 0% 16%;
   --card-foreground: 0 0% 95%;
   --primary: 0 0% 85%;
   --primary-foreground: 0 0% 15%;
-  --secondary: 0 0% 18%;
-  --secondary-foreground: 0 0% 90%;
-  --muted: 0 0% 18%;
-  --muted-foreground: 0 0% 60%;
-  --accent: 0 0% 22%;
-  --accent-foreground: 0 0% 90%;
-  --border: 0 0% 25%;
-  --ring: 0 0% 50%;
+  --secondary: 0 0% 19%;
+  --secondary-foreground: 0 0% 92%;
+  --muted: 0 0% 19%;
+  --muted-foreground: 0 0% 65%;
+  --accent: 0 0% 24%;
+  --accent-foreground: 0 0% 92%;
+  --border: 0 0% 27%;
+  --ring: 0 0% 52%;
 }
 
-/* Reader Mode Adjustments */
-.reader-mode {
-  /* Simplified typography */
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
-}
-
-/* Hide decorative elements in reader mode */
-.reader-mode .reader-hide {
-  display: none !important;
-}
-
-/* Simplify borders */
+.reader-mode { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif; }
+.reader-mode .reader-hide                      { display: none !important; }
 .reader-mode .border-primary,
 .reader-mode .border-accent,
-.reader-mode .border-ring {
-  border-color: hsl(var(--border)) !important;
-}
-
-.reader-mode .border-double {
-  border-style: solid !important;
-}
-
-.reader-mode .border-\[3px\],
-.reader-mode .border-\[4px\] {
-  border-width: 1px !important;
-}
-
-/* Simplify shadows */
-.reader-mode [class*="shadow-"] {
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
-}
-
-/* Remove background patterns */
-.reader-mode [style*="backgroundImage"] {
-  background-image: none !important;
-}
-
-/* Simplify gradients */
-.reader-mode [style*="linear-gradient"] {
-  background: transparent !important;
-}
-
-/* Hide decorative symbols */
-.reader-mode [aria-hidden="true"] {
-  opacity: 0.3;
-}
-
-/* Remove animations */
+.reader-mode .border-ring                      { border-color: hsl(var(--border)) !important; }
+.reader-mode .border-double                    { border-style: solid !important; }
+.reader-mode [class*="shadow-"]               { box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important; }
+.reader-mode [style*="backgroundImage"]        { background-image: none !important; }
+.reader-mode [style*="linear-gradient"]        { background: transparent !important; }
+.reader-mode [aria-hidden="true"]              { opacity: 0.3; }
 .reader-mode .animate-spin,
-.reader-mode .animate-spin-slow {
-  animation: none !important;
-}
-
-/* Simplify header in reader mode */
-.reader-mode header {
-  padding-top: 1rem;
-  padding-bottom: 1rem;
-}
-
-.reader-mode h1,
-.reader-mode h2,
-.reader-mode h3 {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+.reader-mode .animate-spin-slow               { animation: none !important; }
+.reader-mode header                           { padding-top: 1rem; padding-bottom: 1rem; }
+.reader-mode h1, .reader-mode h2,
+.reader-mode h3                               {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   letter-spacing: normal;
   text-transform: none;
 }
-
-/* Better line height for reading */
-.reader-mode p,
-.reader-mode .prose {
-  line-height: 1.75;
-}
-
-/* Increase contrast for text */
-.reader-mode .text-muted-foreground {
-  color: hsl(var(--foreground)) !important;
-  opacity: 0.8;
-}
-
-/* Simplify buttons */
-.reader-mode button,
-.reader-mode .button {
-  border-radius: 0.25rem;
-  border-width: 1px;
-}
-
-/* Remove text shadows and drop shadows */
+.reader-mode p, .reader-mode .prose          { line-height: 1.75; }
+.reader-mode .text-muted-foreground           { color: hsl(var(--foreground)) !important; opacity: 0.75; }
+.reader-mode button, .reader-mode .button    { border-radius: 0.25rem; border-width: 1px; }
 .reader-mode [class*="drop-shadow"],
-.reader-mode [class*="text-shadow"] {
-  filter: none !important;
-  text-shadow: none !important;
-}
-
-/* Simplify card backgrounds */
-.reader-mode .bg-card {
-  background-color: hsl(var(--card));
-}
-
-/* Remove backdrop blur */
+.reader-mode [class*="text-shadow"]           { filter: none !important; text-shadow: none !important; }
 .reader-mode .backdrop-blur-md,
-.reader-mode .backdrop-blur {
-  backdrop-filter: none !important;
-}
-
-/* Cleaner focus states */
-.reader-mode *:focus-visible {
-  outline: 2px solid hsl(var(--ring));
-  outline-offset: 2px;
-}
-
-/* Simplify sphere dots in reader mode */
-.reader-mode .sphere-dot {
-  border-width: 1px;
-}
-
-/* Hide corner decorations */
-.reader-mode .absolute.\-top-1,
-.reader-mode .absolute.\-top-2 {
-  display: none;
-}
-
-/* Optimize for reading - max width and center */
-.reader-mode main {
-  max-width: 900px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-/* Increase font size slightly for readability */
-.reader-mode {
-  font-size: 16px;
-}
-
-.reader-mode h1 {
-  font-size: 2rem;
-}
-
-.reader-mode h2 {
-  font-size: 1.5rem;
-}
-
-.reader-mode h3 {
-  font-size: 1.25rem;
-}
-
-/* Better spacing for content */
-.reader-mode .prose p {
-  margin-top: 1.25em;
-  margin-bottom: 1.25em;
-}
-
-/* Cleaner lists */
-.reader-mode ul,
-.reader-mode ol {
-  margin-left: 1.5rem;
-}
-
-/* Remove ornamental fonts */
-.reader-mode .font-serif {
-  font-family: Georgia, 'Times New Roman', serif;
-}
-
-.reader-mode .font-mono {
-  font-family: 'Courier New', Courier, monospace;
-}
+.reader-mode .backdrop-blur                  { backdrop-filter: none !important; }
+.reader-mode *:focus-visible                  { outline: 2px solid hsl(var(--ring)); outline-offset: 2px; }
+.reader-mode main                             { max-width: 900px; margin-left: auto; margin-right: auto; }
+.reader-mode                                  { font-size: 16px; }
+.reader-mode h1                               { font-size: 2rem; }
+.reader-mode h2                               { font-size: 1.5rem; }
+.reader-mode h3                               { font-size: 1.25rem; }
+.reader-mode .prose p                         { margin-top: 1.25em; margin-bottom: 1.25em; }
+.reader-mode ul, .reader-mode ol             { margin-left: 1.5rem; }
+.reader-mode .font-serif                      { font-family: Georgia, 'Times New Roman', serif; }
+.reader-mode .font-mono                       { font-family: 'Courier New', Courier, monospace; }

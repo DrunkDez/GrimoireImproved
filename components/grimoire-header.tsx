@@ -5,123 +5,160 @@ import { ThemeToggle } from "@/components/theme-toggle"
 import { ReaderModeToggle } from "@/components/reader-mode-toggle"
 import { RandomLogo } from "@/components/random-logo"
 import Link from "next/link"
-import { Button } from "@/components/ui/button"
 
 export function GrimoireHeader() {
   return (
-    <header className="relative bg-card px-3 sm:px-4 md:px-6 py-6 sm:py-8 md:py-12 text-center border-b-2 md:border-b-4 border-double border-primary">
-      {/* Theme Toggle, Reader Mode & User Navigation - repositioned for mobile */}
-      <div className="absolute top-2 right-2 sm:top-3 sm:right-4 md:top-4 md:right-6 z-20 flex items-center gap-1 sm:gap-2">
-        <div className="hidden sm:flex items-center gap-1 sm:gap-2">
+    <header className="relative bg-card overflow-hidden">
+
+      {/* ── Layered atmospheric background ── */}
+      <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+        <div style={{
+          position: "absolute", inset: 0,
+          background: `
+            radial-gradient(ellipse 55% 80% at 8% 50%,  hsl(280 55% 18% / 0.5) 0%, transparent 65%),
+            radial-gradient(ellipse 30% 45% at 88% 20%, hsl(300 40% 20% / 0.15) 0%, transparent 55%)
+          `,
+        }} />
+
+        {/* Hex grid */}
+        <svg
+          className="absolute inset-0 w-full h-full reader-hide"
+          xmlns="http://www.w3.org/2000/svg"
+          style={{ opacity: 0.03, mixBlendMode: "screen" }}
+        >
+          <defs>
+            <pattern id="grimoire-hex" x="0" y="0" width="28" height="32" patternUnits="userSpaceOnUse">
+              <polygon
+                points="14,1 27,8 27,24 14,31 1,24 1,8"
+                fill="none" stroke="hsl(280 70% 75%)" strokeWidth="0.6"
+              />
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#grimoire-hex)" />
+        </svg>
+
+        {/* Ghost wheel top-right */}
+        <div
+          className="absolute animate-spin-slow select-none reader-hide"
+          style={{
+            top: "-90px", right: "-90px",
+            fontSize: "340px", lineHeight: 1,
+            color: "hsl(280 55% 65% / 0.04)",
+            fontFamily: "serif",
+          }}
+        >⚙</div>
+      </div>
+
+      {/* ── Controls top-right ── */}
+      <div className="absolute top-3 right-3 sm:top-4 sm:right-4 z-20 flex items-center gap-1 sm:gap-1.5">
+        <div className="hidden sm:flex items-center gap-1 sm:gap-1.5">
           <ReaderModeToggle />
           <ThemeToggle />
         </div>
         <UserNav />
       </div>
 
-      {/* Mobile controls - bottom right to avoid overlap */}
-      <div className="sm:hidden absolute bottom-2 right-2 z-20 flex items-center gap-1">
+      {/* Mobile controls */}
+      <div className="sm:hidden absolute bottom-3 right-3 z-20 flex items-center gap-1">
         <ReaderModeToggle />
         <ThemeToggle />
       </div>
 
-      {/* Top gold line */}
-      <div
-        className="absolute top-2 sm:top-3 md:top-4 left-1/2 -translate-x-1/2 w-3/5 h-[2px] md:h-[3px] reader-hide"
-        style={{
-          background: 'linear-gradient(90deg, transparent, hsl(42 42% 59%), transparent)',
-        }}
-        aria-hidden="true"
-      />
+      {/* ── Main content — left-anchored ── */}
+      <div className="relative z-10 px-5 sm:px-7 md:px-10 pt-7 sm:pt-9 pb-5 sm:pb-6">
 
-      {/* Bottom gold line */}
-      <div
-        className="absolute bottom-2 sm:bottom-3 md:bottom-4 left-1/2 -translate-x-1/2 w-3/5 h-[2px] md:h-[3px] reader-hide"
-        style={{
-          background: 'linear-gradient(90deg, transparent, hsl(42 42% 59%), transparent)',
-        }}
-        aria-hidden="true"
-      />
-
-      <Link href="/" className="block hover:opacity-80 transition-opacity">
-        {/* Title with Wheel Symbol - add padding on mobile for auth buttons */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 md:gap-6 mb-3 sm:mb-4 pr-20 sm:pr-0">
-          {/* Logo - hide on very small screens */}
-          <div className="hidden sm:block reader-hide">
+        {/* Brand */}
+        <Link href="/" className="inline-flex items-start gap-3 sm:gap-4 group mb-0.5">
+          <div className="mt-1.5 shrink-0 opacity-70 group-hover:opacity-100 transition-opacity duration-300
+            w-[44px] h-[44px] sm:w-[52px] sm:h-[52px] reader-hide">
             <RandomLogo />
           </div>
-          
-          {/* Title - adjust size to fit */}
-          <div className="flex items-center gap-2 sm:gap-3 md:gap-4 flex-wrap justify-center">
-            <h1 className="font-serif text-xl xs:text-2xl sm:text-3xl md:text-4xl lg:text-6xl font-black tracking-wider uppercase text-primary leading-tight">
-              The Paradox
+
+          <div>
+            <p className="font-serif text-[9px] sm:text-[10px] uppercase tracking-[0.4em] text-primary/50 mb-0.5 pl-0.5 reader-hide">
+              The
+            </p>
+            <h1
+              className="font-serif font-black uppercase leading-[0.88] tracking-[0.07em] text-primary
+                group-hover:text-primary/80 transition-colors duration-300"
+              style={{ fontSize: "clamp(2rem, 5vw, 3.8rem)" }}
+            >
+              Paradox
             </h1>
-            
-            {/* Wheel - smaller on mobile */}
-            <div className="relative flex items-center justify-center w-[35px] h-[35px] xs:w-[40px] xs:h-[40px] sm:w-[50px] sm:h-[50px] md:w-[60px] md:h-[60px] lg:w-[84px] lg:h-[84px]" aria-hidden="true">
-              <div className="absolute inset-0 flex items-center justify-center text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-7xl text-accent animate-spin-slow">
-                ⚙
-              </div>
+            <div className="flex items-center gap-2 sm:gap-3 mt-0.5">
+              <h1
+                className="font-serif font-black uppercase leading-[0.88] tracking-[0.07em] text-primary
+                  group-hover:text-primary/80 transition-colors duration-300"
+                style={{ fontSize: "clamp(2rem, 5vw, 3.8rem)" }}
+              >
+                Wheel
+              </h1>
+              <span
+                className="text-accent animate-spin-slow shrink-0 reader-hide"
+                style={{
+                  fontSize: "clamp(1.4rem, 3.2vw, 2.5rem)",
+                  filter: "drop-shadow(0 0 10px hsl(var(--accent) / 0.5))",
+                  display: "inline-block",
+                }}
+                aria-hidden="true"
+              >⚙</span>
             </div>
-            
-            <h1 className="font-serif text-xl xs:text-2xl sm:text-3xl md:text-4xl lg:text-6xl font-black tracking-wider uppercase text-primary leading-tight">
-              Wheel
-            </h1>
           </div>
+        </Link>
+
+        {/* Tagline — right-aligned, readable */}
+        <p className="font-mono text-[10px] sm:text-[11px] italic tracking-[0.18em]
+          text-right pr-1 mt-2 mb-4 sm:mb-5 reader-hide"
+          style={{ color: "hsl(var(--foreground) / 0.55)" }}
+        >
+          Where Reality Bends&nbsp;·&nbsp;Navigate the Spheres
+        </p>
+
+        {/* Hairline */}
+        <div
+          className="h-px mb-3 sm:mb-4 reader-hide"
+          style={{
+            width: "45%",
+            background: "linear-gradient(90deg, hsl(var(--accent) / 0.5), hsl(var(--primary) / 0.3), transparent)",
+          }}
+          aria-hidden="true"
+        />
+
+        {/* Quick-access — SECONDARY PAGES ONLY: About · Credits · Wonders */}
+        <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+          {[
+            { href: "/about",    icon: "ℹ",  label: "About"   },
+            { href: "/credits",  icon: "✦",  label: "Credits" },
+            { href: "/wonders",  icon: "✨", label: "Wonders" },
+          ].map(link => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md
+                font-serif text-[10px] sm:text-[11px] uppercase tracking-[0.12em] font-semibold
+                transition-all duration-200
+                hover:bg-primary/[0.08]
+                border border-transparent hover:border-primary/[0.18]"
+              style={{ color: "hsl(var(--foreground) / 0.65)" }}
+            >
+              <span className="text-[11px] leading-none reader-hide" aria-hidden="true">
+                {link.icon}
+              </span>
+              {link.label}
+            </Link>
+          ))}
         </div>
-      </Link>
-
-      {/* Decorative underline */}
-      <div
-        className="mx-auto w-32 sm:w-40 md:w-48 h-[1px] md:h-[2px] mb-3 sm:mb-4 reader-hide"
-        style={{
-          background: 'linear-gradient(90deg, transparent, hsl(300 45% 30%), transparent)',
-        }}
-        aria-hidden="true"
-      />
-
-      {/* Tagline - smaller on mobile */}
-      <p className="font-mono text-xs sm:text-sm md:text-lg lg:text-xl italic text-muted-foreground tracking-wide mb-4 sm:mb-5 md:mb-6 px-2">
-        Where Reality Bends • Navigate the Spheres
-      </p>
-
-      {/* Quick Access Links - FIXED responsive behavior */}
-      <div className="flex justify-center gap-2 sm:gap-3 flex-wrap max-w-full px-2">
-        <Link href="/about">
-          <Button variant="outline" size="sm" className="gap-1 sm:gap-2 font-serif text-xs sm:text-sm min-h-[40px] sm:min-h-[44px] px-2 sm:px-3">
-            <span className="text-sm sm:text-base reader-hide">{'\u2139'}</span>
-            About
-          </Button>
-        </Link>
-        
-        <Link href="/credits">
-          <Button variant="outline" size="sm" className="gap-1 sm:gap-2 font-serif text-xs sm:text-sm min-h-[40px] sm:min-h-[44px] px-2 sm:px-3">
-            <span className="text-sm sm:text-base reader-hide">{'\u2726'}</span>
-            Credits
-          </Button>
-        </Link>
-        
-        <Link href="/merits-flaws">
-          <Button variant="outline" size="sm" className="gap-1 sm:gap-2 font-serif text-xs sm:text-sm min-h-[40px] sm:min-h-[44px] px-2 sm:px-3">
-            <span className="text-sm sm:text-base reader-hide">{'\u2726'}</span>
-            Merits & Flaws
-          </Button>
-        </Link>
-        
-        <Link href="/wonders">
-          <Button variant="outline" size="sm" className="gap-1 sm:gap-2 font-serif text-xs sm:text-sm min-h-[40px] sm:min-h-[44px] px-2 sm:px-3">
-            <span className="text-sm sm:text-base reader-hide">{'\u2728'}</span>
-            Wonders
-          </Button>
-        </Link>
-        
-        <Link href="/recommended">
-          <Button variant="outline" size="sm" className="gap-1 sm:gap-2 font-serif text-xs sm:text-sm min-h-[40px] sm:min-h-[44px] px-2 sm:px-3">
-            <span className="text-sm sm:text-base reader-hide">{'\u{1F4DA}'}</span>
-            Resources
-          </Button>
-        </Link>
       </div>
+
+      {/* ── Bottom accent line ── */}
+      <div
+        className="h-[2px] w-full pointer-events-none"
+        aria-hidden="true"
+        style={{
+          background: "linear-gradient(90deg, hsl(var(--accent) / 0.65) 0%, hsl(var(--primary) / 0.5) 12%, hsl(var(--primary) / 0.2) 50%, transparent 100%)",
+          boxShadow: "0 1px 6px hsl(var(--primary) / 0.1)",
+        }}
+      />
     </header>
   )
 }
