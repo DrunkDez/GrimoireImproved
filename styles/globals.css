@@ -2,14 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Modern font stack */
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
-  font-feature-settings: 'kern' 1, 'liga' 1, 'calt' 1;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+/* ============================================================
+   NOTE: NO body { font-family } override here.
+   Cinzel, Crimson Text, and IM Fell DW Pica are loaded in
+   layout.tsx via next/font and mapped in tailwind.config.ts:
+     font-sans  → Crimson Text  (body default)
+     font-serif → Cinzel        (headings)
+     font-mono  → IM Fell       (taglines, quotes)
+   Both font overrides that were here have been removed.
+   ============================================================ */
 
 @layer utilities {
   .text-balance {
@@ -19,109 +20,123 @@ body {
 
 @layer base {
   :root {
-    /* Enhanced warm mystical palette */
-    --background: 36 42% 95%;
-    --foreground: 30 20% 15%;
-    --card: 0 0% 100%;
-    --card-foreground: 30 20% 15%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 30 20% 15%;
-    
-    /* Mystical purple primary */
-    --primary: 300 45% 25%;
-    --primary-foreground: 42 42% 95%;
-    
-    /* Warm secondary */
-    --secondary: 36 42% 88%;
-    --secondary-foreground: 30 20% 15%;
-    
-    /* Subtle muted */
-    --muted: 36 30% 90%;
-    --muted-foreground: 30 10% 45%;
-    
-    /* Golden accent */
-    --accent: 42 42% 59%;
-    --accent-foreground: 30 20% 15%;
-    
+    /* ═══════════════════════════════════════════════════════
+       LIGHT MODE
+       Warm parchment base + deep inkwell purple + gold accent
+       ═══════════════════════════════════════════════════════ */
+
+    /* True parchment — warm ivory, not silver-grey */
+    --background:      38 30% 91%;
+    --foreground:      280 45% 12%;   /* deep purple-tinted dark — readable */
+
+    /* Vellum card — lifts clearly above background */
+    --card:            40 25% 96%;
+    --card-foreground: 280 45% 12%;
+    --popover:         40 25% 96%;
+    --popover-foreground: 280 45% 12%;
+
+    /* PRIMARY: deep inkwell purple — structural color */
+    --primary:         280 60% 32%;
+    --primary-foreground: 40 35% 97%;
+
+    /* SECONDARY: warm parchment shadow */
+    --secondary:       36 22% 83%;
+    --secondary-foreground: 280 45% 18%;
+
+    /* Muted: mid-tone parchment */
+    --muted:           36 20% 86%;
+    --muted-foreground: 280 20% 42%;
+
+    /* ACCENT: burnished gold — used sparingly */
+    --accent:          42 85% 52%;
+    --accent-foreground: 280 45% 10%;
+
     /* Destructive */
-    --destructive: 0 84% 60%;
+    --destructive:     0 72% 51%;
     --destructive-foreground: 0 0% 98%;
-    
-    /* Borders */
-    --border: 36 30% 85%;
-    --input: 36 30% 85%;
-    --ring: 42 42% 59%;
-    
+
+    /* Borders: warm sepia with purple undertone */
+    --border:          280 20% 72%;
+    --input:           280 18% 76%;
+    --ring:            280 60% 45%;
+
     /* Charts */
-    --chart-1: 42 60% 55%;
-    --chart-2: 300 45% 45%;
-    --chart-3: 36 50% 50%;
-    --chart-4: 280 40% 55%;
-    --chart-5: 20 55% 60%;
-    
+    --chart-1: 280 60% 35%;
+    --chart-2: 42 85% 52%;
+    --chart-3: 25 50% 55%;
+    --chart-4: 280 40% 50%;
+    --chart-5: 0 72% 51%;
+
     --radius: 0.5rem;
-    
+
     /* Sidebar */
-    --sidebar-background: 36 42% 98%;
-    --sidebar-foreground: 30 20% 20%;
-    --sidebar-primary: 300 45% 25%;
-    --sidebar-primary-foreground: 42 42% 95%;
-    --sidebar-accent: 36 42% 93%;
-    --sidebar-accent-foreground: 30 20% 15%;
-    --sidebar-border: 36 30% 88%;
-    --sidebar-ring: 42 42% 59%;
+    --sidebar-background:        38 28% 94%;
+    --sidebar-foreground:        280 45% 15%;
+    --sidebar-primary:           280 60% 32%;
+    --sidebar-primary-foreground: 40 35% 97%;
+    --sidebar-accent:            36 22% 88%;
+    --sidebar-accent-foreground: 280 45% 12%;
+    --sidebar-border:            280 18% 75%;
+    --sidebar-ring:              42 85% 52%;
   }
-  
+
   .dark {
-    /* Warm dark mode */
-    --background: 30 20% 8%;
-    --foreground: 42 42% 95%;
-    --card: 30 20% 10%;
-    --card-foreground: 42 42% 95%;
-    --popover: 30 20% 8%;
-    --popover-foreground: 42 42% 95%;
-    
-    /* Golden primary in dark */
-    --primary: 42 42% 70%;
-    --primary-foreground: 30 20% 10%;
-    
-    /* Dark secondary */
-    --secondary: 30 15% 15%;
-    --secondary-foreground: 42 42% 95%;
-    
-    /* Dark muted */
-    --muted: 30 15% 18%;
-    --muted-foreground: 36 20% 65%;
-    
-    /* Accent */
-    --accent: 42 42% 59%;
-    --accent-foreground: 30 20% 10%;
-    
+    /* ═══════════════════════════════════════════════════════
+       DARK MODE
+       Deep cosmic void + luminous amethyst + gold accent
+       ═══════════════════════════════════════════════════════ */
+
+    /* Deep void with slight purple warmth */
+    --background:      270 40% 6%;
+    --foreground:      40 55% 90%;   /* warm cream — readable, not harsh white */
+
+    /* Lifted card surface */
+    --card:            270 35% 10%;
+    --card-foreground: 40 55% 90%;
+    --popover:         270 40% 8%;
+    --popover-foreground: 40 55% 90%;
+
+    /* PRIMARY: luminous amethyst — commanding and clear */
+    --primary:         280 70% 65%;
+    --primary-foreground: 270 40% 6%;
+
+    /* SECONDARY: deep shadow purple */
+    --secondary:       270 25% 16%;
+    --secondary-foreground: 40 55% 88%;
+
+    /* Muted: barely-there purple */
+    --muted:           270 22% 14%;
+    --muted-foreground: 280 20% 60%;
+
+    /* ACCENT: burnished gold — sparingly on CTAs and glyphs */
+    --accent:          42 90% 62%;
+    --accent-foreground: 270 40% 6%;
+
     /* Destructive */
-    --destructive: 0 70% 50%;
+    --destructive:     0 65% 48%;
     --destructive-foreground: 0 0% 98%;
-    
-    /* Dark borders */
-    --border: 30 15% 20%;
-    --input: 30 15% 20%;
-    --ring: 42 42% 70%;
-    
-    /* Dark charts */
-    --chart-1: 42 65% 60%;
-    --chart-2: 300 50% 55%;
-    --chart-3: 36 55% 58%;
-    --chart-4: 280 45% 60%;
-    --chart-5: 20 60% 65%;
-    
+
+    /* Borders: soft purple shadow */
+    --border:          270 28% 20%;
+    --input:           270 24% 18%;
+    --ring:            280 70% 60%;
+
+    /* Charts */
+    --chart-1: 280 70% 65%;
+    --chart-2: 42 90% 62%;
+    --chart-3: 200 65% 60%;
+    --chart-4: 280 55% 55%;
+    --chart-5: 0 72% 51%;
+
     /* Dark sidebar */
-    --sidebar-background: 30 20% 10%;
-    --sidebar-foreground: 42 42% 95%;
-    --sidebar-primary: 42 42% 70%;
-    --sidebar-primary-foreground: 30 20% 10%;
-    --sidebar-accent: 30 15% 15%;
-    --sidebar-accent-foreground: 42 42% 95%;
-    --sidebar-border: 30 15% 18%;
-    --sidebar-ring: 42 42% 70%;
+    --sidebar-background:        270 35% 10%;
+    --sidebar-foreground:        40 55% 90%;
+    --sidebar-primary:           280 70% 65%;
+    --sidebar-primary-foreground: 270 40% 6%;
+    --sidebar-accent:            270 25% 16%;
+    --sidebar-accent-foreground: 40 55% 88%;
+    --sidebar-border:            270 25% 18%;
+    --sidebar-ring:              280 70% 60%;
   }
 }
 
@@ -129,74 +144,76 @@ body {
   * {
     @apply border-border;
   }
-  
+
   body {
     @apply bg-background text-foreground;
+    /* font-feature-settings only — NO font-family override */
+    font-feature-settings: 'kern' 1, 'liga' 1, 'calt' 1;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     scroll-behavior: smooth;
   }
-  
-  /* Better focus states */
-  *:focus-visible {
-    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
-  }
-  
-  /* Smooth selection */
-  ::selection {
-    background-color: hsl(var(--accent) / 0.3);
-    color: hsl(var(--foreground));
-  }
-  
-  /* Typography improvements */
+
+  /* ── Headings: wide tracking for arcane gravitas ──
+     Cinzel looks generic with -0.02em (default "modern minimal").
+     It wants wide tracking — 0.06em minimum.              */
   h1, h2, h3, h4, h5, h6 {
     font-weight: 700;
     line-height: 1.2;
-    letter-spacing: -0.02em;
+    letter-spacing: 0.06em;
   }
-  
+
   p {
-    line-height: 1.7;
+    line-height: 1.75;
   }
-  
-  /* Better code blocks */
+
   code {
     @apply rounded bg-muted px-1.5 py-0.5 font-mono text-sm;
   }
-  
-  /* Custom scrollbar */
-  ::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
+
+  *:focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
   }
-  
-  ::-webkit-scrollbar-track {
-    background: hsl(var(--muted));
+
+  /* Selection — purple tint */
+  ::selection {
+    background-color: hsl(var(--primary) / 0.22);
+    color: hsl(var(--foreground));
   }
-  
-  ::-webkit-scrollbar-thumb {
-    background: hsl(var(--accent) / 0.5);
-    border-radius: 5px;
+
+  .dark ::selection {
+    background-color: hsl(var(--primary) / 0.35);
+    color: hsl(var(--foreground));
   }
-  
+
+  /* ── Scrollbar — purple toned ── */
+  ::-webkit-scrollbar        { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track  { background: hsl(var(--muted)); }
+  ::-webkit-scrollbar-thumb  {
+    background: hsl(var(--primary) / 0.35);
+    border-radius: 4px;
+    border: 2px solid hsl(var(--muted));
+  }
   ::-webkit-scrollbar-thumb:hover {
-    background: hsl(var(--accent));
+    background: hsl(var(--primary) / 0.6);
   }
 }
 
-/* Accessibility */
+/* ── Reduced motion ── */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  *, *::before, *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
 }
-/* Reader Mode Styles - Add to globals.css */
 
-/* Reader Mode Variables - Simplified Colors */
+/* ════════════════════════════════════════════════════════
+   READER MODE
+   ════════════════════════════════════════════════════════ */
+
 .reader-mode {
-  /* Light mode reader colors */
   --background: 0 0% 98%;
   --foreground: 0 0% 10%;
   --card: 0 0% 100%;
@@ -213,7 +230,6 @@ body {
   --ring: 0 0% 60%;
 }
 
-/* Dark mode reader colors */
 .dark.reader-mode {
   --background: 0 0% 12%;
   --foreground: 0 0% 95%;
@@ -231,60 +247,29 @@ body {
   --ring: 0 0% 50%;
 }
 
-/* Reader Mode Adjustments */
+/* Reader mode typography */
 .reader-mode {
-  /* Simplified typography */
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
 }
 
-/* Hide decorative elements in reader mode */
-.reader-mode .reader-hide {
-  display: none !important;
-}
+.reader-mode .reader-hide         { display: none !important; }
 
-/* Simplify borders */
 .reader-mode .border-primary,
 .reader-mode .border-accent,
-.reader-mode .border-ring {
-  border-color: hsl(var(--border)) !important;
-}
+.reader-mode .border-ring          { border-color: hsl(var(--border)) !important; }
 
-.reader-mode .border-double {
-  border-style: solid !important;
-}
+.reader-mode .border-double        { border-style: solid !important; }
 
-.reader-mode .border-\[3px\],
-.reader-mode .border-\[4px\] {
-  border-width: 1px !important;
-}
+.reader-mode [class*="shadow-"]    { box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important; }
 
-/* Simplify shadows */
-.reader-mode [class*="shadow-"] {
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
-}
+.reader-mode [style*="backgroundImage"] { background-image: none !important; }
+.reader-mode [style*="linear-gradient"] { background: transparent !important; }
 
-/* Remove background patterns */
-.reader-mode [style*="backgroundImage"] {
-  background-image: none !important;
-}
+.reader-mode [aria-hidden="true"]  { opacity: 0.3; }
 
-/* Simplify gradients */
-.reader-mode [style*="linear-gradient"] {
-  background: transparent !important;
-}
-
-/* Hide decorative symbols */
-.reader-mode [aria-hidden="true"] {
-  opacity: 0.3;
-}
-
-/* Remove animations */
 .reader-mode .animate-spin,
-.reader-mode .animate-spin-slow {
-  animation: none !important;
-}
+.reader-mode .animate-spin-slow    { animation: none !important; }
 
-/* Simplify header in reader mode */
 .reader-mode header {
   padding-top: 1rem;
   padding-bottom: 1rem;
@@ -298,101 +283,49 @@ body {
   text-transform: none;
 }
 
-/* Better line height for reading */
 .reader-mode p,
-.reader-mode .prose {
-  line-height: 1.75;
-}
+.reader-mode .prose               { line-height: 1.75; }
 
-/* Increase contrast for text */
 .reader-mode .text-muted-foreground {
   color: hsl(var(--foreground)) !important;
   opacity: 0.8;
 }
 
-/* Simplify buttons */
 .reader-mode button,
-.reader-mode .button {
-  border-radius: 0.25rem;
-  border-width: 1px;
-}
+.reader-mode .button              { border-radius: 0.25rem; border-width: 1px; }
 
-/* Remove text shadows and drop shadows */
 .reader-mode [class*="drop-shadow"],
 .reader-mode [class*="text-shadow"] {
   filter: none !important;
   text-shadow: none !important;
 }
 
-/* Simplify card backgrounds */
-.reader-mode .bg-card {
-  background-color: hsl(var(--card));
-}
-
-/* Remove backdrop blur */
 .reader-mode .backdrop-blur-md,
-.reader-mode .backdrop-blur {
-  backdrop-filter: none !important;
-}
+.reader-mode .backdrop-blur       { backdrop-filter: none !important; }
 
-/* Cleaner focus states */
 .reader-mode *:focus-visible {
   outline: 2px solid hsl(var(--ring));
   outline-offset: 2px;
 }
 
-/* Simplify sphere dots in reader mode */
-.reader-mode .sphere-dot {
-  border-width: 1px;
-}
-
-/* Hide corner decorations */
-.reader-mode .absolute.\-top-1,
-.reader-mode .absolute.\-top-2 {
-  display: none;
-}
-
-/* Optimize for reading - max width and center */
 .reader-mode main {
   max-width: 900px;
   margin-left: auto;
   margin-right: auto;
 }
 
-/* Increase font size slightly for readability */
-.reader-mode {
-  font-size: 16px;
-}
+.reader-mode { font-size: 16px; }
+.reader-mode h1 { font-size: 2rem; }
+.reader-mode h2 { font-size: 1.5rem; }
+.reader-mode h3 { font-size: 1.25rem; }
 
-.reader-mode h1 {
-  font-size: 2rem;
-}
-
-.reader-mode h2 {
-  font-size: 1.5rem;
-}
-
-.reader-mode h3 {
-  font-size: 1.25rem;
-}
-
-/* Better spacing for content */
 .reader-mode .prose p {
   margin-top: 1.25em;
   margin-bottom: 1.25em;
 }
 
-/* Cleaner lists */
 .reader-mode ul,
-.reader-mode ol {
-  margin-left: 1.5rem;
-}
+.reader-mode ol                   { margin-left: 1.5rem; }
 
-/* Remove ornamental fonts */
-.reader-mode .font-serif {
-  font-family: Georgia, 'Times New Roman', serif;
-}
-
-.reader-mode .font-mono {
-  font-family: 'Courier New', Courier, monospace;
-}
+.reader-mode .font-serif          { font-family: Georgia, 'Times New Roman', serif; }
+.reader-mode .font-mono           { font-family: 'Courier New', Courier, monospace; }
