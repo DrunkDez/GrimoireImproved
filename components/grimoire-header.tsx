@@ -12,49 +12,44 @@ export function GrimoireHeader() {
 
       {/* ── Layered atmospheric background ── */}
       <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
-        {/* Purple radial behind logo — left anchor */}
         <div style={{
           position: "absolute", inset: 0,
           background: `
-            radial-gradient(ellipse 55% 80% at 8% 50%,  hsl(280 55% 18% / 0.55) 0%, transparent 65%),
-            radial-gradient(ellipse 30% 45% at 88% 20%, hsl(300 40% 20% / 0.18) 0%, transparent 55%)
+            radial-gradient(ellipse 55% 80% at 8% 50%,  hsl(280 55% 18% / 0.5) 0%, transparent 65%),
+            radial-gradient(ellipse 30% 45% at 88% 20%, hsl(300 40% 20% / 0.15) 0%, transparent 55%)
           `,
         }} />
 
-        {/* Hex grid — faint purple */}
+        {/* Hex grid */}
         <svg
           className="absolute inset-0 w-full h-full reader-hide"
           xmlns="http://www.w3.org/2000/svg"
-          style={{ opacity: 0.028, mixBlendMode: "screen" }}
+          style={{ opacity: 0.03, mixBlendMode: "screen" }}
         >
           <defs>
             <pattern id="grimoire-hex" x="0" y="0" width="28" height="32" patternUnits="userSpaceOnUse">
               <polygon
                 points="14,1 27,8 27,24 14,31 1,24 1,8"
-                fill="none"
-                stroke="hsl(280 70% 70%)"
-                strokeWidth="0.6"
+                fill="none" stroke="hsl(280 70% 75%)" strokeWidth="0.6"
               />
             </pattern>
           </defs>
           <rect width="100%" height="100%" fill="url(#grimoire-hex)" />
         </svg>
 
-        {/* Ghost wheel bleeding top-right */}
+        {/* Ghost wheel top-right */}
         <div
           className="absolute animate-spin-slow select-none reader-hide"
           style={{
             top: "-90px", right: "-90px",
             fontSize: "340px", lineHeight: 1,
-            color: "hsl(280 55% 65% / 0.038)",
+            color: "hsl(280 55% 65% / 0.04)",
             fontFamily: "serif",
           }}
-        >
-          ⚙
-        </div>
+        >⚙</div>
       </div>
 
-      {/* ── Controls — top right ── */}
+      {/* ── Controls top-right ── */}
       <div className="absolute top-3 right-3 sm:top-4 sm:right-4 z-20 flex items-center gap-1 sm:gap-1.5">
         <div className="hidden sm:flex items-center gap-1 sm:gap-1.5">
           <ReaderModeToggle />
@@ -69,23 +64,20 @@ export function GrimoireHeader() {
         <ThemeToggle />
       </div>
 
-      {/* ── Main content — LEFT-ANCHORED, asymmetric ── */}
+      {/* ── Main content — left-anchored ── */}
       <div className="relative z-10 px-5 sm:px-7 md:px-10 pt-7 sm:pt-9 pb-5 sm:pb-6">
 
-        {/* Brand block */}
+        {/* Brand */}
         <Link href="/" className="inline-flex items-start gap-3 sm:gap-4 group mb-0.5">
-          {/* Logo */}
           <div className="mt-1.5 shrink-0 opacity-70 group-hover:opacity-100 transition-opacity duration-300
             w-[44px] h-[44px] sm:w-[52px] sm:h-[52px] reader-hide">
             <RandomLogo />
           </div>
 
-          {/* Wordmark — left anchored, not centered */}
           <div>
-            <p className="font-serif text-[9px] sm:text-[10px] uppercase tracking-[0.4em] text-primary/40 mb-0.5 pl-0.5 reader-hide">
+            <p className="font-serif text-[9px] sm:text-[10px] uppercase tracking-[0.4em] text-primary/50 mb-0.5 pl-0.5 reader-hide">
               The
             </p>
-
             <h1
               className="font-serif font-black uppercase leading-[0.88] tracking-[0.07em] text-primary
                 group-hover:text-primary/80 transition-colors duration-300"
@@ -93,7 +85,6 @@ export function GrimoireHeader() {
             >
               Paradox
             </h1>
-
             <div className="flex items-center gap-2 sm:gap-3 mt-0.5">
               <h1
                 className="font-serif font-black uppercase leading-[0.88] tracking-[0.07em] text-primary
@@ -102,7 +93,6 @@ export function GrimoireHeader() {
               >
                 Wheel
               </h1>
-              {/* Gold ⚙ — the one gold accent in the header */}
               <span
                 className="text-accent animate-spin-slow shrink-0 reader-hide"
                 style={{
@@ -111,20 +101,20 @@ export function GrimoireHeader() {
                   display: "inline-block",
                 }}
                 aria-hidden="true"
-              >
-                ⚙
-              </span>
+              >⚙</span>
             </div>
           </div>
         </Link>
 
-        {/* Tagline — right-aligned, breaks the central axis */}
-        <p className="font-mono text-[10px] sm:text-[11px] italic tracking-[0.18em] text-muted-foreground/40
-          text-right pr-1 mt-2 mb-4 sm:mb-5 reader-hide">
+        {/* Tagline — right-aligned, readable */}
+        <p className="font-mono text-[10px] sm:text-[11px] italic tracking-[0.18em]
+          text-right pr-1 mt-2 mb-4 sm:mb-5 reader-hide"
+          style={{ color: "hsl(var(--foreground) / 0.55)" }}
+        >
           Where Reality Bends&nbsp;·&nbsp;Navigate the Spheres
         </p>
 
-        {/* Partial hairline — left fade, not centered */}
+        {/* Hairline */}
         <div
           className="h-px mb-3 sm:mb-4 reader-hide"
           style={{
@@ -134,24 +124,22 @@ export function GrimoireHeader() {
           aria-hidden="true"
         />
 
-        {/* Quick-access — ghost chips, NO shadcn Button */}
+        {/* Quick-access — SECONDARY PAGES ONLY: About · Credits · Wonders */}
         <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
           {[
-            { href: "/about",        icon: "ℹ",  label: "About"          },
-            { href: "/credits",      icon: "✦",  label: "Credits"        },
-            { href: "/merits-flaws", icon: "✦",  label: "Merits & Flaws" },
-            { href: "/wonders",      icon: "✨", label: "Wonders"        },
-            { href: "/recommended",  icon: "📚", label: "Resources"      },
+            { href: "/about",    icon: "ℹ",  label: "About"   },
+            { href: "/credits",  icon: "✦",  label: "Credits" },
+            { href: "/wonders",  icon: "✨", label: "Wonders" },
           ].map(link => (
             <Link
               key={link.href}
               href={link.href}
               className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md
-                font-serif text-[9px] sm:text-[10px] uppercase tracking-[0.14em] font-semibold
-                text-muted-foreground/50 hover:text-primary
+                font-serif text-[10px] sm:text-[11px] uppercase tracking-[0.12em] font-semibold
                 transition-all duration-200
-                hover:bg-primary/[0.07]
-                border border-transparent hover:border-primary/[0.15]"
+                hover:bg-primary/[0.08]
+                border border-transparent hover:border-primary/[0.18]"
+              style={{ color: "hsl(var(--foreground) / 0.65)" }}
             >
               <span className="text-[11px] leading-none reader-hide" aria-hidden="true">
                 {link.icon}
@@ -162,7 +150,7 @@ export function GrimoireHeader() {
         </div>
       </div>
 
-      {/* ── Bottom accent line — gold spark → purple fade ── */}
+      {/* ── Bottom accent line ── */}
       <div
         className="h-[2px] w-full pointer-events-none"
         aria-hidden="true"
