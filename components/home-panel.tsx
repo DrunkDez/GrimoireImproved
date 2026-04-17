@@ -2,13 +2,11 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
-import type { Rote } from "@/lib/mage-data"
 import { MarkdownRenderer } from "@/components/ui/markdown-renderer"
 import { RandomSphereSymbols } from "@/components/random-sphere-symbols"
-import { LatestUpdateBanner } from "@/components/latest-update-banner"  // NEW
-import { UpcomingBookReleases } from "@/components/upcoming-book-releases"  // NEW
+import { LatestUpdateBanner } from "@/components/latest-update-banner"
+import { UpcomingBookReleases } from "@/components/upcoming-book-releases"
 import { LatestSiteUpdates } from "@/components/latest-site-updates"
-
 
 interface HomePanelProps {
   totalRotes: number
@@ -18,170 +16,281 @@ interface HomePanelProps {
 
 export function HomePanel({ totalRotes, traditions, onNavigate }: HomePanelProps) {
   const [welcomeTitle, setWelcomeTitle] = useState("Welcome, Newly Awakened")
-  const [welcomeText, setWelcomeText] = useState("")
-  const [howToUse, setHowToUse] = useState("")
-  const [isLoading, setIsLoading] = useState(true)
+  const [welcomeText,  setWelcomeText]  = useState("")
+  const [howToUse,     setHowToUse]     = useState("")
+  const [isLoading,    setIsLoading]    = useState(true)
 
   useEffect(() => {
     const fetchContent = async () => {
       try {
-        const response = await fetch('/api/site-settings')
-        if (response.ok) {
-          const settings = await response.json()
-          setWelcomeTitle(settings.welcomeTitle || "Welcome, Newly Awakened")
-          setWelcomeText(settings.welcomeText || "Within these pages lies a curated compendium of mystical Rotes drawn from the Nine Traditions and beyond.\n\nEach Rote represents a proven path through the Tapestry, a well-worn groove in reality that an Awakened will may follow.\n\nBrowse the collection, search by Sphere or Tradition, or inscribe your own discoveries for others to study.")
-          setHowToUse(settings.howToUse || "Browse rotes, search by tradition or sphere, and add your own discoveries.")
+        const res = await fetch('/api/site-settings')
+        if (res.ok) {
+          const s = await res.json()
+          setWelcomeTitle(s.welcomeTitle || "Welcome, Newly Awakened")
+          setWelcomeText(s.welcomeText   || "Within these pages lies a curated compendium of mystical Rotes drawn from the Nine Traditions and beyond.\n\nEach Rote represents a proven path through the Tapestry, a well-worn groove in reality that an Awakened will may follow.\n\nBrowse the collection, search by Sphere or Tradition, or inscribe your own discoveries for others to study.")
+          setHowToUse(s.howToUse        || "Browse rotes, search by tradition or sphere, and add your own discoveries.")
         }
-      } catch (error) {
-        console.error('Error fetching content:', error)
-      } finally {
-        setIsLoading(false)
-      }
+      } catch (e) { console.error(e) }
+      finally { setIsLoading(false) }
     }
-
     fetchContent()
   }, [])
 
   const stats = [
-    { value: totalRotes, label: "Rotes Inscribed" },
-    { value: traditions, label: "Traditions, Groups and Practices" },
-    { value: 12, label: "Spheres" },
+    { value: totalRotes, label: "Rotes Inscribed"           },
+    { value: traditions,  label: "Traditions & Practices"   },
+    { value: 12,          label: "Spheres"                   },
   ]
 
   return (
-    <div className="animate-fade-in-up flex flex-col gap-4 sm:gap-6 md:gap-8 p-3 sm:p-4 md:p-6 lg:p-10">
-      {/* NEW: Latest Update Banner */}
+    <div className="animate-fade-in-up flex flex-col gap-4 sm:gap-5 p-3 sm:p-5 md:p-7">
+
+      {/* Latest update banner — unchanged */}
       <LatestUpdateBanner />
 
-      {/* Hero area */}
+      {/* ══ Hero card — purple glass, not border-double ══ */}
       <div
-        className="relative bg-card border-2 sm:border-3 md:border-4 border-double border-primary rounded-lg px-3 sm:px-4 md:px-6 py-8 sm:py-12 md:py-16 text-center
-          shadow-[inset_0_0_40px_rgba(139,71,38,0.1),0_8px_20px_rgba(0,0,0,0.2)]
-          md:shadow-[inset_0_0_80px_rgba(139,71,38,0.1),0_10px_30px_rgba(0,0,0,0.2)]"
+        className="relative rounded-xl overflow-hidden px-4 sm:px-6 py-10 sm:py-14 text-center"
+        style={{
+          background: `linear-gradient(135deg, hsl(var(--card) / 0.7) 0%, hsl(var(--card) / 0.4) 100%)`,
+          backdropFilter: "blur(18px)",
+          WebkitBackdropFilter: "blur(18px)",
+          border: "1px solid hsl(var(--primary) / 0.22)",
+          boxShadow: `
+            inset 0 1px 0 hsl(var(--primary) / 0.15),
+            inset 0 -1px 0 hsl(var(--background) / 0.3),
+            0 4px 32px hsl(var(--background) / 0.5)
+          `,
+        }}
       >
-        {/* Background star - smaller on mobile */}
-        <div className="absolute top-4 sm:top-6 md:top-8 left-1/2 -translate-x-1/2 text-3xl sm:text-4xl md:text-6xl text-primary opacity-15 font-serif" aria-hidden="true">
-          ✦
+        {/* Ambient purple corner glows */}
+        <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+          <div style={{
+            position: "absolute", inset: 0,
+            background: `
+              radial-gradient(ellipse 55% 45% at 8%  0%,  hsl(280 55% 30% / 0.1) 0%, transparent 60%),
+              radial-gradient(ellipse 40% 35% at 92% 100%, hsl(300 40% 25% / 0.08) 0%, transparent 55%)
+            `,
+          }} />
+          {/* Hex texture inside card */}
+          <svg
+            className="absolute inset-0 w-full h-full reader-hide"
+            xmlns="http://www.w3.org/2000/svg"
+            style={{ opacity: 0.018 }}
+          >
+            <defs>
+              <pattern id="hexhero" x="0" y="0" width="22" height="25" patternUnits="userSpaceOnUse">
+                <polygon points="11,1 21,6.5 21,18.5 11,24 1,18.5 1,6.5" fill="none" stroke="hsl(280 60% 70%)" strokeWidth="0.5" />
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#hexhero)" />
+          </svg>
         </div>
 
-        {/* Random Sphere Symbols */}
-        <RandomSphereSymbols />
+        {/* Content */}
+        <div className="relative z-10">
+          <div className="opacity-55 mb-2 reader-hide">
+            <RandomSphereSymbols />
+          </div>
 
-        <h2 className="font-serif text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-primary uppercase tracking-widest mb-4 sm:mb-5 md:mb-6 px-2">
-          {welcomeTitle}
-        </h2>
+          <h2
+            className="font-serif font-bold uppercase text-primary mb-4 sm:mb-5 px-2"
+            style={{
+              fontSize: "clamp(1rem, 3vw, 1.45rem)",
+              letterSpacing: "0.14em",
+              textShadow: "0 0 30px hsl(var(--primary) / 0.25)",
+            }}
+          >
+            {welcomeTitle}
+          </h2>
 
-        <div className="max-w-2xl mx-auto px-2">
-          <MarkdownRenderer content={welcomeText} className="text-sm sm:text-base md:text-lg" />
+          <div className="max-w-xl mx-auto px-2">
+            <MarkdownRenderer
+              content={welcomeText}
+              className="text-sm sm:text-base text-foreground/72 leading-[1.85]"
+            />
+          </div>
         </div>
       </div>
 
-      {/* Latest News */}
+      {/* Latest news — unchanged */}
       <LatestSiteUpdates />
-      
-      {/* NEW: Upcoming Book Releases */}
+
+      {/* Upcoming books — unchanged */}
       <UpcomingBookReleases />
 
-      {/* How to Use section */}
-      <div className="bg-card border-2 sm:border-[3px] border-primary border-l-[4px] sm:border-l-[6px] border-l-accent rounded-md p-4 sm:p-5 md:p-6 lg:p-8
-        shadow-[inset_0_0_20px_rgba(139,71,38,0.05),3px_3px_10px_rgba(0,0,0,0.2)]
-        md:shadow-[inset_0_0_40px_rgba(139,71,38,0.05),5px_5px_15px_rgba(0,0,0,0.2)]">
-        <h3 className="font-serif text-base sm:text-lg md:text-xl font-bold text-primary uppercase tracking-[0.1em] sm:tracking-[0.15em] mb-3 sm:mb-4 flex items-center gap-2 sm:gap-3">
-          <span className="text-ring text-sm sm:text-base" aria-hidden="true">✦</span>
-          <span className="flex-1 min-w-0">How to Use The Wheel</span>
-          <span className="ml-auto text-accent text-sm sm:text-base" aria-hidden="true">◈</span>
+      {/* ══ How to Use — purple left-border callout ══ */}
+      <div
+        className="rounded-lg px-4 sm:px-6 py-4 sm:py-5"
+        style={{
+          background:  "hsl(var(--card) / 0.5)",
+          border:      "1px solid hsl(var(--border) / 0.4)",
+          borderLeft:  "3px solid hsl(var(--primary) / 0.6)",
+        }}
+      >
+        <h3 className="font-serif font-bold text-primary uppercase flex items-center gap-2 mb-3"
+          style={{ fontSize: "clamp(0.7rem, 1.5vw, 0.85rem)", letterSpacing: "0.18em" }}
+        >
+          {/* Gold glyph — the one accent-coloured element */}
+          <span className="text-accent/80 text-sm" aria-hidden="true">✦</span>
+          How to Use The Wheel
+          <span className="ml-auto text-primary/25 text-sm reader-hide" aria-hidden="true">◈</span>
         </h3>
-        
+
         {isLoading ? (
-          <div className="flex items-center gap-2 sm:gap-3 justify-center py-3 sm:py-4">
-            <span className="text-lg sm:text-xl text-accent animate-spin">⚙</span>
-            <p className="text-xs sm:text-sm text-muted-foreground">Loading...</p>
+          <div className="flex items-center gap-2 py-2">
+            <span className="text-accent text-lg animate-spin" aria-hidden="true">⚙</span>
+            <p className="text-xs text-muted-foreground font-serif tracking-widest uppercase">Loading…</p>
           </div>
         ) : (
-          <div className="prose prose-sm sm:prose-base dark:prose-invert max-w-none">
-            <MarkdownRenderer content={howToUse} />
-          </div>
+          <MarkdownRenderer content={howToUse} className="text-sm text-foreground/70" />
         )}
       </div>
 
-      {/* Stats - responsive grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+      {/* ══ Stats — purple gradient top-border cards ══ */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {stats.map((stat) => (
           <div
             key={stat.label}
-            className="group relative bg-card border-2 sm:border-[3px] border-double border-primary rounded-md p-4 sm:p-5 md:p-6 text-center
-              shadow-[inset_0_0_15px_rgba(139,71,38,0.05),2px_2px_8px_rgba(0,0,0,0.15)]
-              md:shadow-[inset_0_0_20px_rgba(139,71,38,0.05),3px_3px_10px_rgba(0,0,0,0.15)]
-              transition-all duration-300
-              hover:border-accent hover:-translate-y-1
-              hover:shadow-[inset_0_0_20px_rgba(201,169,97,0.1),3px_3px_15px_rgba(0,0,0,0.2)]"
+            className="relative group rounded-lg px-4 py-5 sm:py-6 text-center overflow-hidden
+              transition-all duration-300 hover:-translate-y-0.5"
+            style={{
+              background: "hsl(var(--card) / 0.7)",
+              border:     "1px solid hsl(var(--border) / 0.5)",
+              boxShadow:  "inset 0 1px 0 hsl(var(--primary) / 0.08)",
+            }}
           >
-            <div className="absolute top-1 sm:top-2 left-1/2 -translate-x-1/2 text-primary opacity-30 text-sm sm:text-base md:text-lg" aria-hidden="true">
-              ◈
-            </div>
-            <div className="text-3xl sm:text-4xl md:text-5xl font-serif text-primary leading-none mb-1 sm:mb-2 drop-shadow-[2px_2px_4px_rgba(0,0,0,0.2)]">
-              {stat.value}
-            </div>
-            <div className="font-serif text-[10px] sm:text-xs text-primary font-semibold uppercase tracking-[0.1em] sm:tracking-[0.12em]">
-              {stat.label}
+            {/* Purple gradient top-border — replaces the ◈ and border-double */}
+            <div
+              className="absolute top-0 left-0 right-0 rounded-t-lg"
+              aria-hidden="true"
+              style={{
+                height: "2px",
+                background: "linear-gradient(90deg, transparent, hsl(var(--primary) / 0.65), transparent)",
+              }}
+            />
+            {/* Hover glow */}
+            <div
+              className="absolute inset-0 opacity-0 group-hover:opacity-100 pointer-events-none
+                transition-opacity duration-300 rounded-lg"
+              aria-hidden="true"
+              style={{
+                background: "radial-gradient(ellipse at 50% 0%, hsl(var(--primary) / 0.08) 0%, transparent 70%)",
+              }}
+            />
+
+            <div className="relative z-10">
+              <div
+                className="font-serif font-black text-primary leading-none mb-1.5"
+                style={{
+                  fontSize:   "clamp(2rem, 5vw, 2.8rem)",
+                  textShadow: "0 0 20px hsl(var(--primary) / 0.25)",
+                }}
+              >
+                {stat.value}
+              </div>
+              <div className="font-serif uppercase text-muted-foreground/60 leading-tight"
+                style={{ fontSize: "clamp(9px, 1.2vw, 11px)", letterSpacing: "0.14em" }}>
+                {stat.label}
+              </div>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Quick actions - responsive */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+      {/* ══ CTA buttons — pill style with glow ══ */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+
+        {/* Primary — gold fill (the one place gold dominates) */}
         <button
           type="button"
           onClick={() => onNavigate("browse")}
-          className="font-serif px-4 sm:px-5 md:px-6 py-3 sm:py-4 bg-primary text-primary-foreground border-2 border-accent rounded-sm
-            font-semibold text-xs sm:text-sm uppercase tracking-[0.1em] sm:tracking-[0.15em] cursor-pointer
-            transition-all duration-300
-            shadow-[0_3px_6px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.1)]
-            md:shadow-[0_4px_8px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.1)]
-            hover:bg-muted-foreground hover:-translate-y-0.5
-            hover:shadow-[0_6px_12px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.2),0_0_20px_rgba(201,169,97,0.3)]
-            active:translate-y-0 flex items-center justify-center gap-2 sm:gap-3 min-h-[44px]"
+          className="group relative overflow-hidden rounded-full px-5 py-3 sm:py-3.5
+            font-serif uppercase font-bold cursor-pointer
+            transition-all duration-200 hover:-translate-y-px active:translate-y-0
+            flex items-center justify-center gap-2"
+          style={{
+            fontSize:    "clamp(9px, 1.3vw, 11px)",
+            letterSpacing: "0.18em",
+            background:  "linear-gradient(135deg, hsl(var(--accent)) 0%, hsl(var(--accent) / 0.8) 100%)",
+            color:       "hsl(var(--accent-foreground))",
+            border:      "none",
+            boxShadow:   "0 0 0 1px hsl(var(--accent) / 0.35), 0 4px 18px hsl(var(--accent) / 0.22)",
+          }}
+          onMouseEnter={e => {
+            (e.currentTarget as HTMLElement).style.boxShadow =
+              "0 0 0 1px hsl(var(--accent)/0.55), 0 6px 28px hsl(var(--accent)/0.35), 0 0 48px hsl(var(--accent)/0.1)"
+          }}
+          onMouseLeave={e => {
+            (e.currentTarget as HTMLElement).style.boxShadow =
+              "0 0 0 1px hsl(var(--accent)/0.35), 0 4px 18px hsl(var(--accent)/0.22)"
+          }}
         >
-          <span aria-hidden="true" className="text-sm sm:text-base">⟐</span>
-          <span className="hidden xs:inline">Browse the Library</span>
-          <span className="xs:hidden">Browse</span>
-          <span aria-hidden="true" className="text-sm sm:text-base">⟐</span>
+          {/* Shimmer sweep */}
+          <span
+            className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+            aria-hidden="true"
+            style={{ background: "linear-gradient(105deg, transparent 25%, rgba(255,255,255,0.16) 50%, transparent 75%)" }}
+          />
+          <span aria-hidden="true" className="relative text-base leading-none">✧</span>
+          <span className="relative hidden xs:inline">Browse the Library</span>
+          <span className="relative xs:hidden">Browse</span>
         </button>
-        
+
+        {/* Secondary — purple ghost */}
         <button
           type="button"
           onClick={() => onNavigate("add")}
-          className="font-serif px-4 sm:px-5 md:px-6 py-3 sm:py-4 bg-secondary text-secondary-foreground border-2 border-primary rounded-sm
-            font-semibold text-xs sm:text-sm uppercase tracking-[0.1em] sm:tracking-[0.15em] cursor-pointer
-            transition-all duration-300
-            shadow-[0_3px_6px_rgba(0,0,0,0.15)]
-            md:shadow-[0_4px_8px_rgba(0,0,0,0.15)]
-            hover:bg-background hover:border-ring hover:-translate-y-0.5
-            active:translate-y-0 flex items-center justify-center gap-2 sm:gap-3 min-h-[44px]"
+          className="rounded-full px-5 py-3 sm:py-3.5
+            font-serif uppercase font-semibold cursor-pointer
+            transition-all duration-200 hover:-translate-y-px active:translate-y-0
+            text-primary/75 hover:text-primary
+            flex items-center justify-center gap-2"
+          style={{
+            fontSize:       "clamp(9px, 1.3vw, 11px)",
+            letterSpacing:  "0.18em",
+            background:     "hsl(var(--card) / 0.5)",
+            backdropFilter: "blur(8px)",
+            border:         "1px solid hsl(var(--primary) / 0.3)",
+            boxShadow:      "inset 0 1px 0 hsl(var(--primary) / 0.08)",
+          }}
+          onMouseEnter={e => {
+            (e.currentTarget as HTMLElement).style.borderColor = "hsl(var(--primary) / 0.55)"
+            ;(e.currentTarget as HTMLElement).style.background  = "hsl(var(--primary) / 0.07)"
+          }}
+          onMouseLeave={e => {
+            (e.currentTarget as HTMLElement).style.borderColor = "hsl(var(--primary) / 0.3)"
+            ;(e.currentTarget as HTMLElement).style.background  = "hsl(var(--card) / 0.5)"
+          }}
         >
-          <span aria-hidden="true" className="text-sm sm:text-base">⟐</span>
+          <span aria-hidden="true" className="text-base leading-none">✎</span>
           <span className="hidden xs:inline">Inscribe a Rote</span>
           <span className="xs:hidden">Inscribe</span>
-          <span aria-hidden="true" className="text-sm sm:text-base">⟐</span>
         </button>
-        
+
+        {/* Tertiary — purple ghost */}
         <Link
           href="/character-creation"
-          className="font-serif px-4 sm:px-5 md:px-6 py-3 sm:py-4 bg-secondary text-secondary-foreground border-2 border-primary rounded-sm
-            font-semibold text-xs sm:text-sm uppercase tracking-[0.1em] sm:tracking-[0.15em] cursor-pointer
-            transition-all duration-300
-            shadow-[0_3px_6px_rgba(0,0,0,0.15)]
-            md:shadow-[0_4px_8px_rgba(0,0,0,0.15)]
-            hover:bg-background hover:border-ring hover:-translate-y-0.5
-            active:translate-y-0 flex items-center justify-center gap-2 sm:gap-3 min-h-[44px]"
+          className="rounded-full px-5 py-3 sm:py-3.5
+            font-serif uppercase font-semibold
+            transition-all duration-200 hover:-translate-y-px active:translate-y-0
+            text-primary/75 hover:text-primary
+            flex items-center justify-center gap-2"
+          style={{
+            fontSize:       "clamp(9px, 1.3vw, 11px)",
+            letterSpacing:  "0.18em",
+            background:     "hsl(var(--card) / 0.5)",
+            backdropFilter: "blur(8px)",
+            border:         "1px solid hsl(var(--primary) / 0.3)",
+            boxShadow:      "inset 0 1px 0 hsl(var(--primary) / 0.08)",
+          }}
         >
-          <span aria-hidden="true" className="text-sm sm:text-base">⟐</span>
+          <span aria-hidden="true" className="text-base leading-none">◈</span>
           <span className="hidden sm:inline">Character Creation</span>
           <span className="sm:hidden">Character</span>
-          <span aria-hidden="true" className="text-sm sm:text-base">⟐</span>
         </Link>
       </div>
+
     </div>
   )
 }
