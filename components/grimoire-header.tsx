@@ -6,11 +6,20 @@ import { ReaderModeToggle } from "@/components/reader-mode-toggle"
 import { RandomLogo } from "@/components/random-logo"
 import Link from "next/link"
 
+// Safe decorative symbols — these render as text glyphs, not emoji
+// ✦ (U+2726) is a text symbol, not in the emoji range — safe
+// ℹ (U+2139) can go emoji on iOS — replaced with · below
+const NAV_LINKS = [
+  { href: "/about",   label: "About",   icon: "·"  },
+  { href: "/credits", label: "Credits", icon: "✦"  },
+  { href: "/wonders", label: "Wonders", icon: "✦"  },
+]
+
 export function GrimoireHeader() {
   return (
     <header className="relative bg-card overflow-hidden">
 
-      {/* ── Layered atmospheric background ── */}
+      {/* ── Atmospheric background ── */}
       <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
         <div style={{
           position: "absolute", inset: 0,
@@ -37,16 +46,22 @@ export function GrimoireHeader() {
           <rect width="100%" height="100%" fill="url(#grimoire-hex)" />
         </svg>
 
-        {/* Ghost wheel top-right */}
+        {/* Ghost wheel — desktop only, hidden on mobile to avoid emoji issues */}
         <div
-          className="absolute animate-spin-slow select-none reader-hide"
+          className="absolute animate-spin-slow select-none reader-hide hidden md:block"
           style={{
             top: "-90px", right: "-90px",
             fontSize: "340px", lineHeight: 1,
             color: "hsl(280 55% 65% / 0.04)",
             fontFamily: "serif",
-          }}
-        >⚙</div>
+            /* Force text rendering — prevent emoji substitution */
+            fontVariantEmoji: "text",
+          } as React.CSSProperties}
+          aria-hidden="true"
+        >
+          {/* Unicode variation selector \uFE0E forces text rendering */}
+          ⚙&#xFE0E;
+        </div>
       </div>
 
       {/* ── Controls top-right ── */}
@@ -64,7 +79,7 @@ export function GrimoireHeader() {
         <ThemeToggle />
       </div>
 
-      {/* ── Main content — left-anchored ── */}
+      {/* ── Main content ── */}
       <div className="relative z-10 px-5 sm:px-7 md:px-10 pt-7 sm:pt-9 pb-5 sm:pb-6">
 
         {/* Brand */}
@@ -93,22 +108,34 @@ export function GrimoireHeader() {
               >
                 Wheel
               </h1>
+              {/*
+                ⚙ + \uFE0E variation selector forces text rendering on all platforms.
+                font-variant-emoji: text does the same for modern browsers.
+                The explicit width/height + line-height stops iOS from inflating it.
+              */}
               <span
                 className="text-accent animate-spin-slow shrink-0 reader-hide"
                 style={{
-                  fontSize: "clamp(1.4rem, 3.2vw, 2.5rem)",
-                  filter: "drop-shadow(0 0 10px hsl(var(--accent) / 0.5))",
-                  display: "inline-block",
-                }}
+                  fontSize:          "clamp(1.4rem, 3.2vw, 2.5rem)",
+                  filter:            "drop-shadow(0 0 10px hsl(var(--accent) / 0.5))",
+                  display:           "inline-block",
+                  lineHeight:        1,
+                  width:             "1em",
+                  height:            "1em",
+                  fontVariantEmoji:  "text",
+                } as React.CSSProperties}
                 aria-hidden="true"
-              >⚙</span>
+              >
+                ⚙&#xFE0E;
+              </span>
             </div>
           </div>
         </Link>
 
-        {/* Tagline — right-aligned, readable */}
-        <p className="font-mono text-[10px] sm:text-[11px] italic tracking-[0.18em]
-          text-right pr-1 mt-2 mb-4 sm:mb-5 reader-hide"
+        {/* Tagline */}
+        <p
+          className="font-mono text-[10px] sm:text-[11px] italic tracking-[0.18em]
+            text-right pr-1 mt-2 mb-4 sm:mb-5 reader-hide"
           style={{ color: "hsl(var(--foreground) / 0.55)" }}
         >
           Where Reality Bends&nbsp;·&nbsp;Navigate the Spheres
@@ -124,25 +151,36 @@ export function GrimoireHeader() {
           aria-hidden="true"
         />
 
-        {/* Quick-access — SECONDARY PAGES ONLY: About · Credits · Wonders */}
+        {/* Quick-access links — NO emoji, constrained icon size */}
         <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-          {[
-            { href: "/about",    icon: "ℹ",  label: "About"   },
-            { href: "/credits",  icon: "✦",  label: "Credits" },
-            { href: "/wonders",  icon: "✨", label: "Wonders" },
-          ].map(link => (
+          {NAV_LINKS.map(link => (
             <Link
               key={link.href}
               href={link.href}
-              className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md
+              className="inline-flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md
                 font-serif text-[10px] sm:text-[11px] uppercase tracking-[0.12em] font-semibold
                 transition-all duration-200
                 hover:bg-primary/[0.08]
                 border border-transparent hover:border-primary/[0.18]"
               style={{ color: "hsl(var(--foreground) / 0.65)" }}
             >
-              <span className="text-[11px] leading-none reader-hide" aria-hidden="true">
-                {link.icon}
+              {/*
+                Icon span: explicit 12px size + text rendering forces it to
+                behave as a glyph, not an emoji on iOS/Android.
+              */}
+              <span
+                aria-hidden="true"
+                className="reader-hide"
+                style={{
+                  fontSize:         "12px",
+                  lineHeight:       1,
+                  width:            "12px",
+                  height:           "12px",
+                  display:          "inline-block",
+                  fontVariantEmoji: "text",
+                } as React.CSSProperties}
+              >
+                {link.icon}&#xFE0E;
               </span>
               {link.label}
             </Link>
@@ -150,7 +188,7 @@ export function GrimoireHeader() {
         </div>
       </div>
 
-      {/* ── Bottom accent line ── */}
+      {/* Bottom accent line */}
       <div
         className="h-[2px] w-full pointer-events-none"
         aria-hidden="true"
