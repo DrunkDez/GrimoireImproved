@@ -9,13 +9,16 @@ interface GrimoireNavProps {
   onTabChange: (tab: TabId) => void
 }
 
+// 📚 is a full emoji — replaced with ✦ (text glyph, safe on all platforms)
+// All symbols get \uFE0E variation selector via dangerouslySetInnerHTML trick
+// or by using the unicode escape inline
 const tabs: { id: TabId; label: string; symbol: string }[] = [
-  { id: "home",      label: "Sanctum",          symbol: "⌂"  },
-  { id: "browse",    label: "Browse Rotes",     symbol: "✧"  },
-  { id: "add",       label: "Inscribe",         symbol: "✎"  },
-  { id: "merits",    label: "Merits & Flaws",   symbol: "✦"  },
-  { id: "resources", label: "Resources",        symbol: "📚" },
-  { id: "character", label: "Character",        symbol: "◈"  },
+  { id: "home",      label: "Sanctum",        symbol: "⌂"  },
+  { id: "browse",    label: "Browse Rotes",   symbol: "✧"  },
+  { id: "add",       label: "Inscribe",       symbol: "✎"  },
+  { id: "merits",    label: "Merits & Flaws", symbol: "✦"  },
+  { id: "resources", label: "Resources",      symbol: "✦"  },
+  { id: "character", label: "Character",      symbol: "◈"  },
 ]
 
 export function GrimoireNav({ activeTab, onTabChange }: GrimoireNavProps) {
@@ -53,22 +56,30 @@ export function GrimoireNav({ activeTab, onTabChange }: GrimoireNavProps) {
               !isActive && "hover:bg-primary/[0.05]",
             )}
             style={{
-              /* Readable at rest — not muted-foreground/50 which was invisible */
               color: isActive
                 ? "hsl(var(--primary))"
                 : "hsl(var(--foreground) / 0.55)",
             }}
           >
+            {/* Symbol — constrained size prevents emoji inflation on iOS */}
             <span
-              className="text-sm leading-none transition-colors duration-200"
+              aria-hidden="true"
               style={{
+                fontSize:         "13px",
+                lineHeight:       1,
+                width:            "13px",
+                height:           "13px",
+                display:          "inline-block",
+                flexShrink:       0,
                 color: isActive
                   ? "hsl(var(--primary))"
                   : "hsl(var(--foreground) / 0.4)",
-              }}
-              aria-hidden="true"
+                /* Force text rendering, not emoji rendering */
+                fontVariantEmoji: "text",
+              } as React.CSSProperties}
             >
-              {tab.symbol}
+              {/* \uFE0E variation selector appended — text presentation */}
+              {tab.symbol}&#xFE0E;
             </span>
 
             <span className="hidden sm:inline">{tab.label}</span>
@@ -79,10 +90,10 @@ export function GrimoireNav({ activeTab, onTabChange }: GrimoireNavProps) {
                 className="absolute bottom-0 left-1 right-1"
                 aria-hidden="true"
                 style={{
-                  height:     "2px",
+                  height:       "2px",
                   borderRadius: "2px 2px 0 0",
-                  background: "linear-gradient(90deg, hsl(var(--primary) / 0.5), hsl(var(--primary)), hsl(var(--primary) / 0.5))",
-                  boxShadow:  "0 0 8px hsl(var(--primary) / 0.55), 0 0 2px hsl(var(--accent) / 0.3)",
+                  background:   "linear-gradient(90deg, hsl(var(--primary) / 0.5), hsl(var(--primary)), hsl(var(--primary) / 0.5))",
+                  boxShadow:    "0 0 8px hsl(var(--primary) / 0.55), 0 0 2px hsl(var(--accent) / 0.3)",
                 }}
               />
             )}
