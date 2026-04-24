@@ -2,11 +2,10 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { cn } from "@/lib/utils"
-import { Lock, ChevronRight, Check, Plus, Minus, Sparkles, Share2 } from "lucide-react"
+import { Lock, Check, Plus, Minus, Sparkles, Share2 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Badge } from "@/components/ui/badge"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { useToast } from "@/hooks/use-toast"
@@ -80,86 +79,38 @@ const INITIAL_STATE: CharacterState = {
 
 // ── Static lore data (fallback if CMS fails) ─────────────────────────────────
 const traditionBlurbs: Record<string, { short: string; long: string; affinitySphere: string }> = {
-  "Akashic Brotherhood": {
-    short: "Warrior-monks who channel enlightenment through martial discipline and meditative focus.",
-    long: "The Akashic Brotherhood believe that Do — the martial art of existence — is the path to Awakening. Every movement, breath, and stillness is magic.",
-    affinitySphere: "Mind",
-  },
-  "Celestial Chorus": {
-    short: "Faith-driven mages who hear the divine One Song and shape reality through prayer and devotion.",
-    long: "The Celestial Chorus draw magic from a shared divine source — the One, God, Allah, the Tao — and weave it through ritual, prayer, and sacred music.",
-    affinitySphere: "Prime",
-  },
-  "Cult of Ecstasy": {
-    short: "Hedonists, artists, and time-seers who transcend the mundane through passion, sensation, and altered states.",
-    long: "Where others seek control, the Cult of Ecstasy seeks to dissolve it. Through music, dance, drugs, sex, fasting, pain, or art, they push past the boundaries of the consensus.",
-    affinitySphere: "Time",
-  },
-  "Dreamspeakers": {
-    short: "Spirit-walkers and shamans who bridge the worlds of the living, the dead, and the Umbra.",
-    long: "The Dreamspeakers are the inheritors of shamanic and indigenous magical traditions from across the world. They communicate with spirits of land, ancestor, and beast.",
-    affinitySphere: "Spirit",
-  },
-  "Euthanatos": {
-    short: "Mages of death and karma who believe in merciful endings and the purification of the cycle of rebirth.",
-    long: "The Euthanatos believe death is not an ending but a transition — and sometimes, that a life must end so that the soul can continue its journey unimpeded.",
-    affinitySphere: "Entropy",
-  },
-  "Order of Hermes": {
-    short: "Hermetic wizards who command reality through rigorous scholarship, ritual, and ancient formulae.",
-    long: "The Order of Hermes trace their lineage back to the mages of ancient Alexandria and the mythic figure Hermes Trismegistus.",
-    affinitySphere: "Forces",
-  },
-  "Sons of Ether": {
-    short: "Renegade scientists who reject consensus physics and work miracles through weird technology and mad inspiration.",
-    long: "Expelled from the Technocracy for their belief in the luminiferous Ether, the Sons of Ether build raygun-toting robots and design impossible engines.",
-    affinitySphere: "Matter",
-  },
-  "Verbena": {
-    short: "Nature witches who draw power from blood, earth, moon, and the primal cycle of life and death.",
-    long: "The Verbena are among the oldest Traditions, tracing their roots to the wise-women and witches of pre-Christian Europe.",
-    affinitySphere: "Life",
-  },
-  "Virtual Adepts": {
-    short: "Cybermages who hack reality itself through data, code, and digital transcendence.",
-    long: "The Virtual Adepts defected from the Technocracy when they realised information was more powerful than any weapon.",
-    affinitySphere: "Correspondence",
-  },
-  "Hollow Ones": {
-    short: "Gothic autodidacts who practice eclectic, death-tinged magic outside the formal Traditions.",
-    long: "The Hollow Ones are not a true Tradition — they are a loose subculture of Orphan mages who share an aesthetic of melancholy, romanticism, and death.",
-    affinitySphere: "Entropy",
-  },
-  "Orphan": {
-    short: "Self-taught mages who Awakened without a mentor and walk their path alone.",
-    long: "Orphans have no Tradition to guide them, no chantry to shelter them, and no lineage to validate them.",
-    affinitySphere: "Varies",
-  },
-  "Technocracy": {
-    short: "The dominant order of reality — scientists, agents, and engineers who enforce the consensus.",
-    long: "The Technocracy believe they are saving humanity from chaos. They have spent centuries replacing superstition with science.",
-    affinitySphere: "Varies",
-  },
+  "Akashic Brotherhood": { short: "Warrior-monks who channel enlightenment through martial discipline.", long: "The Akashic Brotherhood believe that Do — the martial art of existence — is the path to Awakening.", affinitySphere: "Mind" },
+  "Celestial Chorus": { short: "Faith-driven mages who hear the divine One Song.", long: "The Celestial Chorus draw magic from a shared divine source.", affinitySphere: "Prime" },
+  "Cult of Ecstasy": { short: "Hedonists, artists, and time-seers.", long: "Where others seek control, the Cult of Ecstasy seeks to dissolve it.", affinitySphere: "Time" },
+  "Dreamspeakers": { short: "Spirit-walkers and shamans who bridge the worlds.", long: "The Dreamspeakers communicate with spirits of land, ancestor, and beast.", affinitySphere: "Spirit" },
+  "Euthanatos": { short: "Mages of death and karma.", long: "The Euthanatos believe death is not an ending but a transition.", affinitySphere: "Entropy" },
+  "Order of Hermes": { short: "Hermetic wizards who command reality through ritual.", long: "The Order of Hermes trace their lineage back to the mages of ancient Alexandria.", affinitySphere: "Forces" },
+  "Sons of Ether": { short: "Renegade scientists who reject consensus physics.", long: "Expelled from the Technocracy for their belief in the luminiferous Ether.", affinitySphere: "Matter" },
+  "Verbena": { short: "Nature witches who draw power from blood and earth.", long: "The Verbena are among the oldest Traditions, tracing their roots to pre-Christian Europe.", affinitySphere: "Life" },
+  "Virtual Adepts": { short: "Cybermages who hack reality through data.", long: "The Virtual Adepts defected from the Technocracy when they realised information was more powerful.", affinitySphere: "Correspondence" },
+  "Hollow Ones": { short: "Gothic autodidacts who practice eclectic magic.", long: "The Hollow Ones are a loose subculture of Orphan mages.", affinitySphere: "Entropy" },
+  "Orphan": { short: "Self-taught mages who Awakened without a mentor.", long: "Orphans have no Tradition to guide them.", affinitySphere: "Varies" },
+  "Technocracy": { short: "The dominant order of reality — scientists and agents.", long: "The Technocracy believe they are saving humanity from chaos.", affinitySphere: "Varies" },
 }
 
 const archetypeDescriptions: Record<string, string> = {
-  Architect: "You build things meant to last — institutions, relationships, works of art — and draw meaning from seeing your creations endure.",
+  Architect: "You build things meant to last — institutions, relationships, works of art.",
   Autocrat: "You need to be in control. Not for cruelty, but because you genuinely believe things work better when you are in charge.",
-  "Bon Vivant": "Life is short; pleasure is real. You live for enjoyment and see no virtue in suffering.",
-  Bravo: "Strength impresses you, and you use your own to get what you want. You're not necessarily cruel — just direct.",
-  Caregiver: "You find meaning in nurturing others. Their wellbeing is your priority, sometimes to the point of neglecting yourself.",
-  Celebrant: "You have found something to believe in — a cause, an art form, a person — and your devotion gives your life meaning.",
-  Competitor: "Everything is a game, and games are meant to be won. You are driven by the need to be best.",
-  Conformist: "You follow strong leaders and find comfort in belonging to a group. This isn't weakness — it's a survival strategy.",
+  "Bon Vivant": "Life is short; pleasure is real.",
+  Bravo: "Strength impresses you, and you use your own to get what you want.",
+  Caregiver: "You find meaning in nurturing others.",
+  Celebrant: "You have found something to believe in — a cause, an art form, a person.",
+  Competitor: "Everything is a game, and games are meant to be won.",
+  Conformist: "You follow strong leaders and find comfort in belonging to a group.",
   Conniver: "You work angles. Why do something the hard way when the right word in the right ear gets it done faster?",
-  Critic: "You have high standards and the courage to say when they aren't being met. You are honest to the point of harshness.",
-  Curmudgeon: "The world irritates you. It has earned this. You are sharp, cynical, and almost always right.",
-  Deviant: "Society's rules were never made for you, and you stopped pretending otherwise. You live outside the lines.",
+  Critic: "You have high standards and the courage to say when they aren't being met.",
+  Curmudgeon: "The world irritates you. It has earned this.",
+  Deviant: "Society's rules were never made for you, and you stopped pretending otherwise.",
   Director: "You see the shape of things as they should be and spend your energy moving people into the right positions.",
-  Fanatic: "You have a cause, and it consumes you. Everything else is secondary. Others may call this dangerous.",
-  Gallant: "Life is performance, and you are the star. You love to be seen, admired, and remembered.",
-  Judge: "You weigh evidence, consider all sides, and reach a verdict. You are fair to a fault and rarely wrong.",
-  Loner: "People drain you. Solitude restores you. You work better alone, think better alone, and honestly prefer it.",
+  Fanatic: "You have a cause, and it consumes you.",
+  Gallant: "Life is performance, and you are the star.",
+  Judge: "You weigh evidence, consider all sides, and reach a verdict.",
+  Loner: "People drain you. Solitude restores you.",
   Martyr: "You sacrifice yourself — your comfort, your safety, your future — for what you believe in.",
   Masochist: "You push against your own limits, physical or emotional, and find out who you are in the breaking.",
   Monster: "You have accepted what you are. Others may see a predator; you see clarity.",
@@ -167,8 +118,8 @@ const archetypeDescriptions: Record<string, string> = {
   Penitent: "You have done something you cannot forgive, and everything since is an attempt to balance that ledger.",
   Perfectionist: "You have a vision of how things should be done, and anything less is a failure.",
   Rebel: "Authority is a problem to be solved. You question everything and accept nothing on faith alone.",
-  Rogue: "You look out for yourself, and you are honest about it. This isn't selfishness — it's clear-eyed recognition.",
-  Sage: "Wisdom is your currency. You accumulate knowledge, perspective, and patience, and you spend them carefully.",
+  Rogue: "You look out for yourself, and you are honest about it.",
+  Sage: "Wisdom is your currency. You accumulate knowledge, perspective, and patience.",
   Scientist: "Everything can be understood if you ask the right questions and apply the right method.",
   Sociopath: "You do not feel what others feel, and you have learned to simulate it well enough to move through the world.",
   Survivor: "You have outlasted things that should have killed you, and you intend to keep doing so.",
@@ -180,22 +131,22 @@ const archetypeDescriptions: Record<string, string> = {
 const natureDemeanorOptions = Object.keys(archetypeDescriptions)
 
 const essenceOptions = [
-  { value: "Dynamic",   description: "You are a force of change. Dynamic mages are creative, restless, and revolutionary — they see what could be and bend reality toward it.", keyword: "Change" },
-  { value: "Pattern",   description: "You are a force of structure. Pattern mages preserve, organise, and maintain — they see the beauty in systems and the danger in entropy.", keyword: "Order" },
+  { value: "Dynamic",   description: "You are a force of change. Dynamic mages are creative, restless, and revolutionary.", keyword: "Change" },
+  { value: "Pattern",   description: "You are a force of structure. Pattern mages preserve, organise, and maintain.", keyword: "Order" },
   { value: "Primordial",description: "You are a force of nature. Primordial mages work on instinct, tapping into drives older than civilisation.", keyword: "Instinct" },
-  { value: "Questing",  description: "You are a force of seeking. Questing mages are on a journey — spiritual, intellectual, or literal — and find meaning in the pursuit.", keyword: "Growth" },
+  { value: "Questing",  description: "You are a force of seeking. Questing mages are on a journey — spiritual, intellectual, or literal.", keyword: "Growth" },
 ]
 
 const sphereData: Record<string, { short: string; long: string }> = {
-  correspondence: { short: "Space, distance, and location", long: "Correspondence is the Sphere of space and connectivity. At low levels it lets you sense across distance; at higher levels you can teleport, create portals, and exist in multiple places simultaneously." },
-  entropy: { short: "Chaos, probability, and decay", long: "Entropy governs the tendency of all things to fall apart — and the patterns hidden within that falling." },
-  forces: { short: "Energy, fire, and the physical world", long: "Forces controls the energies of the physical world: fire, electricity, gravity, light, sound, and kinetic force." },
-  life: { short: "Living things, healing, and transformation", long: "Life governs all living matter — from bacteria to human beings. At low levels you can read biological states; at higher levels you can heal, reshape, or corrupt living flesh." },
-  matter: { short: "Inanimate substances and transmutation", long: "Matter controls non-living physical substances — stone, metal, water, air, plastic." },
-  mind: { short: "Thought, consciousness, and perception", long: "Mind is the Sphere of consciousness, thought, and perception. At low levels you can read surface emotions or project your consciousness." },
-  prime: { short: "Raw magic and Quintessence", long: "Prime is the study of Quintessence — the raw material of magic itself, the fifth essence that underlies all reality." },
-  spirit: { short: "The Umbra, spirits, and the dead", long: "Spirit governs the relationship between the physical world and the Umbra — the spirit realm that mirrors it." },
-  time: { short: "Temporal perception and manipulation", long: "Time governs perception of and travel through the fourth dimension. At low levels you sense the past and future as impressions." },
+  correspondence: { short: "Space, distance, and location", long: "Correspondence is the Sphere of space and connectivity." },
+  entropy: { short: "Chaos, probability, and decay", long: "Entropy governs the tendency of all things to fall apart." },
+  forces: { short: "Energy, fire, and the physical world", long: "Forces controls the energies of the physical world." },
+  life: { short: "Living things, healing, and transformation", long: "Life governs all living matter." },
+  matter: { short: "Inanimate substances and transmutation", long: "Matter controls non-living physical substances." },
+  mind: { short: "Thought, consciousness, and perception", long: "Mind is the Sphere of consciousness, thought, and perception." },
+  prime: { short: "Raw magic and Quintessence", long: "Prime is the study of Quintessence — the raw material of magic itself." },
+  spirit: { short: "The Umbra, spirits, and the dead", long: "Spirit governs the relationship between the physical world and the Umbra." },
+  time: { short: "Temporal perception and manipulation", long: "Time governs perception of and travel through the fourth dimension." },
 }
 
 const STEP_CATEGORIES = [
@@ -220,16 +171,16 @@ interface CMSContent {
 }
 
 const defaultGuidanceTexts: Record<string, string> = {
-  'name-concept-tradition': "<p><strong>Name:</strong> Choose something evocative — gothic, mythic, or grounded in your character's cultural background. The World of Darkness rewards names that carry weight.</p><p><strong>Concept:</strong> A two-to-four-word phrase that captures your character's essence — their role in the world before magic enters the picture (e.g., \"Grieving Forensic Pathologist\", \"Hacker on the Run\").</p><p><strong>Tradition:</strong> The magical order or paradigm your character belongs to. It shapes <em>how</em> you work magic — your style, your community, and your enemies.</p>",
-  'nature-demeanor': "<p><strong>Nature</strong> is your character's true inner self — the core of who they are when no one is watching and nothing external constrains them.</p><p><strong>Demeanor</strong> is the mask they show the world. It may be completely different from their Nature, or nearly identical. Either is valid. The tension between the two is often where the most interesting roleplaying lives.</p>",
-  'essence-chronicle': "<p><strong>Essence</strong> is your character's fundamental magical nature — the cosmic principle they most embody.</p><p><strong>Chronicle</strong> is the name of your campaign or story. Your Storyteller will usually provide this.</p><p><strong>Sect</strong> (optional) is a sub-group within your Tradition — a specific chantry, a philosophical school, or a regional chapter.</p>",
-  'attribute-priority': "<p><strong>Attributes</strong> are your character's innate capabilities. You have three categories: Physical, Social, Mental.</p><p>Assign <strong>Primary (7 dots)</strong>, <strong>Secondary (5 dots)</strong>, and <strong>Tertiary (3 dots)</strong> to the three categories.</p>",
-  'attribute-assign': "<p>Each attribute starts at <strong>1 dot</strong>. You have additional dots to spend based on your priorities. Click on the dots to increase an attribute. The first dot (base) is locked.</p>",
-  'ability-priority': "<p><strong>Abilities</strong> represent learned skills and knowledge — Talents (innate), Skills (trained), and Knowledges (academic).</p><p>Assign <strong>Primary (13 dots)</strong>, <strong>Secondary (9 dots)</strong>, and <strong>Tertiary (5 dots)</strong>.</p>",
-  'ability-assign': "<p>Assign your ability dots. Each ability can have at most <strong>3 dots</strong> during creation. Click a filled dot to clear it back to 0.</p>",
-  'arete-start': "<p><strong>Arete</strong> is your character's magical enlightenment — it determines how many dice you roll for magic and what level of effects you can attempt. Most starting characters begin at Arete 1.</p><p>Your Storyteller may allow you to start higher, but it costs freebie points. Discuss this before making your choice.</p>",
-  'spheres': "<p><strong>Spheres</strong> are the nine domains of magical reality. Your Tradition grants you an <strong>Affinity Sphere</strong> — you must take at least 1 dot in it.</p><p>You have <strong>6 total dots</strong> across all Spheres (max 3 per Sphere). The Affinity Sphere uses 1 of those dots, leaving 5 to distribute freely.</p>",
-  'backgrounds': "<p><strong>Backgrounds</strong> represent your character's resources, allies, and supernatural advantages outside raw power.</p><p>You have <strong>7 dots</strong> to spend across any backgrounds (max 5 per background).</p>",
+  'name-concept-tradition': "<p><strong>Name:</strong> Choose something evocative — gothic, mythic, or grounded in your character's cultural background.</p><p><strong>Concept:</strong> A two-to-four-word phrase that captures your character's essence.</p><p><strong>Tradition:</strong> The magical order or paradigm your character belongs to.</p>",
+  'nature-demeanor': "<p><strong>Nature</strong> is your character's true inner self — what drives them when no one is watching.</p><p><strong>Demeanor</strong> is the mask they show the world.</p>",
+  'essence-chronicle': "<p><strong>Essence</strong> is your character's fundamental magical nature.</p><p><strong>Chronicle</strong> is the name of your campaign or story.</p><p><strong>Sect</strong> (optional) is a sub-group within your Tradition.</p>",
+  'attribute-priority': "<p><strong>Attributes</strong> are your character's innate capabilities.</p><p>Assign <strong>Primary (7 dots)</strong>, <strong>Secondary (5 dots)</strong>, and <strong>Tertiary (3 dots)</strong>.</p>",
+  'attribute-assign': "<p>Each attribute starts at <strong>1 dot</strong>. You have additional dots to spend based on your priorities.</p>",
+  'ability-priority': "<p><strong>Abilities</strong> represent learned skills and knowledge.</p><p>Assign <strong>Primary (13 dots)</strong>, <strong>Secondary (9 dots)</strong>, and <strong>Tertiary (5 dots)</strong>.</p>",
+  'ability-assign': "<p>Assign your ability dots. Each ability can have at most <strong>3 dots</strong> during creation.</p>",
+  'arete-start': "<p><strong>Arete</strong> is your character's magical enlightenment — it determines how many dice you roll for magic.</p><p>Most starting characters begin at Arete 1. Higher Arete costs freebie points.</p>",
+  'spheres': "<p><strong>Spheres</strong> are the nine domains of magical reality. Your Tradition grants you an <strong>Affinity Sphere</strong>.</p><p>You have <strong>6 total dots</strong> across all Spheres (max 3 per Sphere).</p>",
+  'backgrounds': "<p><strong>Backgrounds</strong> represent your character's resources, allies, and supernatural advantages.</p><p>You have <strong>7 dots</strong> to spend across any backgrounds (max 5 per background).</p>",
   'freebies': "<p><strong>Freebie Points</strong> let you further customize your character. You start with 15, plus up to 7 from Flaws.</p>",
 }
 
@@ -258,23 +209,14 @@ function NameConceptTraditionStep({ state, setState, onNext, cmsContent, isLoadi
 }) {
   const tradition = traditionBlurbs[state.affiliation] || null
   const guidanceHtml = cmsContent || defaultGuidanceTexts['name-concept-tradition']
-
   return (
     <div className="space-y-5">
-      <GuidanceBox>
-        {isLoadingCMS ? (
-          <div className="animate-pulse h-20 bg-primary/10 rounded" />
-        ) : (
-          <div dangerouslySetInnerHTML={{ __html: guidanceHtml }} />
-        )}
-      </GuidanceBox>
-      <SheetInput label="Character Name" value={state.name} onChange={v=>setState({...state,name:v})} placeholder="e.g., Lilith Vance, Tomás de la Cruz"/>
-      <SheetInput label="Concept" value={state.concept} onChange={v=>setState({...state,concept:v})} placeholder="e.g., Grieving Forensic Pathologist"/>
+      <GuidanceBox>{isLoadingCMS ? <div className="animate-pulse h-20 bg-primary/10 rounded" /> : <div dangerouslySetInnerHTML={{ __html: guidanceHtml }} />}</GuidanceBox>
+      <SheetInput label="Character Name" value={state.name} onChange={v=>setState({...state,name:v})} placeholder="e.g., Lilith Vance" />
+      <SheetInput label="Concept" value={state.concept} onChange={v=>setState({...state,concept:v})} placeholder="e.g., Occult Librarian" />
       <div className="space-y-2">
         <SheetLabel>Tradition / Affiliation</SheetLabel>
-        <select value={state.affiliation} onChange={e=>setState({...state,affiliation:e.target.value})}
-          className="w-full rounded-md px-3 py-2 text-sm font-serif text-foreground transition-all duration-200 outline-none"
-          style={{background:"hsl(var(--background)/0.6)",border:"1px solid hsl(var(--border)/0.7)"}}>
+        <select value={state.affiliation} onChange={e=>setState({...state,affiliation:e.target.value})} className="w-full rounded-md px-3 py-2 text-sm font-serif" style={{background:"hsl(var(--background)/0.6)",border:"1px solid hsl(var(--border)/0.7)"}}>
           <option value="">— Select a tradition —</option>
           {Object.keys(traditionBlurbs).map(t=><option key={t} value={t}>{t}</option>)}
         </select>
@@ -282,11 +224,7 @@ function NameConceptTraditionStep({ state, setState, onNext, cmsContent, isLoadi
           <div className="rounded-md overflow-hidden" style={{border:"1px solid hsl(var(--border)/0.5)"}}>
             <div className="px-3 py-2 text-xs italic font-serif" style={{background:"hsl(var(--primary)/0.06)",color:"hsl(var(--foreground)/0.7)"}}>{tradition.short}</div>
             <div className="px-3 py-3 text-xs leading-relaxed font-serif" style={{color:"hsl(var(--foreground)/0.85)"}}>{tradition.long}</div>
-            {tradition.affinitySphere !== "Varies" && (
-              <div className="px-3 py-2 text-xs font-serif font-semibold" style={{background:"hsl(var(--primary)/0.08)",color:"hsl(var(--primary))",borderTop:"1px solid hsl(var(--primary)/0.15)"}}>
-                ✦ Affinity Sphere: {tradition.affinitySphere}
-              </div>
-            )}
+            {tradition.affinitySphere !== "Varies" && <div className="px-3 py-2 text-xs font-serif font-semibold" style={{background:"hsl(var(--primary)/0.08)",color:"hsl(var(--primary))",borderTop:"1px solid hsl(var(--primary)/0.15)"}}>✦ Affinity Sphere: {tradition.affinitySphere}</div>}
           </div>
         )}
       </div>
@@ -302,20 +240,18 @@ function NatureDemeanorStep({ state, setState, onNext, onBack, cmsContent, isLoa
   const guidanceHtml = cmsContent || defaultGuidanceTexts['nature-demeanor']
   return (
     <div className="space-y-5">
-      <GuidanceBox>
-        {isLoadingCMS ? <div className="animate-pulse h-16 bg-primary/10 rounded" /> : <div dangerouslySetInnerHTML={{ __html: guidanceHtml }} />}
-      </GuidanceBox>
+      <GuidanceBox>{isLoadingCMS ? <div className="animate-pulse h-16 bg-primary/10 rounded" /> : <div dangerouslySetInnerHTML={{ __html: guidanceHtml }} />}</GuidanceBox>
       <div className="space-y-1.5">
         <SheetLabel>Nature — your true self</SheetLabel>
-        <select value={state.nature} onChange={e=>setState({...state,nature:e.target.value})} className="w-full rounded-md px-3 py-2 text-sm font-serif text-foreground transition-all duration-200 outline-none" style={{background:"hsl(var(--background)/0.6)",border:"1px solid hsl(var(--border)/0.7)"}}><option value="">— Select a nature —</option>{natureDemeanorOptions.map(o=><option key={o} value={o}>{o}</option>)}</select>
+        <select value={state.nature} onChange={e=>setState({...state,nature:e.target.value})} className="w-full rounded-md px-3 py-2 text-sm font-serif" style={{background:"hsl(var(--background)/0.6)",border:"1px solid hsl(var(--border)/0.7)"}}><option value="">— Select a nature —</option>{natureDemeanorOptions.map(o=><option key={o} value={o}>{o}</option>)}</select>
         {state.nature && archetypeDescriptions[state.nature] && <LoreBox>{archetypeDescriptions[state.nature]}</LoreBox>}
       </div>
       <div className="space-y-1.5">
         <SheetLabel>Demeanor — the face you show</SheetLabel>
-        <select value={state.demeanor} onChange={e=>setState({...state,demeanor:e.target.value})} className="w-full rounded-md px-3 py-2 text-sm font-serif text-foreground transition-all duration-200 outline-none" style={{background:"hsl(var(--background)/0.6)",border:"1px solid hsl(var(--border)/0.7)"}}><option value="">— Select a demeanor —</option>{natureDemeanorOptions.map(o=><option key={o} value={o}>{o}</option>)}</select>
+        <select value={state.demeanor} onChange={e=>setState({...state,demeanor:e.target.value})} className="w-full rounded-md px-3 py-2 text-sm font-serif" style={{background:"hsl(var(--background)/0.6)",border:"1px solid hsl(var(--border)/0.7)"}}><option value="">— Select a demeanor —</option>{natureDemeanorOptions.map(o=><option key={o} value={o}>{o}</option>)}</select>
         {state.demeanor && archetypeDescriptions[state.demeanor] && <LoreBox>{archetypeDescriptions[state.demeanor]}</LoreBox>}
       </div>
-      {state.nature && state.demeanor && state.nature !== state.demeanor && (<div className="text-xs px-3 py-2.5 rounded-md font-serif" style={{background:"hsl(var(--primary)/0.07)",color:"hsl(var(--primary))",border:"1px solid hsl(var(--primary)/0.18)"}}><strong>Note:</strong> Your Nature ({state.nature}) and Demeanor ({state.demeanor}) differ — this gap is where roleplaying gold lives.</div>)}
+      {state.nature && state.demeanor && state.nature !== state.demeanor && (<div className="text-xs px-3 py-2.5 rounded-md font-serif" style={{background:"hsl(var(--primary)/0.07)",color:"hsl(var(--primary))",border:"1px solid hsl(var(--primary)/0.18)"}}><strong>Note:</strong> Your Nature and Demeanor differ — this gap is where roleplaying gold lives.</div>)}
       <div className="flex justify-between gap-3"><SheetButton onClick={onBack} variant="secondary">← Back</SheetButton><SheetButton onClick={onNext} disabled={!state.nature||!state.demeanor}>Next: Essence & Chronicle →</SheetButton></div>
     </div>
   )
@@ -328,9 +264,7 @@ function EssenceChronicleStep({ state, setState, onNext, onBack, cmsContent, isL
   const guidanceHtml = cmsContent || defaultGuidanceTexts['essence-chronicle']
   return (
     <div className="space-y-5">
-      <GuidanceBox>
-        {isLoadingCMS ? <div className="animate-pulse h-20 bg-primary/10 rounded" /> : <div dangerouslySetInnerHTML={{ __html: guidanceHtml }} />}
-      </GuidanceBox>
+      <GuidanceBox>{isLoadingCMS ? <div className="animate-pulse h-20 bg-primary/10 rounded" /> : <div dangerouslySetInnerHTML={{ __html: guidanceHtml }} />}</GuidanceBox>
       <div className="space-y-2">
         <SheetLabel>Essence</SheetLabel>
         <div className="grid grid-cols-2 gap-2">
@@ -340,8 +274,8 @@ function EssenceChronicleStep({ state, setState, onNext, onBack, cmsContent, isL
           })}
         </div>
       </div>
-      <SheetInput label="Chronicle" value={state.chronicle} onChange={v=>setState({...state,chronicle:v})} placeholder="e.g., The Ascension War"/>
-      <SheetInput label="Sect (optional)" value={state.sect} onChange={v=>setState({...state,sect:v})} placeholder="e.g., House Bonisagus"/>
+      <SheetInput label="Chronicle" value={state.chronicle} onChange={v=>setState({...state,chronicle:v})} placeholder="e.g., The Ascension War" />
+      <SheetInput label="Sect (optional)" value={state.sect} onChange={v=>setState({...state,sect:v})} placeholder="e.g., House Bonisagus" />
       <div className="flex justify-between gap-3"><SheetButton onClick={onBack} variant="secondary">← Back</SheetButton><SheetButton onClick={onNext} disabled={!state.essence||!state.chronicle}>Next: Refine Concept →</SheetButton></div>
     </div>
   )
@@ -444,7 +378,7 @@ function BackgroundsGuidedStep({ state, setState, onNext, onBack, cmsContent, is
 }
 
 // =============================================================================
-// STAGE 5 & 6: FreebiesGuidedStep
+// STAGE 5 & 6: FreebiesGuidedStep (with toasts and progress bar)
 // =============================================================================
 function FreebiesGuidedStep({ state, setState, onNext, onBack, freebiePoolAdjustment, cmsContent, isLoadingCMS }: {
   state: CharacterState; setState: (s: CharacterState) => void; onNext: () => void; onBack: () => void; freebiePoolAdjustment: number
@@ -586,12 +520,12 @@ function GuidedWizard({state,setState,open,onClose,setFreebiePoolAdjustment,free
         </DialogHeader>
         <div className="flex-1 overflow-y-auto px-6 py-5" style={{scrollbarWidth:"thin", scrollbarColor:"hsl(var(--border)) transparent"}}>
           <StepPanel stepKey={stepIndex}>
-            {currentStep.component({ 
-              state, setState, 
-              onNext: handleNext, 
-              onBack: handleBack, 
-              setFreebiePoolAdjustment, 
-              freebiePoolAdjustment, 
+            {currentStep.component({
+              state, setState,
+              onNext: handleNext,
+              onBack: handleBack,
+              setFreebiePoolAdjustment,
+              freebiePoolAdjustment,
               onClose: handleClose,
               cmsContent: stepGuidance,
               isLoadingCMS
@@ -641,7 +575,7 @@ export default function CharacterGuidePage() {
 }
 
 // =============================================================================
-// SHARED UI PRIMITIVES
+// SHARED UI PRIMITIVES (FULLY CORRECTED)
 // =============================================================================
 function GuidanceBox({children}:{children:React.ReactNode}) { return <div className="rounded-md px-4 py-3 text-sm space-y-1.5 font-serif leading-relaxed" style={{background:"hsl(var(--card))", border:"1px solid hsl(var(--border)/0.5)", borderLeft:"3px solid hsl(var(--primary)/0.5)", color:"hsl(var(--foreground)/0.85)"}}>{children}</div> }
 function LoreBox({children}:{children:React.ReactNode}) { return <div className="rounded-md px-3 py-2.5 text-xs font-serif italic leading-relaxed" style={{background:"hsl(var(--card)/0.8)", border:"1px solid hsl(var(--border)/0.3)", color:"hsl(var(--foreground)/0.75)"}}>{children}</div> }
