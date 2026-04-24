@@ -575,16 +575,448 @@ export default function CharacterGuidePage() {
 }
 
 // =============================================================================
-// SHARED UI PRIMITIVES (FULLY CORRECTED)
+// SHARED UI PRIMITIVES (FULLY CORRECTED & READABLE)
 // =============================================================================
-function GuidanceBox({children}:{children:React.ReactNode}) { return <div className="rounded-md px-4 py-3 text-sm space-y-1.5 font-serif leading-relaxed" style={{background:"hsl(var(--card))", border:"1px solid hsl(var(--border)/0.5)", borderLeft:"3px solid hsl(var(--primary)/0.5)", color:"hsl(var(--foreground)/0.85)"}}>{children}</div> }
-function LoreBox({children}:{children:React.ReactNode}) { return <div className="rounded-md px-3 py-2.5 text-xs font-serif italic leading-relaxed" style={{background:"hsl(var(--card)/0.8)", border:"1px solid hsl(var(--border)/0.3)", color:"hsl(var(--foreground)/0.75)"}}>{children}</div> }
-function SheetLabel({children}:{children:React.ReactNode}) { return <label className="block font-serif text-[10px] uppercase tracking-[0.15em] mb-1.5" style={{color:"hsl(var(--primary)/0.7)"}}>{children}</label> }
-function SheetInput({label,value,onChange,placeholder}:{label:string;value:string;onChange:(v:string)=>void;placeholder?:string}) { return <div><SheetLabel>{label}</SheetLabel><input value={value} onChange={e=>onChange(e.target.value)} placeholder={placeholder} className="w-full rounded-md px-3 py-2 text-sm font-sans text-foreground transition-all duration-200 outline-none" style={{background:"hsl(var(--background)/0.6)", border:"1px solid hsl(var(--border)/0.7)", backdropFilter:"blur(4px)"}} onFocus={e=>{e.currentTarget.style.borderColor="hsl(var(--primary)/0.55)";e.currentTarget.style.boxShadow="0 0 0 2px hsl(var(--primary)/0.12)"}} onBlur={e=>{e.currentTarget.style.borderColor="hsl(var(--border)/0.7)";e.currentTarget.style.boxShadow="none"}}/></div> }
-function SheetSelect({label,value,onChange,options,placeholder}:{label:string;value:string;onChange:(v:string)=>void;options:string[];placeholder?:string}) { return <div><SheetLabel>{label}</SheetLabel><select value={value} onChange={e=>onChange(e.target.value)} className="w-full rounded-md px-3 py-2 text-sm font-serif text-foreground transition-all duration-200 outline-none" style={{background:"hsl(var(--background)/0.6)", border:"1px solid hsl(var(--border)/0.7)", backdropFilter:"blur(4px)"}} onFocus={e=>{e.currentTarget.style.borderColor="hsl(var(--primary)/0.55)";e.currentTarget.style.boxShadow="0 0 0 2px hsl(var(--primary)/0.12)"}} onBlur={e=>{e.currentTarget.style.borderColor="hsl(var(--border)/0.7)";e.currentTarget.style.boxShadow="none"}}><option value="">{placeholder||"Select…"}</option>{options.map(o=><option key={o} value={o}>{o}</option>)}</select></div> }
-function SheetButton({onClick,disabled,children,variant="primary"}:{onClick:()=>void;disabled?:boolean;children:React.ReactNode;variant?:"primary"|"secondary"}) { if(variant==="secondary") return <button onClick={onClick} disabled={disabled} className="inline-flex items-center justify-center gap-1 px-4 py-2 rounded-md font-serif text-[10px] uppercase tracking-[0.12em] font-semibold transition-all duration-200 hover:bg-primary/[0.08] border border-transparent hover:border-primary/[0.18] disabled:opacity-30 disabled:cursor-not-allowed" style={{color:"hsl(var(--foreground)/0.6)"}}>{children}</button>; return <button onClick={onClick} disabled={disabled} className="group relative overflow-hidden w-full mt-4 inline-flex items-center justify-center gap-2 rounded-full py-2.5 px-5 font-serif text-[11px] uppercase tracking-[0.16em] font-bold transition-all duration-200 hover:-translate-y-px active:translate-y-0 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0" style={{background:"linear-gradient(135deg,hsl(var(--accent)),hsl(var(--accent)/0.82))", color:"hsl(var(--accent-foreground))", border:"none", boxShadow:disabled?"none":"0 0 0 1px hsl(var(--accent)/0.38), 0 4px 18px hsl(var(--accent)/0.25)"}}><span className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" aria-hidden="true" style={{background:"linear-gradient(105deg,transparent 25%,rgba(255,255,255,0.16) 50%,transparent 75%)"}}/><span className="relative">{children}</span></button> }
-function PrioritySelector({label,subtitle,selected,onSelect}:{label:string;subtitle:string;selected:Priority;onSelect:(p:Priority)=>void}) { const isAttr=subtitle.includes("Strength")||subtitle.includes("Charisma")||subtitle.includes("Perception"); const dots=isAttr?{primary:"7 dots",secondary:"5 dots",tertiary:"3 dots"}:{primary:"13 dots",secondary:"9 dots",tertiary:"5 dots"}; return(<div className="flex items-center justify-between p-4 rounded-lg" style={{background:"hsl(var(--card))",border:"1px solid hsl(var(--border)/0.55)"}}><div className="flex-1"><h3 className="font-serif font-bold text-sm text-primary">{label}</h3><p className="text-[10px] mt-0.5 text-muted-foreground font-serif">{subtitle}</p></div><div className="flex gap-2">{(["primary","secondary","tertiary"] as const).map(p=>{const on=selected===p;return<button key={p} onClick={()=>onSelect(p)} className="px-3 py-1.5 rounded-full text-[10px] font-serif font-bold uppercase tracking-[0.1em] transition-all duration-200" style={{background:on?"linear-gradient(135deg,hsl(var(--accent)),hsl(var(--accent)/0.82))":"transparent",color:on?"hsl(var(--accent-foreground))":"hsl(var(--foreground)/0.5)",border:on?"none":"1px solid hsl(var(--border)/0.6)",boxShadow:on?"0 0 0 1px hsl(var(--accent)/0.3),0 2px 8px hsl(var(--accent)/0.2)":"none"}}>{dots[p]}</button>})}</div></div>) }
-function AttributeSection({title,priority,remaining,total,children}:{title:string;priority:Priority;remaining:number;total:number;children:React.ReactNode}) { const done=remaining===0; return(<div className="relative rounded-lg p-4 overflow-hidden" style={{background:"hsl(var(--card))",border:"1px solid hsl(var(--border)/0.55)"}}><div className="absolute top-0 left-0 right-0 h-[2px]" style={{background:"linear-gradient(90deg,transparent,hsl(var(--primary)/0.5),transparent)"}}/><div className="flex items-center justify-between mb-3"><h3 className="font-serif font-bold uppercase text-primary" style={{fontSize:"0.75rem",letterSpacing:"0.18em"}}>{title}</h3><span className="font-mono text-[10px] px-2.5 py-1 rounded-full font-semibold" style={{background:done?"hsl(var(--accent)/0.15)":"hsl(var(--border)/0.4)",color:done?"hsl(var(--accent))":"hsl(var(--muted-foreground))",border:done?"1px solid hsl(var(--accent)/0.3)":"1px solid transparent"}}>{remaining}/{total}</span></div><div className="space-y-1">{children}</div></div>) }
-function AbilityColumn({title,priority,remaining,total,children}:{title:string;priority:Priority;remaining:number;total:number;children:React.ReactNode}) { const done=remaining===0; return(<div><div className="flex items-center justify-between mb-3 pb-2" style={{borderBottom:"1px solid hsl(var(--border)/0.4)"}}><h3 className="font-serif font-bold uppercase text-primary" style={{fontSize:"0.7rem",letterSpacing:"0.2em"}}>{title}</h3><span className="font-mono text-[9px] px-2 py-0.5 rounded-full font-semibold" style={{background:done?"hsl(var(--accent)/0.15)":"hsl(var(--border)/0.4)",color:done?"hsl(var(--accent))":"hsl(var(--muted-foreground))"}}>{remaining}/{total}</span></div><div className="space-y-0.5">{children}</div></div>) }
-function SheetDotRating({label,value,onChange,locked,maxDots=5,variant="attribute"}:{label:string;value:number;onChange:(v:number)=>void;locked?:boolean;maxDots?:number;variant?:"attribute"|"ability"|"sphere"|"arete"}) { const [hovered,setHovered]=useState<number|null>(null); const display=hovered!==null?hovered:value; const isGold=variant==="arete"; const fillColor=isGold?"hsl(var(--accent))":"hsl(var(--primary))"; const borderFill=isGold?"hsl(var(--accent)/0.9)":"hsl(var(--primary)/0.9)"; const borderEmpty=isGold?"hsl(var(--accent)/0.3)":"hsl(var(--primary)/0.3)"; const glowColor=isGold?"0 0 6px hsl(var(--accent)/0.5),inset 0 0 3px rgba(255,255,255,0.2)":"0 0 6px hsl(var(--primary)/0.45),inset 0 0 3px rgba(255,255,255,0.15)"; return(<div className="flex items-center justify-between py-1.5"><span className="text-sm font-serif text-foreground flex-1" style={{opacity:0.85}}>{label}</span><div className="flex gap-0.5" onMouseLeave={()=>setHovered(null)}>{Array.from({length:maxDots},(_,i)=>{const dv=i+1; const filled=dv<=display; const isLocked=locked&&dv===1; return<button key={i} onClick={()=>{if(isLocked)return;if(locked&&dv===value)onChange(1);else onChange(dv===value?(locked?1:0):dv)}} onMouseEnter={()=>!isLocked&&setHovered(dv)} disabled={isLocked} className={cn("rounded-full transition-all duration-150",!isLocked&&"hover:scale-110 cursor-pointer")} style={{width:"16px",height:"16px",border:`2px solid ${filled?borderFill:borderEmpty}`,backgroundColor:filled?fillColor:"transparent",opacity:isLocked?0.6:1,boxShadow:filled?glowColor:"none"}}>{isLocked&&<Lock className="w-2 h-2 m-auto" style={{color:"hsl(var(--accent-foreground))"}}/>}</button>)})}</div></div>) }
-function FreebieDotRating({label,baseDots,freebieDots,onAdd,onRemove,maxDots=5,cost}:{label:string;baseDots:number;freebieDots:number;onAdd:()=>void;onRemove:()=>void;maxDots?:number;cost:number}) { const total=baseDots+freebieDots; return(<div className="flex items-center justify-between py-2 px-2 rounded hover:bg-primary/[0.04] transition-colors"><span className="text-sm font-serif flex-1" style={{color:"hsl(var(--foreground)/0.85)"}}>{label}</span><div className="flex items-center gap-3"><div className="flex gap-1">{Array.from({length:maxDots},(_,i)=>{const dv=i+1; const isBase=dv<=baseDots; const isFree=dv>baseDots&&dv<=total; return<div key={i} className="rounded-full relative" style={{width:"18px",height:"18px",border:`2px solid hsl(var(--primary)/${isBase||isFree?"0.9":"0.3"})`,backgroundColor:isBase?"hsl(var(--primary))":"transparent",boxShadow:isBase?"0 0 5px hsl(var(--primary)/0.4)":"none"}}>{isFree&&<><div className="absolute inset-0 rounded-full" style={{backgroundColor:"hsl(var(--primary))"}}/><div className="absolute inset-0 rounded-full" style={{background:"linear-gradient(90deg,transparent 50%,hsl(var(--accent)) 50%)"}}/></>}</div>)})}</div><div className="flex items-center gap-1"><button onClick={onRemove} disabled={freebieDots<=0} className="w-6 h-6 rounded flex items-center justify-center transition-all hover:scale-110 disabled:opacity-30" style={{background:"hsl(var(--border)/0.8)",color:"hsl(var(--foreground))"}}><Minus className="w-3 h-3"/></button><span className="text-[10px] font-mono w-8 text-center text-muted-foreground">{cost}pt</span><button onClick={onAdd} disabled={total>=maxDots} className="w-6 h-6 rounded flex items-center justify-center transition-all hover:scale-110 disabled:opacity-30" style={{background:"hsl(var(--accent))",color:"hsl(var(--accent-foreground))"}}><Plus className="w-3 h-3"/></button></div></div></div>) }
+
+function GuidanceBox({ children }: { children: React.ReactNode }) {
+  return (
+    <div
+      className="rounded-md px-4 py-3 text-sm space-y-1.5 font-serif leading-relaxed"
+      style={{
+        background: "hsl(var(--card))",
+        border: "1px solid hsl(var(--border)/0.5)",
+        borderLeft: "3px solid hsl(var(--primary)/0.5)",
+        color: "hsl(var(--foreground)/0.85)",
+      }}
+    >
+      {children}
+    </div>
+  )
+}
+
+function LoreBox({ children }: { children: React.ReactNode }) {
+  return (
+    <div
+      className="rounded-md px-3 py-2.5 text-xs font-serif italic leading-relaxed"
+      style={{
+        background: "hsl(var(--card)/0.8)",
+        border: "1px solid hsl(var(--border)/0.3)",
+        color: "hsl(var(--foreground)/0.75)",
+      }}
+    >
+      {children}
+    </div>
+  )
+}
+
+function SheetLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <label
+      className="block font-serif text-[10px] uppercase tracking-[0.15em] mb-1.5"
+      style={{ color: "hsl(var(--primary)/0.7)" }}
+    >
+      {children}
+    </label>
+  )
+}
+
+function SheetInput({
+  label,
+  value,
+  onChange,
+  placeholder,
+}: {
+  label: string
+  value: string
+  onChange: (v: string) => void
+  placeholder?: string
+}) {
+  return (
+    <div>
+      <SheetLabel>{label}</SheetLabel>
+      <input
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        className="w-full rounded-md px-3 py-2 text-sm font-sans text-foreground transition-all duration-200 outline-none"
+        style={{
+          background: "hsl(var(--background)/0.6)",
+          border: "1px solid hsl(var(--border)/0.7)",
+          backdropFilter: "blur(4px)",
+        }}
+        onFocus={(e) => {
+          e.currentTarget.style.borderColor = "hsl(var(--primary)/0.55)"
+          e.currentTarget.style.boxShadow = "0 0 0 2px hsl(var(--primary)/0.12)"
+        }}
+        onBlur={(e) => {
+          e.currentTarget.style.borderColor = "hsl(var(--border)/0.7)"
+          e.currentTarget.style.boxShadow = "none"
+        }}
+      />
+    </div>
+  )
+}
+
+function SheetSelect({
+  label,
+  value,
+  onChange,
+  options,
+  placeholder,
+}: {
+  label: string
+  value: string
+  onChange: (v: string) => void
+  options: string[]
+  placeholder?: string
+}) {
+  return (
+    <div>
+      <SheetLabel>{label}</SheetLabel>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full rounded-md px-3 py-2 text-sm font-serif text-foreground transition-all duration-200 outline-none"
+        style={{
+          background: "hsl(var(--background)/0.6)",
+          border: "1px solid hsl(var(--border)/0.7)",
+          backdropFilter: "blur(4px)",
+        }}
+        onFocus={(e) => {
+          e.currentTarget.style.borderColor = "hsl(var(--primary)/0.55)"
+          e.currentTarget.style.boxShadow = "0 0 0 2px hsl(var(--primary)/0.12)"
+        }}
+        onBlur={(e) => {
+          e.currentTarget.style.borderColor = "hsl(var(--border)/0.7)"
+          e.currentTarget.style.boxShadow = "none"
+        }}
+      >
+        <option value="">{placeholder || "Select…"}</option>
+        {options.map((o) => (
+          <option key={o} value={o}>
+            {o}
+          </option>
+        ))}
+      </select>
+    </div>
+  )
+}
+
+function SheetButton({
+  onClick,
+  disabled,
+  children,
+  variant = "primary",
+}: {
+  onClick: () => void
+  disabled?: boolean
+  children: React.ReactNode
+  variant?: "primary" | "secondary"
+}) {
+  if (variant === "secondary") {
+    return (
+      <button
+        onClick={onClick}
+        disabled={disabled}
+        className="inline-flex items-center justify-center gap-1 px-4 py-2 rounded-md font-serif text-[10px] uppercase tracking-[0.12em] font-semibold transition-all duration-200 hover:bg-primary/[0.08] border border-transparent hover:border-primary/[0.18] disabled:opacity-30 disabled:cursor-not-allowed"
+        style={{ color: "hsl(var(--foreground)/0.6)" }}
+      >
+        {children}
+      </button>
+    )
+  }
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className="group relative overflow-hidden w-full mt-4 inline-flex items-center justify-center gap-2 rounded-full py-2.5 px-5 font-serif text-[11px] uppercase tracking-[0.16em] font-bold transition-all duration-200 hover:-translate-y-px active:translate-y-0 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+      style={{
+        background: "linear-gradient(135deg, hsl(var(--accent)), hsl(var(--accent)/0.82))",
+        color: "hsl(var(--accent-foreground))",
+        border: "none",
+        boxShadow: disabled ? "none" : "0 0 0 1px hsl(var(--accent)/0.38), 0 4px 18px hsl(var(--accent)/0.25)",
+      }}
+    >
+      <span
+        className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+        aria-hidden="true"
+        style={{ background: "linear-gradient(105deg,transparent 25%,rgba(255,255,255,0.16) 50%,transparent 75%)" }}
+      />
+      <span className="relative">{children}</span>
+    </button>
+  )
+}
+
+function PrioritySelector({
+  label,
+  subtitle,
+  selected,
+  onSelect,
+}: {
+  label: string
+  subtitle: string
+  selected: Priority
+  onSelect: (p: Priority) => void
+}) {
+  const isAttr = subtitle.includes("Strength") || subtitle.includes("Charisma") || subtitle.includes("Perception")
+  const dots = isAttr
+    ? { primary: "7 dots", secondary: "5 dots", tertiary: "3 dots" }
+    : { primary: "13 dots", secondary: "9 dots", tertiary: "5 dots" }
+
+  return (
+    <div
+      className="flex items-center justify-between p-4 rounded-lg"
+      style={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border)/0.55)" }}
+    >
+      <div className="flex-1">
+        <h3 className="font-serif font-bold text-sm text-primary">{label}</h3>
+        <p className="text-[10px] mt-0.5 text-muted-foreground font-serif">{subtitle}</p>
+      </div>
+      <div className="flex gap-2">
+        {(["primary", "secondary", "tertiary"] as const).map((p) => {
+          const on = selected === p
+          return (
+            <button
+              key={p}
+              onClick={() => onSelect(p)}
+              className="px-3 py-1.5 rounded-full text-[10px] font-serif font-bold uppercase tracking-[0.1em] transition-all duration-200"
+              style={{
+                background: on
+                  ? "linear-gradient(135deg, hsl(var(--accent)), hsl(var(--accent)/0.82))"
+                  : "transparent",
+                color: on ? "hsl(var(--accent-foreground))" : "hsl(var(--foreground)/0.5)",
+                border: on ? "none" : "1px solid hsl(var(--border)/0.6)",
+                boxShadow: on ? "0 0 0 1px hsl(var(--accent)/0.3),0 2px 8px hsl(var(--accent)/0.2)" : "none",
+              }}
+            >
+              {dots[p]}
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+function AttributeSection({
+  title,
+  priority,
+  remaining,
+  total,
+  children,
+}: {
+  title: string
+  priority: Priority
+  remaining: number
+  total: number
+  children: React.ReactNode
+}) {
+  const done = remaining === 0
+  return (
+    <div
+      className="relative rounded-lg p-4 overflow-hidden"
+      style={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border)/0.55)" }}
+    >
+      <div
+        className="absolute top-0 left-0 right-0 h-[2px]"
+        style={{ background: "linear-gradient(90deg,transparent,hsl(var(--primary)/0.5),transparent)" }}
+      />
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="font-serif font-bold uppercase text-primary" style={{ fontSize: "0.75rem", letterSpacing: "0.18em" }}>
+          {title}
+        </h3>
+        <span
+          className="font-mono text-[10px] px-2.5 py-1 rounded-full font-semibold"
+          style={{
+            background: done ? "hsl(var(--accent)/0.15)" : "hsl(var(--border)/0.4)",
+            color: done ? "hsl(var(--accent))" : "hsl(var(--muted-foreground))",
+            border: done ? "1px solid hsl(var(--accent)/0.3)" : "1px solid transparent",
+          }}
+        >
+          {remaining}/{total}
+        </span>
+      </div>
+      <div className="space-y-1">{children}</div>
+    </div>
+  )
+}
+
+function AbilityColumn({
+  title,
+  priority,
+  remaining,
+  total,
+  children,
+}: {
+  title: string
+  priority: Priority
+  remaining: number
+  total: number
+  children: React.ReactNode
+}) {
+  const done = remaining === 0
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-3 pb-2" style={{ borderBottom: "1px solid hsl(var(--border)/0.4)" }}>
+        <h3 className="font-serif font-bold uppercase text-primary" style={{ fontSize: "0.7rem", letterSpacing: "0.2em" }}>
+          {title}
+        </h3>
+        <span
+          className="font-mono text-[9px] px-2 py-0.5 rounded-full font-semibold"
+          style={{
+            background: done ? "hsl(var(--accent)/0.15)" : "hsl(var(--border)/0.4)",
+            color: done ? "hsl(var(--accent))" : "hsl(var(--muted-foreground))",
+          }}
+        >
+          {remaining}/{total}
+        </span>
+      </div>
+      <div className="space-y-0.5">{children}</div>
+    </div>
+  )
+}
+
+function SheetDotRating({
+  label,
+  value,
+  onChange,
+  locked,
+  maxDots = 5,
+  variant = "attribute",
+}: {
+  label: string
+  value: number
+  onChange: (v: number) => void
+  locked?: boolean
+  maxDots?: number
+  variant?: "attribute" | "ability" | "sphere" | "arete"
+}) {
+  const [hovered, setHovered] = useState<number | null>(null)
+  const display = hovered !== null ? hovered : value
+  const isGold = variant === "arete"
+  const fillColor = isGold ? "hsl(var(--accent))" : "hsl(var(--primary))"
+  const borderFill = isGold ? "hsl(var(--accent)/0.9)" : "hsl(var(--primary)/0.9)"
+  const borderEmpty = isGold ? "hsl(var(--accent)/0.3)" : "hsl(var(--primary)/0.3)"
+  const glowColor = isGold
+    ? "0 0 6px hsl(var(--accent)/0.5),inset 0 0 3px rgba(255,255,255,0.2)"
+    : "0 0 6px hsl(var(--primary)/0.45),inset 0 0 3px rgba(255,255,255,0.15)"
+
+  return (
+    <div className="flex items-center justify-between py-1.5">
+      <span className="text-sm font-serif text-foreground flex-1" style={{ opacity: 0.85 }}>
+        {label}
+      </span>
+      <div className="flex gap-0.5" onMouseLeave={() => setHovered(null)}>
+        {Array.from({ length: maxDots }, (_, i) => {
+          const dotValue = i + 1
+          const filled = dotValue <= display
+          const isLocked = locked && dotValue === 1
+          return (
+            <button
+              key={i}
+              onClick={() => {
+                if (isLocked) return
+                if (locked && dotValue === value) {
+                  onChange(1)
+                } else {
+                  onChange(dotValue === value ? (locked ? 1 : 0) : dotValue)
+                }
+              }}
+              onMouseEnter={() => !isLocked && setHovered(dotValue)}
+              disabled={isLocked}
+              className={cn("rounded-full transition-all duration-150", !isLocked && "hover:scale-110 cursor-pointer")}
+              style={{
+                width: "16px",
+                height: "16px",
+                border: `2px solid ${filled ? borderFill : borderEmpty}`,
+                backgroundColor: filled ? fillColor : "transparent",
+                opacity: isLocked ? 0.6 : 1,
+                boxShadow: filled ? glowColor : "none",
+              }}
+            >
+              {isLocked && <Lock className="w-2 h-2 m-auto" style={{ color: "hsl(var(--accent-foreground))" }} />}
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+function FreebieDotRating({
+  label,
+  baseDots,
+  freebieDots,
+  onAdd,
+  onRemove,
+  maxDots = 5,
+  cost,
+}: {
+  label: string
+  baseDots: number
+  freebieDots: number
+  onAdd: () => void
+  onRemove: () => void
+  maxDots?: number
+  cost: number
+}) {
+  const total = baseDots + freebieDots
+  return (
+    <div className="flex items-center justify-between py-2 px-2 rounded hover:bg-primary/[0.04] transition-colors">
+      <span className="text-sm font-serif flex-1" style={{ color: "hsl(var(--foreground)/0.85)" }}>
+        {label}
+      </span>
+      <div className="flex items-center gap-3">
+        <div className="flex gap-1">
+          {Array.from({ length: maxDots }, (_, i) => {
+            const dotValue = i + 1
+            const isBase = dotValue <= baseDots
+            const isFree = dotValue > baseDots && dotValue <= total
+            return (
+              <div
+                key={i}
+                className="rounded-full relative"
+                style={{
+                  width: "18px",
+                  height: "18px",
+                  border: `2px solid hsl(var(--primary)/${isBase || isFree ? "0.9" : "0.3"})`,
+                  backgroundColor: isBase ? "hsl(var(--primary))" : "transparent",
+                  boxShadow: isBase ? "0 0 5px hsl(var(--primary)/0.4)" : "none",
+                }}
+              >
+                {isFree && (
+                  <>
+                    <div className="absolute inset-0 rounded-full" style={{ backgroundColor: "hsl(var(--primary))" }} />
+                    <div
+                      className="absolute inset-0 rounded-full"
+                      style={{ background: "linear-gradient(90deg,transparent 50%,hsl(var(--accent)) 50%)" }}
+                    />
+                  </>
+                )}
+              </div>
+            )
+          })}
+        </div>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={onRemove}
+            disabled={freebieDots <= 0}
+            className="w-6 h-6 rounded flex items-center justify-center transition-all hover:scale-110 disabled:opacity-30"
+            style={{ background: "hsl(var(--border)/0.8)", color: "hsl(var(--foreground))" }}
+          >
+            <Minus className="w-3 h-3" />
+          </button>
+          <span className="text-[10px] font-mono w-8 text-center text-muted-foreground">{cost}pt</span>
+          <button
+            onClick={onAdd}
+            disabled={total >= maxDots}
+            className="w-6 h-6 rounded flex items-center justify-center transition-all hover:scale-110 disabled:opacity-30"
+            style={{ background: "hsl(var(--accent))", color: "hsl(var(--accent-foreground))" }}
+          >
+            <Plus className="w-3 h-3" />
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
