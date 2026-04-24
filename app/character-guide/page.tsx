@@ -334,17 +334,153 @@ function AbilityAssignStep({ state, setState, onNext, onBack, cmsContent, isLoad
   return (<div className="space-y-5"><GuidanceBox>{isLoadingCMS?<div className="animate-pulse h-12 bg-primary/10 rounded"/>:<div dangerouslySetInnerHTML={{__html:guidanceHtml}}/>}</GuidanceBox><div className="grid grid-cols-3 gap-4"><AbilityColumn title="Talents" priority={state.abilityPriorities.talents!} remaining={getRemaining("talents")} total={getPoints("talents")}>{getAbils("talents").map(a=><SheetDotRating key={a} label={fmt(a)} value={state.abilities[a]} onChange={v=>setVal(a,v)} maxDots={3} variant="ability"/>)}</AbilityColumn><AbilityColumn title="Skills" priority={state.abilityPriorities.skills!} remaining={getRemaining("skills")} total={getPoints("skills")}>{getAbils("skills").map(a=><SheetDotRating key={a} label={fmt(a)} value={state.abilities[a]} onChange={v=>setVal(a,v)} maxDots={3} variant="ability"/>)}</AbilityColumn><AbilityColumn title="Knowledges" priority={state.abilityPriorities.knowledges!} remaining={getRemaining("knowledges")} total={getPoints("knowledges")}>{getAbils("knowledges").map(a=><SheetDotRating key={a} label={fmt(a)} value={state.abilities[a]} onChange={v=>setVal(a,v)} maxDots={3} variant="ability"/>)}</AbilityColumn></div><div className="flex justify-between gap-3 pt-4"><SheetButton onClick={onBack} variant="secondary">← Back</SheetButton><SheetButton onClick={onNext} disabled={!allDone}>Next: Starting Arete →</SheetButton></div></div>)
 }
 
-function AreteStartStep({ state, setState, onNext, onBack, setFreebiePoolAdjustment, cmsContent, isLoadingCMS }: {
-  state: CharacterState; setState: (s: CharacterState) => void; onNext: () => void; onBack: () => void; setFreebiePoolAdjustment: (n:number)=>void
-  cmsContent?: string | null; isLoadingCMS?: boolean
+function AreteStartStep({
+  state,
+  setState,
+  onNext,
+  onBack,
+  setFreebiePoolAdjustment,
+  cmsContent,
+  isLoadingCMS,
+}: {
+  state: CharacterState;
+  setState: (s: CharacterState) => void;
+  onNext: () => void;
+  onBack: () => void;
+  setFreebiePoolAdjustment: (n: number) => void;
+  cmsContent?: string | null;
+  isLoadingCMS?: boolean;
 }) {
-  const [selectedArete,setSelectedArete]=useState<1|2|3>(1)
-  const [confirmed,setConfirmed]=useState(false)
-  const handleConfirm=()=>{let adj=0,dots=0;if(selectedArete===2){dots=1;adj=-4}else if(selectedArete===3){dots=2;adj=-8};setFreebiePoolAdjustment(adj);setState({...state,freebieDots:{...state.freebieDots,arete:dots}});setConfirmed(true)}
-  useEffect(()=>{if(confirmed)onNext()},[confirmed,onNext])
-  const areteCosts: Record<1|2|3, string> = {1:"No freebie cost — standard starting Arete",2:"Costs 4 freebie points from your pool of 15",3:"Costs 8 freebie points from your pool of 15"}
-  const guidanceHtml = cmsContent || defaultGuidanceTexts['arete-start']
-  return (<div className="space-y-6"><GuidanceBox>{isLoadingCMS?<div className="animate-pulse h-20 bg-primary/10 rounded"/>:<div dangerouslySetInnerHTML={{__html:guidanceHtml}}/>}</GuidanceBox><div className="grid grid-cols-3 gap-4">{([1,2,3] as const).map(level=>{const on=selectedArete===level;return(<button key={level} type="button" onClick={()=>setSelectedArete(level)} className="group relative flex flex-col items-center gap-3 p-5 rounded-2xl transition-all duration-300 hover:-translate-y-1" style={{background:on?"linear-gradient(135deg,hsl(var(--accent)/0.15),hsl(var(--card)))":"hsl(var(--card))",border:on?"2px solid hsl(var(--accent)/0.7)":"1px solid hsl(var(--border)/0.55)",boxShadow:on?"0 0 20px hsl(var(--accent)/0.3)":"0 1px 2px rgba(0,0,0,0.1)"}}><div className="flex gap-1.5">{[1,2,3].map(d=>(<div key={d} className="rounded-full transition-all duration-200 group-hover:scale-110" style={{width:"18px",height:"18px",border:`2px solid ${d<=level?"hsl(var(--accent)/0.9)":"hsl(var(--accent)/0.25)"}`,background:d<=level?"hsl(var(--accent))":"transparent",boxShadow:d<=level?"0 0 8px hsl(var(--accent)/0.6)":"none"}}/>))}</div><span className="font-serif font-black text-xl tracking-wide" style={{color:on?"hsl(var(--accent))":"hsl(var(--foreground)/0.7)"}}>Arete {level}</span><span className="text-[10px] font-serif text-center leading-relaxed px-2" style={{color:on?"hsl(var(--foreground)/0.8)":"hsl(var(--muted-foreground))"}}>{areteCosts[level]}</span>{level===1&&(<span className="absolute -top-2 -right-2 text-[9px] font-serif font-bold px-2 py-0.5 rounded-full bg-primary/20 text-primary border border-primary/30">Recommended</span>)}</button>)})}</div><div className="flex justify-between gap-3"><SheetButton onClick={onBack} variant="secondary">← Back</SheetButton><SheetButton onClick={handleConfirm}>Confirm & Continue →</SheetButton></div></div>)
+  const [selectedArete, setSelectedArete] = useState<1 | 2 | 3>(1);
+  const [confirmed, setConfirmed] = useState(false);
+
+  const handleConfirm = () => {
+    let adjustment = 0;
+    let areteDots = 0;
+    if (selectedArete === 2) {
+      areteDots = 1;
+      adjustment = -4;
+    } else if (selectedArete === 3) {
+      areteDots = 2;
+      adjustment = -8;
+    }
+    setFreebiePoolAdjustment(adjustment);
+    setState({
+      ...state,
+      freebieDots: {
+        ...state.freebieDots,
+        arete: areteDots,
+      },
+    });
+    setConfirmed(true);
+  };
+
+  useEffect(() => {
+    if (confirmed) {
+      onNext();
+    }
+  }, [confirmed, onNext]);
+
+  const areteCosts: Record<1 | 2 | 3, string> = {
+    1: "No freebie cost — standard starting Arete",
+    2: "Costs 4 freebie points from your pool of 15",
+    3: "Costs 8 freebie points from your pool of 15",
+  };
+
+  const guidanceHtml = cmsContent || defaultGuidanceTexts["arete-start"];
+
+  return (
+    <div className="space-y-6">
+      <GuidanceBox>
+        {isLoadingCMS ? (
+          <div className="animate-pulse h-20 bg-primary/10 rounded" />
+        ) : (
+          <div dangerouslySetInnerHTML={{ __html: guidanceHtml }} />
+        )}
+      </GuidanceBox>
+
+      <div className="grid grid-cols-3 gap-4">
+        {([1, 2, 3] as const).map((level) => {
+          const on = selectedArete === level;
+          return (
+            <button
+              key={level}
+              type="button"
+              onClick={() => setSelectedArete(level)}
+              className="group relative flex flex-col items-center gap-3 p-5 rounded-2xl transition-all duration-300 hover:-translate-y-1"
+              style={{
+                background: on
+                  ? "linear-gradient(135deg, hsl(var(--accent)/0.15), hsl(var(--card)))"
+                  : "hsl(var(--card))",
+                border: on
+                  ? "2px solid hsl(var(--accent)/0.7)"
+                  : "1px solid hsl(var(--border)/0.55)",
+                boxShadow: on
+                  ? "0 0 20px hsl(var(--accent)/0.3)"
+                  : "0 1px 2px rgba(0, 0, 0, 0.1)",
+              }}
+            >
+              <div className="flex gap-1.5">
+                {[1, 2, 3].map((d) => (
+                  <div
+                    key={d}
+                    className="rounded-full transition-all duration-200 group-hover:scale-110"
+                    style={{
+                      width: "18px",
+                      height: "18px",
+                      border: `2px solid ${
+                        d <= level
+                          ? "hsl(var(--accent)/0.9)"
+                          : "hsl(var(--accent)/0.25)"
+                      }`,
+                      background:
+                        d <= level ? "hsl(var(--accent))" : "transparent",
+                      boxShadow:
+                        d <= level
+                          ? "0 0 8px hsl(var(--accent)/0.6)"
+                          : "none",
+                    }}
+                  />
+                ))}
+              </div>
+              <span
+                className="font-serif font-black text-xl tracking-wide"
+                style={{
+                  color: on
+                    ? "hsl(var(--accent))"
+                    : "hsl(var(--foreground)/0.7)",
+                }}
+              >
+                Arete {level}
+              </span>
+              <span
+                className="text-[10px] font-serif text-center leading-relaxed px-2"
+                style={{
+                  color: on
+                    ? "hsl(var(--foreground)/0.8)"
+                    : "hsl(var(--muted-foreground))",
+                }}
+              >
+                {areteCosts[level]}
+              </span>
+              {level === 1 && (
+                <span className="absolute -top-2 -right-2 text-[9px] font-serif font-bold px-2 py-0.5 rounded-full bg-primary/20 text-primary border border-primary/30">
+                  Recommended
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="flex justify-between gap-3">
+        <SheetButton onClick={onBack} variant="secondary">
+          ← Back
+        </SheetButton>
+        <SheetButton onClick={handleConfirm}>Confirm & Continue →</SheetButton>
+      </div>
+    </div>
+  );
 }
 
 function SpheresStep({ state, setState, onNext, onBack, cmsContent, isLoadingCMS }: {
