@@ -248,46 +248,6 @@ const stepToCmsField: Record<string, keyof CMSContent> = {
   'freebies': 'freebies',
 }
 
-// Hook to fetch CMS content for a specific step
-function useStepContent(stepId: string, enabled: boolean = true) {
-  const [content, setContent] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<Error | null>(null)
-
-  useEffect(() => {
-    if (!enabled) return
-
-    const fetchContent = async () => {
-      setIsLoading(true)
-      setError(null)
-      try {
-        const response = await fetch(`/api/guide-content?step=${stepId}`)
-        if (response.ok) {
-          const data = await response.json()
-          if (data.guidanceText) {
-            setContent(data.guidanceText)
-          } else {
-            setContent(defaultGuidanceTexts[stepId])
-          }
-        } else {
-          // Fallback to hardcoded default
-          setContent(defaultGuidanceTexts[stepId])
-        }
-      } catch (err) {
-        console.error('Failed to fetch guide content:', err)
-        setError(err instanceof Error ? err : new Error('Unknown error'))
-        setContent(defaultGuidanceTexts[stepId])
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    fetchContent()
-  }, [stepId, enabled])
-
-  return { content, isLoading, error }
-}
-
 // =============================================================================
 // GUIDED STEP COMPONENTS (with CMS support)
 // =============================================================================
@@ -484,7 +444,7 @@ function BackgroundsGuidedStep({ state, setState, onNext, onBack, cmsContent, is
 }
 
 // =============================================================================
-// STAGE 5 & 6: FreebiesGuidedStep (kept from previous stage)
+// STAGE 5 & 6: FreebiesGuidedStep
 // =============================================================================
 function FreebiesGuidedStep({ state, setState, onNext, onBack, freebiePoolAdjustment, cmsContent, isLoadingCMS }: {
   state: CharacterState; setState: (s: CharacterState) => void; onNext: () => void; onBack: () => void; freebiePoolAdjustment: number
