@@ -154,7 +154,7 @@ const TechnocracyCodec = ({
   );
 };
 
-export default DanteCodec() {
+export default TechnocracyCodec() {
   const wizardSteps = [
     {
       stepName: "PROCEDURE 01",
