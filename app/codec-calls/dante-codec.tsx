@@ -151,7 +151,7 @@ const DanteCodec = ({
   );
 };
 
-export default function App() {
+export default DanteCodec() {
   const wizardSteps = [
     {
       stepName: "STEP 1 : INITIALIZATION",
