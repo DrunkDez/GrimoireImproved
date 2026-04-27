@@ -152,4 +152,3 @@ const DanteCodec = ({
 };
 
 export default DanteCodec 
-}
