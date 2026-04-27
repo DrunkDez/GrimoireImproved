@@ -155,5 +155,3 @@ const TechnocracyCodec = ({
 };
 
 export default TechnocracyCodec
- ;
-}
