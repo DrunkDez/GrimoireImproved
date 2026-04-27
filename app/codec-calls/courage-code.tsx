@@ -154,7 +154,7 @@ const TechnocracyCodec = ({
   );
 };
 
-export default TechnocracyCodec() {
+export default TechnocracyCodec {
   const wizardSteps = [
     {
       stepName: "PROCEDURE 01",
