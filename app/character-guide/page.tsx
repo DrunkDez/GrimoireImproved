@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useMemo } from "react"
 import { cn } from "@/lib/utils"
 import { Lock, Check, Plus, Minus, Sparkles, Share2 } from "lucide-react"
 import { Input } from "@/components/ui/input"
@@ -19,13 +19,16 @@ import {
 } from "@/components/ui/dialog"
 import DanteCodec from "@/app/codec-calls/dante-codec"
 import TechnocracyCodec from "@/app/codec-calls/courage-code"
+import CharacterTypeSelector from "@/app/codec-calls/Codec_Select"
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 type Priority = "primary" | "secondary" | "tertiary" | null
+type Faction  = "traditions" | "technocracy" | null
 
 interface CharacterState {
   name: string; player: string; chronicle: string; nature: string; demeanor: string
   essence: string; affiliation: string; sect: string; concept: string
+  faction: Faction
   phase: "basics"|"attributes-priority"|"attributes-assign"|"abilities-priority"|"abilities-assign"|"spheres"|"backgrounds"|"freebies"|"complete"
   freebieDots: {
     attributes: {[key:string]:number}; abilities: {[key:string]:number}
@@ -62,7 +65,7 @@ interface CharacterState {
 
 const INITIAL_STATE: CharacterState = {
   name:"", player:"", chronicle:"", nature:"", demeanor:"", essence:"",
-  affiliation:"", sect:"", concept:"", phase:"basics",
+  affiliation:"", sect:"", concept:"", phase:"basics", faction: null,
   attributePriorities:{physical:null,social:null,mental:null},
   attributes:{strength:1,dexterity:1,stamina:1,charisma:1,manipulation:1,appearance:1,perception:1,intelligence:1,wits:1},
   abilityPriorities:{talents:null,skills:null,knowledges:null},
@@ -142,7 +145,42 @@ const traditionBlurbs: Record<string, { short: string; long: string; affinitySph
     long: "The Technocracy believe they are saving humanity from chaos. They have spent centuries replacing superstition with science, and magic with predictable, controllable technology. To them, the Traditions are dangerous anarchists who would drag the world back into the Dark Ages. They are organised into Conventions (Progenitors, Iteration X, the NWO, Syndicate, Void Engineers) and have vast resources. Playing a Technocrat is playing the antagonist — but they have their own internal heroism.",
     affinitySphere: "Varies",
   },
+  "Iteration X": {
+    short: "Cyborg engineers who push human flesh toward mechanical perfection through augmentation and force.",
+    long: "Iteration X believe that biology is a flawed prototype and technology is the correction. They build HIT Marks, design combat cyborgs, and pursue the ideal of a humanity upgraded beyond its own fragility. Cold, precise, and terrifyingly effective, they are the Technocracy's iron fist. Their internal debates about how much flesh is acceptable are more philosophical than they appear — and more dangerous.",
+    affinitySphere: "Forces",
+  },
+  "New World Order": {
+    short: "Agents, propagandists, and information controllers who shape what humanity believes is real.",
+    long: "The New World Order understand that the most powerful weapon is not a gun or a drug — it is consensus. They control media, governments, educational systems, and the flow of information. Men in Black are their most visible face, but their reach extends into every institution that shapes what people accept as normal. They are the reason most humans never question reality. They consider this a kindness.",
+    affinitySphere: "Mind",
+  },
+  "Progenitors": {
+    short: "Bioscientists who reshape living matter, develop pharmaceuticals, and police the boundaries of life itself.",
+    long: "The Progenitors are the Technocracy's doctors, geneticists, and biological engineers. They develop the drugs that keep the population calm, the treatments that cure disease, and the protocols that define what counts as a healthy human. They also breed Deviant-hunting organisms and develop biological countermeasures against Tradition magic. They see themselves as healers. Their critics see them as something else.",
+    affinitySphere: "Life",
+  },
+  "Syndicate": {
+    short: "Financial architects who control reality through capital, markets, and the quiet power of economic leverage.",
+    long: "Money is a form of consensus magic, and the Syndicate have mastered it. They control banks, corporations, and the flow of resources that make the modern world function. They fund the other Conventions, manage the Technocracy's political relationships, and ensure that economic incentives always push humanity toward the consensus. They are the least dramatic Convention and arguably the most powerful.",
+    affinitySphere: "Entropy",
+  },
+  "Void Engineers": {
+    short: "Explorers and wardens of deep space, the Digital Web, and the boundaries of known reality.",
+    long: "The Void Engineers were once the Technocracy's boldest dreamers — the ones who mapped the Umbra, charted deep space, and built the infrastructure of the Digital Web. What they found out there changed them. They have seen things beyond the Gauntlet that the other Conventions don't know about, and the knowledge has made them strange. Of all the Conventions, they are the most likely to question the Union's methods.",
+    affinitySphere: "Correspondence",
+  },
 }
+
+// ── Faction filter constants ───────────────────────────────────────────────────
+const TRADITION_NAMES = [
+  "Akashic Brotherhood","Celestial Chorus","Cult of Ecstasy","Dreamspeakers",
+  "Euthanatos","Order of Hermes","Sons of Ether","Verbena","Virtual Adepts",
+  "Hollow Ones","Orphan",
+]
+const CONVENTION_NAMES = [
+  "Iteration X","New World Order","Progenitors","Syndicate","Void Engineers",
+]
 
 const archetypeDescriptions: Record<string, string> = {
   Architect:      "You build things meant to last — institutions, relationships, works of art — and draw meaning from seeing your creations endure. You are driven by legacy.",
@@ -289,6 +327,16 @@ function NameConceptTraditionStep({ state, setState, onNext, cmsContent, isLoadi
 }) {
   const tradition = traditionBlurbs[state.affiliation] || null
   const guidanceHtml = cmsContent || defaultGuidanceTexts['name-concept-tradition']
+
+  // Filter the tradition list based on faction chosen at the selector screen
+  const availableTraditions = Object.keys(traditionBlurbs).filter(t =>
+    state.faction === "technocracy"
+      ? CONVENTION_NAMES.includes(t)
+      : TRADITION_NAMES.includes(t)
+  )
+
+  const selectorLabel = state.faction === "technocracy" ? "Convention" : "Tradition"
+
   return (
     <div className="space-y-5">
       <GuidanceBox>
@@ -299,14 +347,14 @@ function NameConceptTraditionStep({ state, setState, onNext, cmsContent, isLoadi
       <SheetInput label="Character Name" value={state.name} onChange={v=>setState({...state,name:v})} placeholder="e.g., Lilith Vance, Tomás de la Cruz, Sister Miriam"/>
       <SheetInput label="Concept" value={state.concept} onChange={v=>setState({...state,concept:v})} placeholder="e.g., Grieving Forensic Pathologist"/>
       <div className="space-y-2">
-        <SheetLabel>Tradition / Affiliation</SheetLabel>
+        <SheetLabel>{selectorLabel} / Affiliation</SheetLabel>
         <select value={state.affiliation} onChange={e=>setState({...state,affiliation:e.target.value})}
           className="w-full rounded-md px-3 py-2 text-sm font-serif"
           style={{background:"hsl(var(--background)/0.6)",border:"1px solid hsl(var(--border)/0.7)"}}
           onFocus={e=>{e.currentTarget.style.borderColor="hsl(var(--primary)/0.55)";e.currentTarget.style.boxShadow="0 0 0 2px hsl(var(--primary)/0.12)"}}
           onBlur={e=>{e.currentTarget.style.borderColor="hsl(var(--border)/0.7)";e.currentTarget.style.boxShadow="none"}}>
-          <option value="">— Select a tradition —</option>
-          {Object.keys(traditionBlurbs).map(t=><option key={t} value={t}>{t}</option>)}
+          <option value="">— Select a {selectorLabel.toLowerCase()} —</option>
+          {availableTraditions.map(t=><option key={t} value={t}>{t}</option>)}
         </select>
         {tradition && (
           <div className="rounded-md overflow-hidden" style={{border:"1px solid hsl(var(--border)/0.5)"}}>
@@ -1006,40 +1054,107 @@ function StepPanel({children, stepKey}:{children:React.ReactNode; stepKey:number
   return <div key={stepKey} style={{animation:"grimoire-emerge 0.4s cubic-bezier(0.16,1,0.3,1) forwards"}}>{children}</div>
 }
 
-// ── Codec trigger map — keyed by the step index the user just COMPLETED ───────
-// Fires AFTER step N is done, BEFORE step N+1 renders.
+// ── Pre-wizard codec dialogue — fires once after faction selection ────────────
+const PRE_WIZARD_CODEC: Record<"traditions"|"technocracy", CodecTrigger & { component: "dante"|"courage" }> = {
+  traditions: {
+    stepName:  "UPLINK ESTABLISHED",
+    dialogue:  "Listen closely, initiate. The Digital Web is shifting. Your Paradox signature is spiking, and we need to stabilize your avatar before the Technocracy locks onto your coordinates. Ready to begin the Awakening?",
+    component: "dante",
+  },
+  technocracy: {
+    stepName:  "SECURE CHANNEL OPEN",
+    dialogue:  "Citizen, remain calm. Your recent behavior suggests a deviation from the consensus reality. We are initiating a temporary adjustment to your profile. Please provide the requested data for the Tech-Union records.",
+    component: "courage",
+  },
+}
+
+// ── In-wizard codec triggers — faction-aware ──────────────────────────────────
 interface CodecTrigger {
   dialogue: string
   stepName: string
 }
 
-const CODEC_TRIGGERS: Record<number, CodecTrigger> = {
+interface FactionedCodecTrigger {
+  traditions:  CodecTrigger
+  technocracy: CodecTrigger
+}
+
+const CODEC_TRIGGERS: Record<number, FactionedCodecTrigger> = {
   // After Name / Concept / Tradition (step 0) → before Nature & Demeanor
   0: {
-    stepName: "UPLINK ESTABLISHED",
-    dialogue: "So you've chosen a path. Good. Every Awakening starts with a name and a story — but the Traditions care less about who you were and more about who you're becoming. Your Nature will define your soul. Your Demeanor is the lie you tell the world. Choose carefully — both matter more than you think.",
+    traditions: {
+      stepName: "IDENTITY ESTABLISHED",
+      dialogue: "Good. A name, a concept, a Tradition — that's the skeleton of a person. Now we go deeper. Nature is who you actually are when nobody's watching. Demeanor is the story you tell. They can match. They often don't. Pick both carefully — they define how you recover Willpower, which means they define how you survive.",
+    },
+    technocracy: {
+      stepName: "PROFILE INITIALIZED",
+      dialogue: "Designation logged. Convention affiliation on record. Now we calibrate your psychological profile. The Union requires a precise understanding of an operative's core behavioral patterns. Nature defines your true motivational architecture. Demeanor defines your operational persona. Both are required for Union assignment clearance.",
+    },
   },
   // After Concept Refinement (step 3) → before Attribute Priority
   3: {
-    stepName: "IDENTITY LOCKED",
-    dialogue: "Identity confirmed. Now we get to the part that actually keeps you alive. Attributes are what you ARE — the raw material the universe gave you before you learned to bend it. Physical, Social, Mental. One will always be your strongest. Figure out which one your character leans on. That choice echoes through everything that comes next.",
+    traditions: {
+      stepName: "IDENTITY LOCKED",
+      dialogue: "Identity confirmed. Now we get to the part that actually keeps you alive. Attributes are what you ARE — the raw material the universe gave you before you learned to bend it. Physical, Social, Mental. One will always be your strongest. Figure out which one your character leans on. That choice echoes through everything that comes next.",
+    },
+    technocracy: {
+      stepName: "PSYCHOLOGICAL PROFILE COMPLETE",
+      dialogue: "Profile parameters confirmed. Proceeding to baseline capability assessment. The Union measures operatives across three vectors: Physical, Social, and Mental. Allocate your primary resources where your function demands. A field agent prioritises differently than an analyst. Choose your role. Then build toward it.",
+    },
   },
   // After Ability Assignment (step 7) → before Arete
   7: {
-    stepName: "CAPABILITY MATRIX LOADED",
-    dialogue: "Skills registered. You know what you can do. Now comes the dangerous question — how deep does your Awakening go? Arete is the measure of your enlightenment. Most mages start at one. A few start higher — but that cost comes out of your freebie pool. Talk to your Storyteller before you commit.",
+    traditions: {
+      stepName: "CAPABILITY MATRIX LOADED",
+      dialogue: "Skills registered. You know what you can do. Now comes the dangerous question — how deep does your Awakening go? Arete is the measure of your enlightenment. Most mages start at one. A few start higher — but that cost comes out of your freebie pool. Talk to your Storyteller before you commit.",
+    },
+    technocracy: {
+      stepName: "SKILL ASSESSMENT COMPLETE",
+      dialogue: "Capability index recorded. Now we assess your Enlightenment rating — what the deviants call Arete. The Union prefers to call it Genius Quotient. Most field operatives begin at baseline. Enhanced ratings are available at significant resource cost. Coordinate with your Control before selecting above standard parameters.",
+    },
   },
   // After Arete (step 8) → before Spheres
   8: {
-    stepName: "PARADIGM INTERFACE",
-    dialogue: "Arete locked. Now we map your connection to the nine Spheres — the fundamental forces of reality that mages learn to manipulate. Your Tradition gives you one for free, your Affinity Sphere. The rest you earn. Remember: Sphere rating can never exceed your Arete. Choose what feels true to your paradigm.",
+    traditions: {
+      stepName: "PARADIGM INTERFACE",
+      dialogue: "Arete locked. Now we map your connection to the nine Spheres — the fundamental forces of reality that mages learn to manipulate. Your Tradition gives you one for free, your Affinity Sphere. The rest you earn. Remember: your Sphere rating can never exceed your Arete. Choose what feels true to your paradigm.",
+    },
+    technocracy: {
+      stepName: "METHODOLOGY CLASSIFICATION",
+      dialogue: "Genius Quotient confirmed. Now we define your operational methodology — what the Union formally classifies as your Enlightened Sciences. Your Convention determines your primary discipline. Secondary disciplines require additional resource allocation. All methodology ratings are bounded by your Genius Quotient. Select your focus areas.",
+    },
   },
   // After Backgrounds (step 10) → before Freebies
   10: {
-    stepName: "FINAL ALLOCATION",
-    dialogue: "Resources logged. You're almost done. Freebie points are the last layer of customisation — the place where your character stops being a template and starts being a person. Spend them on what matters to the story you want to tell, not just what looks powerful on paper. Fifteen points. Make them count.",
+    traditions: {
+      stepName: "FINAL ALLOCATION",
+      dialogue: "Resources logged. You're almost done. Freebie points are the last layer of customisation — the place where your character stops being a template and starts being a person. Spend them on what matters to the story you want to tell, not just what looks powerful on paper. Fifteen points. Make them count.",
+    },
+    technocracy: {
+      stepName: "RESOURCE ALLOCATION PHASE",
+      dialogue: "Asset inventory confirmed. Final discretionary resource allocation commencing. The Union provides all operatives a standard supplemental budget for profile optimisation. Allocate according to operational priorities. Reminder: post-assignment resource redistribution requires supervisor approval. Use your allocation wisely.",
+    },
   },
 }
+
+// ── Static step definitions — component references must live outside any
+// component function to prevent React from seeing new references each render,
+// which would violate the Rules of Hooks for steps that use useState internally.
+const GUIDED_STEP_DEFS = [
+  {id:"name-concept-tradition", title:"Name, Concept & Tradition",    description:"The foundation of your character.",                                         component:NameConceptTraditionStep, selfNavigates:true},
+  {id:"nature-demeanor",        title:"Nature & Demeanor",             description:"Who you really are vs. how you appear.",                                    component:NatureDemeanorStep,       selfNavigates:true},
+  {id:"essence-chronicle",      title:"Essence, Chronicle & Sect",     description:"Your magical essence and campaign details.",                                 component:EssenceChronicleStep,     selfNavigates:true},
+  {id:"concept-refinement",     title:"Refine Your Concept",           description:"Tie everything together.",                                                   component:ConceptRefinementStep,    selfNavigates:true},
+  {id:"attribute-priority",     title:"Attribute Priority",            description:"Assign Primary, Secondary, Tertiary to Physical, Social, Mental.",           component:AttributePriorityStep,    selfNavigates:true},
+  {id:"attribute-assign",       title:"Assign Attributes",             description:"Spend your attribute dots (each starts at 1).",                              component:AttributeAssignStep,      selfNavigates:true},
+  {id:"ability-priority",       title:"Ability Priority",              description:"Assign Primary, Secondary, Tertiary to Talents, Skills, Knowledges.",        component:AbilityPriorityStep,      selfNavigates:true},
+  {id:"ability-assign",         title:"Assign Abilities",              description:"Spend your ability dots — max 3 per ability.",                               component:AbilityAssignStep,        selfNavigates:true},
+  {id:"arete-start",            title:"Starting Arete",                description:"Your Storyteller determines if you begin above Arete 1.",                   component:AreteStartStep,           selfNavigates:true},
+  {id:"spheres",                title:"Spheres of Magic",              description:"Choose your Affinity Sphere and spend 6 dots across the nine Spheres.",      component:SpheresStep,              selfNavigates:true},
+  {id:"backgrounds",            title:"Backgrounds",                   description:"Spend 7 dots on resources, allies, and supernatural advantages.",             component:BackgroundsGuidedStep,    selfNavigates:true},
+  {id:"freebies",               title:"Freebie Points",                description:"15 points to spend — plus bonus points from Flaws.",                         component:FreebiesGuidedStep,       selfNavigates:true},
+  {id:"complete",               title:"Awakening Complete",            description:"Your character is ready to be inscribed in the Tapestry.",                   component:CompleteGuidedStep,       selfNavigates:true},
+] as const
 
 function GuidedWizard({state,setState,open,onClose,setFreebiePoolAdjustment,freebiePoolAdjustment}:{state:CharacterState;setState:(s:CharacterState)=>void;open:boolean;onClose:()=>void;setFreebiePoolAdjustment:(n:number)=>void;freebiePoolAdjustment:number}) {
   const [stepIndex,setStepIndex]=useState(0)
@@ -1052,21 +1167,51 @@ function GuidedWizard({state,setState,open,onClose,setFreebiePoolAdjustment,free
   const [pendingStep, setPendingStep] = useState<number>(0)
   const [codecTypingDone, setCodecTypingDone] = useState(false)
 
-  const guidedSteps: GuidedStep[] = [
-    {id:"name-concept-tradition",title:"Name, Concept & Tradition",description:"The foundation of your character.",component:NameConceptTraditionStep,canProceed:s=>!!s.name&&!!s.concept&&!!s.affiliation,selfNavigates:true},
-    {id:"nature-demeanor",title:"Nature & Demeanor",description:"Who you really are vs. how you appear.",component:NatureDemeanorStep,canProceed:s=>!!s.nature&&!!s.demeanor,selfNavigates:true},
-    {id:"essence-chronicle",title:"Essence, Chronicle & Sect",description:"Your magical essence and campaign details.",component:EssenceChronicleStep,canProceed:s=>!!s.essence&&!!s.chronicle,selfNavigates:true},
-    {id:"concept-refinement",title:"Refine Your Concept",description:"Tie everything together.",component:ConceptRefinementStep,canProceed:()=>true,selfNavigates:true},
-    {id:"attribute-priority",title:"Attribute Priority",description:"Assign Primary, Secondary, Tertiary to Physical, Social, Mental.",component:AttributePriorityStep,canProceed:s=>Object.values(s.attributePriorities).every(p=>p!==null),selfNavigates:true},
-    {id:"attribute-assign",title:"Assign Attributes",description:"Spend your attribute dots (each starts at 1).",component:AttributeAssignStep,canProceed:s=>{const gp=(cat:keyof typeof s.attributePriorities)=>{const p=s.attributePriorities[cat];return p==="primary"?7:p==="secondary"?5:p==="tertiary"?3:0};const gs=(cat:"physical"|"social"|"mental")=>{const a=cat==="physical"?["strength","dexterity","stamina"]:cat==="social"?["charisma","manipulation","appearance"]:["perception","intelligence","wits"];return a.reduce((sum,x)=>sum+(s.attributes[x as keyof typeof s.attributes]-1),0)};return gp("physical")-gs("physical")===0&&gp("social")-gs("social")===0&&gp("mental")-gs("mental")===0},selfNavigates:true},
-    {id:"ability-priority",title:"Ability Priority",description:"Assign Primary, Secondary, Tertiary to Talents, Skills, Knowledges.",component:AbilityPriorityStep,canProceed:s=>Object.values(s.abilityPriorities).every(p=>p!==null),selfNavigates:true},
-    {id:"ability-assign",title:"Assign Abilities",description:"Spend your ability dots — max 3 per ability.",component:AbilityAssignStep,canProceed:s=>{const gp=(cat:keyof typeof s.abilityPriorities)=>{const p=s.abilityPriorities[cat];return p==="primary"?13:p==="secondary"?9:p==="tertiary"?5:0};const ga=(cat:"talents"|"skills"|"knowledges")=>{const m={talents:["alertness","art","athletics","awareness","brawl","empathy","expression","intimidation","leadership","streetwise","subterfuge"],skills:["crafts","drive","etiquette","firearms","martialArts","meditation","melee","research","stealth","survival","technology"],knowledges:["academics","computer","cosmology","enigmas","esoterica","investigation","law","medicine","occult","politics","science"]};return(m as any)[cat].reduce((sum:number,ab:string)=>sum+s.abilities[ab as keyof typeof s.abilities],0)};return gp("talents")-ga("talents")===0&&gp("skills")-ga("skills")===0&&gp("knowledges")-ga("knowledges")===0},selfNavigates:true},
-    {id:"arete-start",title:"Starting Arete",description:"Your Storyteller determines if you begin above Arete 1.",component:AreteStartStep,canProceed:()=>true,selfNavigates:true},
-    {id:"spheres",title:"Spheres of Magic",description:"Choose your Affinity Sphere and spend 6 dots across the nine Spheres.",component:SpheresStep,canProceed:s=>Object.values(s.spheres).reduce((a,b)=>a+b,0)===6&&s.affinitySphere!=="",selfNavigates:true},
-    {id:"backgrounds",title:"Backgrounds",description:"Spend 7 dots on resources, allies, and supernatural advantages.",component:BackgroundsGuidedStep,canProceed:s=>Object.values(s.backgrounds).reduce((a,b)=>a+b,0)===7,selfNavigates:true},
-    {id:"freebies",title:"Freebie Points",description:"15 points to spend — plus bonus points from Flaws.",component:FreebiesGuidedStep,canProceed:s=>{let sp=0;Object.values(s.freebieDots.attributes).forEach(d=>sp+=d*5);Object.values(s.freebieDots.abilities).forEach(d=>sp+=d*2);Object.values(s.freebieDots.spheres).forEach(d=>sp+=d*7);Object.values(s.freebieDots.backgrounds).forEach(d=>sp+=d);sp+=s.freebieDots.arete*4;sp+=s.freebieDots.willpower;s.merits.forEach(m=>sp+=Math.abs(m.cost));const fp=s.flaws.reduce((t,f)=>t+Math.abs(f.cost),0);const total=15+fp+freebiePoolAdjustment;const rem=total-sp;const high=Math.max(...Object.values(s.spheres));const areteT=1+s.freebieDots.arete;return rem===0&&areteT>=high},selfNavigates:true},
-    {id:"complete",title:"Awakening Complete",description:"Your character is ready to be inscribed in the Tapestry.",component:CompleteGuidedStep,canProceed:()=>true,selfNavigates:true},
-  ]
+  // ── canProceed functions need runtime values so they stay inside ───────────
+  // but are memoized so they don't cause identity changes on every render.
+  const canProceedFns = useMemo<Record<string,(s:CharacterState)=>boolean>>(()=>({
+    "name-concept-tradition": s=>!!s.name&&!!s.concept&&!!s.affiliation,
+    "nature-demeanor":        s=>!!s.nature&&!!s.demeanor,
+    "essence-chronicle":      s=>!!s.essence&&!!s.chronicle,
+    "concept-refinement":     ()=>true,
+    "attribute-priority":     s=>Object.values(s.attributePriorities).every(p=>p!==null),
+    "attribute-assign":       s=>{
+      const gp=(cat:keyof typeof s.attributePriorities)=>{const p=s.attributePriorities[cat];return p==="primary"?7:p==="secondary"?5:p==="tertiary"?3:0}
+      const gs=(cat:"physical"|"social"|"mental")=>{const a=cat==="physical"?["strength","dexterity","stamina"]:cat==="social"?["charisma","manipulation","appearance"]:["perception","intelligence","wits"];return a.reduce((sum,x)=>sum+(s.attributes[x as keyof typeof s.attributes]-1),0)}
+      return gp("physical")-gs("physical")===0&&gp("social")-gs("social")===0&&gp("mental")-gs("mental")===0
+    },
+    "ability-priority":       s=>Object.values(s.abilityPriorities).every(p=>p!==null),
+    "ability-assign":         s=>{
+      const gp=(cat:keyof typeof s.abilityPriorities)=>{const p=s.abilityPriorities[cat];return p==="primary"?13:p==="secondary"?9:p==="tertiary"?5:0}
+      const ga=(cat:"talents"|"skills"|"knowledges")=>{const m={talents:["alertness","art","athletics","awareness","brawl","empathy","expression","intimidation","leadership","streetwise","subterfuge"],skills:["crafts","drive","etiquette","firearms","martialArts","meditation","melee","research","stealth","survival","technology"],knowledges:["academics","computer","cosmology","enigmas","esoterica","investigation","law","medicine","occult","politics","science"]};return(m as any)[cat].reduce((sum:number,ab:string)=>sum+s.abilities[ab as keyof typeof s.abilities],0)}
+      return gp("talents")-ga("talents")===0&&gp("skills")-ga("skills")===0&&gp("knowledges")-ga("knowledges")===0
+    },
+    "arete-start":            ()=>true,
+    "spheres":                s=>Object.values(s.spheres).reduce((a,b)=>a+b,0)===6&&s.affinitySphere!=="",
+    "backgrounds":            s=>Object.values(s.backgrounds).reduce((a,b)=>a+b,0)===7,
+    "freebies":               s=>{
+      let sp=0
+      Object.values(s.freebieDots.attributes).forEach(d=>sp+=d*5)
+      Object.values(s.freebieDots.abilities).forEach(d=>sp+=d*2)
+      Object.values(s.freebieDots.spheres).forEach(d=>sp+=d*7)
+      Object.values(s.freebieDots.backgrounds).forEach(d=>sp+=d)
+      sp+=s.freebieDots.arete*4; sp+=s.freebieDots.willpower
+      s.merits.forEach(m=>sp+=Math.abs(m.cost))
+      const fp=s.flaws.reduce((t,f)=>t+Math.abs(f.cost),0)
+      const total=15+fp+freebiePoolAdjustment
+      const rem=total-sp
+      const high=Math.max(...Object.values(s.spheres))
+      const areteT=1+s.freebieDots.arete
+      return rem===0&&areteT>=high
+    },
+    "complete": ()=>true,
+  }),[freebiePoolAdjustment])
+
+  // Merge static defs with runtime canProceed
+  const guidedSteps: GuidedStep[] = GUIDED_STEP_DEFS.map(def=>({
+    ...def,
+    canProceed: canProceedFns[def.id] ?? (()=>true),
+  }))
 
   const currentStep = guidedSteps[stepIndex]
   const totalSteps = guidedSteps.length
@@ -1087,11 +1232,12 @@ function GuidedWizard({state,setState,open,onClose,setFreebiePoolAdjustment,free
     fetchContent()
   },[open,currentStep?.id,codecActive])
 
-  // ── Navigation with codec interstitial ────────────────────────────────────
+  // ── Navigation with faction-aware codec interstitial ─────────────────────
   const advanceTo = (nextIndex: number) => {
-    const trigger = CODEC_TRIGGERS[stepIndex]
+    const triggerMap = CODEC_TRIGGERS[stepIndex]
+    const faction = state.faction ?? "traditions"
+    const trigger = triggerMap ? triggerMap[faction] : null
     if (trigger && nextIndex > stepIndex) {
-      // There's a codec for this transition — show it before advancing
       setCodecData(trigger)
       setPendingStep(nextIndex)
       setCodecTypingDone(false)
@@ -1138,13 +1284,21 @@ function GuidedWizard({state,setState,open,onClose,setFreebiePoolAdjustment,free
               </button>
             </div>
 
-            {/* Codec component — fills the scrollable area */}
+            {/* Codec component — faction determines which NPC appears */}
             <div className="flex-1 overflow-y-auto">
-              <DanteCodec
-                dialogue={codecData.dialogue}
-                stepName={codecData.stepName}
-                onTypingComplete={()=>setCodecTypingDone(true)}
-              />
+              {state.faction === "technocracy" ? (
+                <TechnocracyCodec
+                  dialogue={codecData.dialogue}
+                  stepName={codecData.stepName}
+                  onTypingComplete={()=>setCodecTypingDone(true)}
+                />
+              ) : (
+                <DanteCodec
+                  dialogue={codecData.dialogue}
+                  stepName={codecData.stepName}
+                  onTypingComplete={()=>setCodecTypingDone(true)}
+                />
+              )}
             </div>
 
             {/* Codec footer — Continue only enabled after typing finishes */}
@@ -1218,76 +1372,253 @@ function GuidedWizard({state,setState,open,onClose,setFreebiePoolAdjustment,free
 }
 
 // =============================================================================
-// MAIN PAGE
+// MAIN PAGE — faction selector → pre-wizard codec → guided wizard
 // =============================================================================
 export default function CharacterGuidePage() {
-  const [state,setState]=useState<CharacterState>(INITIAL_STATE)
-  const [wizardOpen,setWizardOpen]=useState(false)
-  const [freebiePoolAdjustment,setFreebiePoolAdjustment]=useState(0)
-  const hasStarted=state.name.length>0
-  const openWizard=()=>{ if(!hasStarted)setFreebiePoolAdjustment(0); setWizardOpen(true) }
-  const resetAndStart=()=>{ setState(INITIAL_STATE); setFreebiePoolAdjustment(0); setWizardOpen(true) }
+  const [state,setState]                 = useState<CharacterState>(INITIAL_STATE)
+  const [wizardOpen,setWizardOpen]       = useState(false)
+  const [freebiePoolAdjustment,setFreebiePoolAdjustment] = useState(0)
+
+  // ── Faction selector ───────────────────────────────────────────────────────
+  const [showFactionSelect,setShowFactionSelect] = useState(false)
+
+  // ── Pre-wizard codec ───────────────────────────────────────────────────────
+  const [showPreCodec,setShowPreCodec]   = useState(false)
+  const [preCodecDone,setPreCodecDone]   = useState(false)
+  const [selectedFaction,setSelectedFaction] = useState<"traditions"|"technocracy"|null>(null)
+
+  const hasStarted = state.name.length > 0
+
+  // Landing "Begin Awakening" → open faction selector
+  const openFactionSelect = () => {
+    if (!hasStarted) setFreebiePoolAdjustment(0)
+    setShowFactionSelect(true)
+  }
+
+  // Faction confirmed → store it, fire pre-wizard codec
+  const handleFactionConfirmed = (faction: "traditions"|"technocracy") => {
+    setSelectedFaction(faction)
+    setState(prev => ({ ...prev, faction }))
+    setShowFactionSelect(false)
+    setPreCodecDone(false)
+    setShowPreCodec(true)
+  }
+
+  // Pre-wizard codec dismissed → open wizard
+  const handlePreCodecDismiss = () => {
+    setShowPreCodec(false)
+    setWizardOpen(true)
+  }
+
+  // In-progress "Continue" skips faction select + codec
+  const continueWizard = () => { setWizardOpen(true) }
+
+  const resetAndStart = () => {
+    setState(INITIAL_STATE)
+    setFreebiePoolAdjustment(0)
+    setSelectedFaction(null)
+    setShowFactionSelect(true)
+  }
+
+  const preCodecData = selectedFaction ? PRE_WIZARD_CODEC[selectedFaction] : null
+
   return (
     <>
+      {/* ── Faction selector — full-screen overlay ── */}
+      {showFactionSelect && (
+        <div className="fixed inset-0 z-50">
+          <CharacterTypeSelector
+            onConfirm={handleFactionConfirmed}
+            onBack={() => setShowFactionSelect(false)}
+          />
+        </div>
+      )}
+
+      {/* ── Pre-wizard codec — full-screen overlay ── */}
+      {showPreCodec && preCodecData && (
+        <div className="fixed inset-0 z-50 flex flex-col bg-black">
+          {/* Header */}
+          <div className="px-6 pt-5 pb-3 shrink-0 flex items-center justify-between"
+            style={{borderBottom:"1px solid rgba(255,255,255,0.06)"}}>
+            <span className="font-mono text-[9px] uppercase tracking-[0.3em] text-slate-600">
+              Incoming Transmission
+            </span>
+            <button
+              onClick={handlePreCodecDismiss}
+              className="font-mono text-[9px] uppercase tracking-[0.2em] px-3 py-1 rounded border border-slate-800 text-slate-600 hover:text-slate-400 transition-colors">
+              Skip ▶
+            </button>
+          </div>
+
+          {/* Codec */}
+          <div className="flex-1 overflow-y-auto">
+            {preCodecData.component === "courage" ? (
+              <TechnocracyCodec
+                dialogue={preCodecData.dialogue}
+                stepName={preCodecData.stepName}
+                onTypingComplete={() => setPreCodecDone(true)}
+              />
+            ) : (
+              <DanteCodec
+                dialogue={preCodecData.dialogue}
+                stepName={preCodecData.stepName}
+                onTypingComplete={() => setPreCodecDone(true)}
+              />
+            )}
+          </div>
+
+          {/* Footer */}
+          <div className="shrink-0 px-6 py-4 flex items-center justify-between"
+            style={{borderTop:"1px solid rgba(255,255,255,0.06)"}}>
+            <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-slate-700">
+              {preCodecDone ? "Transmission complete" : "Receiving…"}
+            </span>
+            <button
+              onClick={handlePreCodecDismiss}
+              disabled={!preCodecDone}
+              className="group relative overflow-hidden inline-flex items-center gap-2 rounded-full px-6 py-2.5 font-serif text-[10px] uppercase tracking-[0.16em] font-bold transition-all duration-200 hover:-translate-y-px disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+              style={{
+                background: "linear-gradient(135deg,hsl(var(--accent)),hsl(var(--accent)/0.82))",
+                color:      "hsl(var(--accent-foreground))",
+                border:     "none",
+                boxShadow:  preCodecDone ? "0 0 0 1px hsl(var(--accent)/0.38),0 4px 14px hsl(var(--accent)/0.25)" : "none",
+              }}>
+              <span className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+                style={{background:"linear-gradient(105deg,transparent 25%,rgba(255,255,255,0.16) 50%,transparent 75%)"}}/>
+              <span className="relative">Begin Creation →</span>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── Landing page ── */}
       <div className="min-h-screen relative z-[1] py-5 px-3 md:py-7 md:px-4 grimoire-bg">
         <div className="max-w-[900px] mx-auto bg-background rounded-xl overflow-hidden relative"
           style={{border:"1px solid hsl(var(--primary)/0.32)",boxShadow:"inset 0 1px 0 hsl(var(--primary)/0.12), 0 20px 60px hsl(var(--background)/0.8), 0 4px 24px rgba(0,0,0,0.45)"}}>
-          {["-top-[6px] -left-[6px]","-top-[6px] -right-[6px]"].map((pos,i)=>(<div key={i} className={`absolute ${pos} text-primary z-10 text-xl pointer-events-none`} style={{filter:"drop-shadow(0 0 6px hsl(var(--primary)/0.6))"}} aria-hidden="true">◈</div>))}
-          <div className="h-px w-full pointer-events-none" aria-hidden="true" style={{background:"linear-gradient(90deg,hsl(var(--accent)/0.55) 0%,hsl(var(--primary)/0.5) 15%,hsl(var(--primary)/0.15) 55%,transparent 100%)"}}/>
+          {["-top-[6px] -left-[6px]","-top-[6px] -right-[6px]"].map((pos,i)=>(
+            <div key={i} className={`absolute ${pos} text-primary z-10 text-xl pointer-events-none`}
+              style={{filter:"drop-shadow(0 0 6px hsl(var(--primary)/0.6))"}} aria-hidden="true">◈</div>
+          ))}
+          <div className="h-px w-full pointer-events-none" aria-hidden="true"
+            style={{background:"linear-gradient(90deg,hsl(var(--accent)/0.55) 0%,hsl(var(--primary)/0.5) 15%,hsl(var(--primary)/0.15) 55%,transparent 100%)"}}/>
+
+          {/* Header */}
           <div className="text-center px-8 pt-10 pb-8" style={{borderBottom:"1px solid hsl(var(--border)/0.5)"}}>
-            <div className="mb-3"><span className="font-serif text-[10px] uppercase tracking-[0.3em]" style={{color:"hsl(var(--primary)/0.5)"}}>The Paradox Wheel</span></div>
-            <h1 className="font-serif font-black uppercase text-primary" style={{fontSize:"clamp(1.6rem,5vw,2.8rem)",letterSpacing:"0.12em",textShadow:"0 0 40px hsl(var(--primary)/0.2)"}}>Character Creation</h1>
-            <p className="font-serif italic mt-2 text-muted-foreground" style={{fontSize:"0.95rem"}}>Mage: The Ascension — Guided Awakening</p>
+            <div className="mb-3">
+              <span className="font-serif text-[10px] uppercase tracking-[0.3em]" style={{color:"hsl(var(--primary)/0.5)"}}>The Paradox Wheel</span>
+            </div>
+            <h1 className="font-serif font-black uppercase text-primary"
+              style={{fontSize:"clamp(1.6rem,5vw,2.8rem)",letterSpacing:"0.12em",textShadow:"0 0 40px hsl(var(--primary)/0.2)"}}>
+              Character Creation
+            </h1>
+            <p className="font-serif italic mt-2 text-muted-foreground" style={{fontSize:"0.95rem"}}>
+              Mage: The Ascension — Guided Awakening
+            </p>
             <div className="flex items-center gap-3 mt-5 justify-center">
               <div className="h-px flex-1 max-w-[120px]" style={{background:"linear-gradient(90deg,transparent,hsl(var(--primary)/0.4))"}}/>
               <span className="text-primary text-lg" aria-hidden="true" style={{fontVariantEmoji:"text" as any}}>⚙&#xFE0E;</span>
               <div className="h-px flex-1 max-w-[120px]" style={{background:"linear-gradient(270deg,transparent,hsl(var(--primary)/0.4))"}}/>
             </div>
           </div>
-          <div className="px-8 py-10" style={{backgroundImage:`url("data:image/svg+xml,%3Csvg width='40' height='40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M40 0L0 0 0 40' fill='none' stroke='%237b5ea7' stroke-width='0.35' opacity='0.06'/%3E%3C/svg%3E")`}}>
+
+          {/* Content */}
+          <div className="px-8 py-10"
+            style={{backgroundImage:`url("data:image/svg+xml,%3Csvg width='40' height='40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M40 0L0 0 0 40' fill='none' stroke='%237b5ea7' stroke-width='0.35' opacity='0.06'/%3E%3C/svg%3E")`}}>
             {!hasStarted ? (
               <div className="space-y-8 text-center">
                 <div className="max-w-lg mx-auto space-y-3">
-                  <p className="font-serif text-foreground" style={{fontSize:"0.95rem",lineHeight:1.7}}>This wizard will guide you through creating a Mage: The Ascension character step by step — with lore guidance, mechanical explanations, and contextual pop-ups at every stage.</p>
-                  <p className="font-serif text-muted-foreground" style={{fontSize:"0.85rem"}}>13 steps · approximately 15–20 minutes</p>
+                  <p className="font-serif text-foreground" style={{fontSize:"0.95rem",lineHeight:1.7}}>
+                    This wizard will guide you through creating a Mage: The Ascension character step by step — with lore guidance, mechanical explanations, and NPC guidance at every stage.
+                  </p>
+                  <p className="font-serif text-muted-foreground" style={{fontSize:"0.85rem"}}>
+                    13 steps · approximately 15–20 minutes
+                  </p>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-xl mx-auto">
-                  {[{icon:"✦",label:"Lore Guidance",desc:"Blurbs for Traditions, Natures, Spheres"},{icon:"◈",label:"Step by Step",desc:"One decision at a time, never overwhelming"},{icon:"✧",label:"Rules Explained",desc:"Points, costs, and limits shown in context"}].map(f=>(
-                    <div key={f.label} className="rounded-lg p-4 text-center" style={{background:"hsl(var(--card))",border:"1px solid hsl(var(--border)/0.5)"}}>
+                  {[
+                    {icon:"✦", label:"Lore Guidance",  desc:"Blurbs for Traditions, Conventions, Spheres"},
+                    {icon:"◈", label:"Step by Step",   desc:"One decision at a time, never overwhelming"},
+                    {icon:"✧", label:"NPC Guidance",   desc:"Dante or John Courage walk you through it"},
+                  ].map(f=>(
+                    <div key={f.label} className="rounded-lg p-4 text-center"
+                      style={{background:"hsl(var(--card))",border:"1px solid hsl(var(--border)/0.5)"}}>
                       <div className="text-xl text-primary mb-2" aria-hidden="true" style={{fontVariantEmoji:"text" as any}}>{f.icon}&#xFE0E;</div>
                       <div className="font-serif text-[10px] uppercase tracking-[0.16em] text-primary mb-1">{f.label}</div>
                       <div className="text-xs text-muted-foreground font-serif">{f.desc}</div>
                     </div>
                   ))}
                 </div>
-                <button onClick={openWizard} className="group relative overflow-hidden inline-flex items-center gap-2.5 rounded-full px-8 py-3.5 font-serif text-[11px] uppercase tracking-[0.2em] font-bold transition-all duration-200 hover:-translate-y-px active:translate-y-0"
-                  style={{background:"linear-gradient(135deg,hsl(var(--accent)) 0%,hsl(var(--accent)/0.82) 100%)",color:"hsl(var(--accent-foreground))",border:"none",boxShadow:"0 0 0 1px hsl(var(--accent)/0.38), 0 6px 24px hsl(var(--accent)/0.3)"}}>
-                  <span className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" aria-hidden="true" style={{background:"linear-gradient(105deg,transparent 25%,rgba(255,255,255,0.16) 50%,transparent 75%)"}}/>
-                  <Sparkles className="relative w-4 h-4"/><span className="relative">Begin Awakening</span>
+                <button onClick={openFactionSelect}
+                  className="group relative overflow-hidden inline-flex items-center gap-2.5 rounded-full px-8 py-3.5 font-serif text-[11px] uppercase tracking-[0.2em] font-bold transition-all duration-200 hover:-translate-y-px active:translate-y-0"
+                  style={{
+                    background: "linear-gradient(135deg,hsl(var(--accent)) 0%,hsl(var(--accent)/0.82) 100%)",
+                    color:      "hsl(var(--accent-foreground))",
+                    border:     "none",
+                    boxShadow:  "0 0 0 1px hsl(var(--accent)/0.38), 0 6px 24px hsl(var(--accent)/0.3)",
+                  }}>
+                  <span className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" aria-hidden="true"
+                    style={{background:"linear-gradient(105deg,transparent 25%,rgba(255,255,255,0.16) 50%,transparent 75%)"}}/>
+                  <Sparkles className="relative w-4 h-4"/>
+                  <span className="relative">Begin Awakening</span>
                 </button>
               </div>
             ) : (
               <div className="space-y-6 text-center">
                 <div>
                   <p className="font-serif text-xs uppercase tracking-[0.2em] text-muted-foreground mb-1">In Progress</p>
-                  <h2 className="font-serif font-black uppercase text-primary" style={{fontSize:"1.4rem",letterSpacing:"0.1em"}}>{state.name}</h2>
-                  {state.affiliation&&(<span className="font-serif text-[9px] uppercase tracking-[0.2em] px-2 py-0.5 rounded-full mt-2 inline-block" style={{color:"hsl(var(--primary)/0.7)",background:"hsl(var(--primary)/0.08)",border:"1px solid hsl(var(--primary)/0.18)"}}>{state.affiliation}</span>)}
+                  <h2 className="font-serif font-black uppercase text-primary" style={{fontSize:"1.4rem",letterSpacing:"0.1em"}}>
+                    {state.name}
+                  </h2>
+                  <div className="flex items-center justify-center gap-2 mt-2 flex-wrap">
+                    {state.faction && (
+                      <span className="font-serif text-[9px] uppercase tracking-[0.2em] px-2 py-0.5 rounded-full inline-block"
+                        style={{
+                          color:      state.faction==="technocracy" ? "hsl(210 80% 70%)" : "hsl(var(--primary)/0.7)",
+                          background: state.faction==="technocracy" ? "hsl(210 80% 60%/0.1)" : "hsl(var(--primary)/0.08)",
+                          border:     `1px solid ${state.faction==="technocracy" ? "hsl(210 80% 60%/0.25)" : "hsl(var(--primary)/0.18)"}`,
+                        }}>
+                        {state.faction === "technocracy" ? "The Union" : "The Traditions"}
+                      </span>
+                    )}
+                    {state.affiliation && (
+                      <span className="font-serif text-[9px] uppercase tracking-[0.2em] px-2 py-0.5 rounded-full inline-block"
+                        style={{color:"hsl(var(--primary)/0.7)",background:"hsl(var(--primary)/0.08)",border:"1px solid hsl(var(--primary)/0.18)"}}>
+                        {state.affiliation}
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                  <button onClick={openWizard} className="group relative overflow-hidden inline-flex items-center gap-2 rounded-full px-6 py-2.5 font-serif text-[10px] uppercase tracking-[0.18em] font-bold transition-all duration-200 hover:-translate-y-px"
+                  <button onClick={continueWizard}
+                    className="group relative overflow-hidden inline-flex items-center gap-2 rounded-full px-6 py-2.5 font-serif text-[10px] uppercase tracking-[0.18em] font-bold transition-all duration-200 hover:-translate-y-px"
                     style={{background:"linear-gradient(135deg,hsl(var(--accent)),hsl(var(--accent)/0.82))",color:"hsl(var(--accent-foreground))",border:"none",boxShadow:"0 0 0 1px hsl(var(--accent)/0.38),0 4px 18px hsl(var(--accent)/0.25)"}}>
                     <Sparkles className="w-3.5 h-3.5"/>Continue Creation
                   </button>
-                  <button onClick={resetAndStart} className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full font-serif text-[10px] uppercase tracking-[0.18em] font-semibold transition-all duration-200 hover:bg-primary/[0.08] border border-transparent hover:border-primary/[0.18]"
-                    style={{color:"hsl(var(--foreground)/0.55)"}}>Start Over</button>
+                  <button onClick={resetAndStart}
+                    className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full font-serif text-[10px] uppercase tracking-[0.18em] font-semibold transition-all duration-200 hover:bg-primary/[0.08] border border-transparent hover:border-primary/[0.18]"
+                    style={{color:"hsl(var(--foreground)/0.55)"}}>
+                    Start Over
+                  </button>
                 </div>
               </div>
             )}
           </div>
-          <div className="h-[2px] w-full pointer-events-none" aria-hidden="true" style={{background:"linear-gradient(90deg,hsl(var(--accent)/0.65) 0%,hsl(var(--primary)/0.5) 12%,hsl(var(--primary)/0.2) 50%,transparent 100%)"}}/>
+
+          <div className="h-[2px] w-full pointer-events-none" aria-hidden="true"
+            style={{background:"linear-gradient(90deg,hsl(var(--accent)/0.65) 0%,hsl(var(--primary)/0.5) 12%,hsl(var(--primary)/0.2) 50%,transparent 100%)"}}/>
         </div>
       </div>
-      <GuidedWizard state={state} setState={setState} open={wizardOpen} onClose={()=>setWizardOpen(false)} setFreebiePoolAdjustment={setFreebiePoolAdjustment} freebiePoolAdjustment={freebiePoolAdjustment}/>
+
+      {/* ── Guided wizard dialog ── */}
+      <GuidedWizard
+        state={state}
+        setState={setState}
+        open={wizardOpen}
+        onClose={()=>setWizardOpen(false)}
+        setFreebiePoolAdjustment={setFreebiePoolAdjustment}
+        freebiePoolAdjustment={freebiePoolAdjustment}
+      />
+
       <Toaster/>
     </>
   )
