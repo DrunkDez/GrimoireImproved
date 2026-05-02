@@ -820,7 +820,7 @@ function FreebiesGuidedStep({ state, setState, onNext, onBack, freebiePoolAdjust
   const [flaws,setFlaws]=useState<any[]>([])
   const [isLoading,setIsLoading]=useState(true)
   useEffect(()=>{fetch("/api/merits").then(r=>r.json()).then(d=>{setMerits(d.filter((m:any)=>m.type==="merit"));setFlaws(d.filter((m:any)=>m.type==="flaw"))}).catch(console.error).finally(()=>setIsLoading(false))},[])
-  const calcPts=()=>{let s=0;Object.values(state.freebieDots.attributes).forEach(d=>s+=d*5);Object.values(state.freebieDots.abilities).forEach(d=>s+=d*2);Object.values(state.freebieDots.spheres).forEach(d=>s+=d*7);Object.values(state.freebieDots.backgrounds).forEach(d=>s+=d*1);s+=state.freebieDots.arete*4;s+=state.freebieDots.willpower*1;state.merits.forEach(m=>s+=Math.abs(m.cost));const fp=state.flaws.reduce((t,f)=>t+Math.abs(f.cost),0);return(15+fp+freebiePoolAdjustment)-s}
+  const calcPts=()=>{let s=0;Object.values(state.freebieDots.attributes).forEach(d=>s+=d*5);Object.values(state.freebieDots.abilities).forEach(d=>s+=d*2);Object.values(state.freebieDots.spheres).forEach(d=>s+=d*7);Object.values(state.freebieDots.backgrounds).forEach(d=>s+=d*1);s+=state.freebieDots.willpower*1;state.merits.forEach(m=>s+=Math.abs(m.cost));const fp=state.flaws.reduce((t,f)=>t+Math.abs(f.cost),0);return(15+fp+freebiePoolAdjustment)-s}
   const remaining=calcPts()
   const getHighest=()=>Math.max(...Object.keys(state.spheres).map(sp=>state.spheres[sp as keyof typeof state.spheres]+(state.freebieDots.spheres[sp]||0)))
   const getTotalArete=()=>1+state.freebieDots.arete
@@ -1195,7 +1195,7 @@ function GuidedWizard({state,setState,open,onClose,setFreebiePoolAdjustment,free
       Object.values(s.freebieDots.abilities).forEach(d=>sp+=d*2)
       Object.values(s.freebieDots.spheres).forEach(d=>sp+=d*7)
       Object.values(s.freebieDots.backgrounds).forEach(d=>sp+=d)
-      sp+=s.freebieDots.arete*4; sp+=s.freebieDots.willpower
+      sp+=s.freebieDots.willpower
       s.merits.forEach(m=>sp+=Math.abs(m.cost))
       const fp=s.flaws.reduce((t,f)=>t+Math.abs(f.cost),0)
       const total=15+fp+freebiePoolAdjustment
@@ -1796,8 +1796,8 @@ function FreebieDotRating({ label, baseDots, freebieDots, onAdd, onRemove, maxDo
   const total=baseDots+freebieDots
   return (
     <div className="flex items-center justify-between py-2 px-2 rounded hover:bg-primary/[0.04] transition-colors">
-      <span className="text-sm font-serif flex-1" style={{color:"hsl(var(--foreground)/0.85)"}}>{label}</span>
-      <div className="flex items-center gap-3">
+      <span className="text-sm font-serif flex-1 min-w-0 truncate" style={{color:"hsl(var(--foreground)/0.85)"}}>{label}</span>
+      <div className="flex items-center gap-3 shrink-0">
         <div className="flex gap-1">
           {Array.from({length:maxDots},(_,i)=>{
             const dv=i+1; const isBase=dv<=baseDots; const isFree=dv>baseDots&&dv<=total
