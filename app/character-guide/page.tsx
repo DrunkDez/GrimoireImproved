@@ -776,7 +776,7 @@ function BackgroundsGuidedStep({ state, setState, onNext, onBack, cmsContent, is
   const mage=backgrounds.filter(bg=>bg.subtype==='mage')
   const guidanceHtml = cmsContent || defaultGuidanceTexts['backgrounds']
   return (
-    <div className="space-y-5 max-h-[60vh] overflow-y-auto pr-1">
+    <div className="space-y-5">
       <GuidanceBox>{isLoadingCMS?<div className="animate-pulse h-12 bg-primary/10 rounded"/>:<div dangerouslySetInnerHTML={{__html:guidanceHtml}}/>}</GuidanceBox>
       {isLoading ? (
         <div className="text-center py-4 text-muted-foreground font-serif text-sm">Loading backgrounds…</div>
@@ -842,7 +842,7 @@ function FreebiesGuidedStep({ state, setState, onNext, onBack, freebiePoolAdjust
   const percentSpent=totalAvailable>0?(spentPoints/totalAvailable)*100:0
   const guidanceHtml = cmsContent || defaultGuidanceTexts['freebies']
   return (
-    <div className="space-y-5 max-h-[60vh] overflow-y-auto pr-1">
+    <div className="space-y-5">
       <GuidanceBox>{isLoadingCMS?<div className="animate-pulse h-12 bg-primary/10 rounded"/>:<div dangerouslySetInnerHTML={{__html:guidanceHtml}}/>}</GuidanceBox>
       {/* Points counter with progress bar */}
       <div className="space-y-2 p-3 rounded-lg" style={{background:"hsl(var(--card))",border:"1px solid hsl(var(--accent)/0.3)"}}>
@@ -918,7 +918,7 @@ function FreebiesGuidedStep({ state, setState, onNext, onBack, freebiePoolAdjust
                 <h4 className="font-serif text-xs uppercase tracking-widest text-primary mb-2">Selected ({state.merits.reduce((s,m)=>s+m.cost,0)} pts)</h4>
                 {state.merits.map((m,i)=>(<div key={i} className="flex justify-between items-center p-2 rounded-md mb-1" style={{background:"hsl(var(--primary)/0.07)",border:"1px solid hsl(var(--primary)/0.15)"}}><span className="text-sm font-serif">{m.name} ({m.cost} pts)</span><button onClick={()=>removeMerit(i)} className="text-xs px-2 py-1 rounded text-muted-foreground hover:text-destructive">Remove</button></div>))}
               </div>}
-              <div className="space-y-2 max-h-60 overflow-y-auto">
+              <div className="space-y-2 max-h-80 overflow-y-auto">
                 {merits.map(m=>{const cost=Math.abs(parseInt(m.cost)||1);const alreadySelected=isMeritSelected(m.id);const notEnoughPoints=remaining<cost;const disabled=alreadySelected||notEnoughPoints;return(<div key={m.id} className="p-2.5 rounded-md" style={{border:"1px solid hsl(var(--border)/0.4)"}}><div className="flex justify-between items-start"><span className="font-serif font-semibold text-sm text-foreground">{m.name}</span><button onClick={()=>addMerit(m)} disabled={disabled} className="text-xs px-3 py-1 rounded-full font-serif ml-2 shrink-0 disabled:opacity-30 transition-all" style={{background:alreadySelected?"hsl(var(--muted))":"hsl(var(--primary)/0.1)",color:alreadySelected?"hsl(var(--muted-foreground))":"hsl(var(--primary))",border:"1px solid hsl(var(--primary)/0.2)",cursor:disabled?"not-allowed":"pointer"}}>{alreadySelected?"✓ Selected":`+${cost} pts`}</button></div><p className="text-xs text-muted-foreground mt-0.5 font-serif">{m.description}</p>{notEnoughPoints&&!alreadySelected&&<p className="text-[10px] text-destructive mt-1">Requires {cost} points</p>}</div>)})}
               </div>
             </div>
@@ -931,7 +931,7 @@ function FreebiesGuidedStep({ state, setState, onNext, onBack, freebiePoolAdjust
                 <h4 className="font-serif text-xs uppercase tracking-widest text-primary mb-2">Selected (+{state.flaws.reduce((s,f)=>s+f.cost,0)} pts)</h4>
                 {state.flaws.map((f,i)=>(<div key={i} className="flex justify-between items-center p-2 rounded-md mb-1" style={{background:"hsl(var(--destructive)/0.08)",border:"1px solid hsl(var(--destructive)/0.2)",boxShadow:"inset 3px 0 0 hsl(var(--destructive)/0.4)"}}><span className="text-sm font-serif">{f.name} (+{f.cost} pts)</span><button onClick={()=>removeFlaw(i)} className="text-xs px-2 py-1 rounded text-muted-foreground hover:text-destructive">Remove</button></div>))}
               </div>}
-              <div className="space-y-2 max-h-60 overflow-y-auto">
+              <div className="space-y-2 max-h-80 overflow-y-auto">
                 {flaws.map(f=>{const cost=Math.abs(parseInt(f.cost)||1);const alreadySelected=isFlawSelected(f.id);const wouldExceedLimit=currentFlawPoints+cost>7;const disabled=alreadySelected||wouldExceedLimit;return(<div key={f.id} className="p-2.5 rounded-md" style={{border:"1px solid hsl(var(--border)/0.4)"}}><div className="flex justify-between items-start"><span className="font-serif font-semibold text-sm text-foreground">{f.name}</span><button onClick={()=>addFlaw(f)} disabled={disabled} className="text-xs px-3 py-1 rounded-full font-serif ml-2 shrink-0 disabled:opacity-30 transition-all" style={{background:alreadySelected?"hsl(var(--muted))":"hsl(var(--destructive)/0.1)",color:alreadySelected?"hsl(var(--muted-foreground))":"hsl(var(--destructive))",border:"1px solid hsl(var(--destructive)/0.2)",cursor:disabled?"not-allowed":"pointer"}}>{alreadySelected?"✓ Selected":`+${cost} pts`}</button></div><p className="text-xs text-muted-foreground mt-0.5 font-serif">{f.description}</p>{wouldExceedLimit&&!alreadySelected&&<p className="text-[10px] text-destructive mt-1">Would exceed 7 point limit</p>}</div>)})}
               </div>
             </div>
@@ -1264,7 +1264,7 @@ function GuidedWizard({state,setState,open,onClose,setFreebiePoolAdjustment,free
 
   return (
     <Dialog open={open} onOpenChange={isOpen=>{ if(!isOpen)handleClose() }}>
-      <DialogContent className="sm:max-w-3xl max-h-[92vh] overflow-hidden flex flex-col p-0"
+      <DialogContent className="sm:max-w-4xl max-h-[95vh] overflow-hidden flex flex-col p-0"
         style={{background:"hsl(var(--card))",border:"1px solid hsl(var(--primary)/0.35)",boxShadow:"0 0 0 1px hsl(var(--primary)/0.12), 0 32px 64px rgba(0,0,0,0.65), inset 0 1px 0 hsl(var(--primary)/0.1)",borderRadius:"14px"}}>
         <div className="absolute top-0 left-0 right-0 h-[2px] rounded-t-[14px] pointer-events-none z-10" aria-hidden="true" style={{background:"linear-gradient(90deg,hsl(var(--accent)/0.7),hsl(var(--primary)/0.6) 30%,transparent 75%)"}}/>
 
