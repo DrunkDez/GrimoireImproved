@@ -1343,18 +1343,19 @@ function GuidedWizard({state,setState,open,onClose,setFreebiePoolAdjustment,free
               <div className="h-px" aria-hidden="true" style={{background:"linear-gradient(90deg,hsl(var(--border)/0.5),transparent)"}}/>
             </DialogHeader>
             <div className="flex-1 overflow-y-auto px-6 py-5" style={{scrollbarWidth:"thin",scrollbarColor:"hsl(var(--border)) transparent"}}>
-              <StepPanel stepKey={stepIndex}>
-                {currentStep.component({
-                  state, setState,
-                  onNext: handleNext,
-                  onBack: handleBack,
-                  setFreebiePoolAdjustment,
-                  freebiePoolAdjustment,
-                  onClose: handleClose,
-                  cmsContent: stepGuidance,
-                  isLoadingCMS,
-                })}
-              </StepPanel>
+             <StepPanel stepKey={stepIndex}>
+              <currentStep.component
+                state={state}
+                setState={setState}
+                onNext={handleNext}
+                onBack={handleBack}
+                setFreebiePoolAdjustment={setFreebiePoolAdjustment}
+                freebiePoolAdjustment={freebiePoolAdjustment}
+                onClose={handleClose}
+                cmsContent={stepGuidance}
+                isLoadingCMS={isLoadingCMS}
+              />
+             </StepPanel>
             </div>
             {showFooter&&(
               <div className="shrink-0 px-6 py-4 flex items-center justify-between gap-3" style={{borderTop:"1px solid hsl(var(--border)/0.4)"}}>
